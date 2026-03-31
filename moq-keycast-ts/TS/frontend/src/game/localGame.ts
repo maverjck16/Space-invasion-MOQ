@@ -2,17 +2,22 @@ import type { GameSnapshot } from "../moq/publisher";
 import spaceshipImgSrc from "../image/spaceship.png";
 import invaderImgSrc from "../image/invader.png";
 
+//definisco i tipi per le entità di gioco e le loro proprietà, così come le opzioni per inizializzare il gioco locale
 type LocalGameOptions = {
   canvas: HTMLCanvasElement;
+  //funzione di callback per inviare snapshot del gioco al publisher
   onSnapshot: (snapshot: GameSnapshot) => void;
+  //funzione di callback opzionale per notificare il publisher quando il punteggio cambia
   onScoreChange?: (score: number) => void;
 };
 
+//Vec2 è un tipo che rappresenta un vettore a due dimensioni, usato per posizioni e velocità
 type Vec2 = {
   x: number;
   y: number;
 };
 
+//RestartButton rappresenta le proprietà di un pulsante di riavvio visualizzato quando il gioco è finito
 type RestartButton = {
   x: number;
   y: number;
@@ -20,6 +25,7 @@ type RestartButton = {
   height: number;
 };
 
+//KeyState tiene traccia dello stato di pressione dei tasti WASD e spazio, usati per controllare il giocatore
 type KeysState = {
   a: { pressed: boolean };
   d: { pressed: boolean };
@@ -28,11 +34,14 @@ type KeysState = {
   space: { pressed: boolean };
 };
 
+//GameFlags tiene traccia dello stato del gioco, se è finito o attivo
 type GameFlags = {
   over: boolean;
   active: boolean;
 };
 
+//i tipi "Like" rappresentano le proprietà  delle entità di gioco che vengono incluse negli snapshot inviati al publisher per tenere
+//traccia dello stato del gioco lato server e sincronizzare i client connessi
 type ProjectileLike = {
   id: string;
   position: Vec2;
@@ -88,11 +97,15 @@ type AsteroidLike = {
 
 let idCounter = 0;
 
+//funzione di supporto che genera ID univoci per le entità di gioco così da poterle identificare negli snapshot inviati al publisher
+//e gestire correttamente le collisioni e gli aggiornamenti dello stato del gioco
 function nextId(prefix: string): string {
   idCounter += 1;
-  return `${prefix}-${idCounter}`;
+  return `${prefix}-${idCounter}`; //esempio: "proj-1", "invader-3", "asteroid-5"
 }
 
+//funzione principale che crea e avvia il gioco locale, accettando un canvas su cui disegnare, una funzione di callback per inviare 
+// snapshot al publisher
 export function createLocalGame(
   canvas: HTMLCanvasElement,
   onSnapshot: (snapshot: GameSnapshot) => void,
@@ -105,9 +118,12 @@ export function createLocalGame(
   });
 
   game.start();
-  return () => game.destroy();
+  //funzione che permette di distruggere il gioco quando il giocatore si disconnette o chiude la finestra.
+  return () => game.destroy(); 
 }
 
+//Classe Player rappresenta il giocatore controllato dall'utente, gestisce la sua posizione, velocità, disegno e aggiornamento dello 
+// stato
 class Player {
   position: Vec2;
   velocity: Vec2;
@@ -118,7 +134,7 @@ class Player {
   image: HTMLImageElement;
   loaded: boolean;
 
-  constructor(
+  constructor( //accetta il contesto del canvas e l'elemento canvas per poter disegnare e gestire i limiti di movimento
     private ctx: CanvasRenderingContext2D,
     private canvas: HTMLCanvasElement,
   ) {
@@ -138,7 +154,6 @@ class Player {
 
     this.image.onload = () => {
       this.loaded = true;
-
       const scale = 0.18;
       this.width = this.image.width * scale;
       this.height = this.image.height * scale;
@@ -146,7 +161,8 @@ class Player {
       this.position.y = this.canvas.height - this.height - 30;
     };
   }
-
+  
+  //metodo per disegnare il giocatore sul canvas, applicando rotazione e trasparenza se necessario
   draw(): void {
     const { ctx } = this;
     const { x, y } = this.position;
@@ -164,6 +180,8 @@ class Player {
     ctx.restore();
   }
 
+  //metodo per aggiornare lo stato del giocatore, muovendolo in base alla sua velocità e assicurandosi che non esca dai limiti 
+  // del canvas
   update(): void {
     this.draw();
 
@@ -182,18 +200,20 @@ class Player {
   }
 }
 
+//Classe Projectile rappresenta i proiettili sparati dal giocatore, gestisce la loro posizione, velocità, disegno e aggiornamento dello
+//  stato
 class Projectile {
   id: string;
   position: Vec2;
   velocity: Vec2;
   radius: number;
 
-  constructor(
+  constructor( //accetta il contesto del canvas e le proprietà iniziali del proiettile come posizione e velocità
     private ctx: CanvasRenderingContext2D,
     args: { position: Vec2; velocity: Vec2 },
   ) {
     this.id = nextId("proj");
-    this.position = { ...args.position };
+    this.position = { ...args.position }; 
     this.velocity = { ...args.velocity };
     this.radius = 4;
   }
@@ -213,6 +233,8 @@ class Projectile {
   }
 }
 
+//Classe Particle rappresenta le particelle usate per esplosioni e stelle di sfondo, gestisce la loro posizione, velocità, disegno, 
+// opacità e aggiornamento dello stato
 class Particle {
   id: string;
   position: Vec2;
@@ -263,6 +285,8 @@ class Particle {
   }
 }
 
+//Classe InvaderProjectile rappresenta i proiettili sparati dagli invasori, gestisce la loro posizione, velocità, disegno e 
+// aggiornamento dello stato. Differiscono dai proiettili del giocatore per forma e velocità.
 class InvaderProjectile {
   id: string;
   position: Vec2;
@@ -293,6 +317,8 @@ class InvaderProjectile {
   }
 }
 
+//Classe Invader rappresenta gli invasori nemici, gestisce la loro posizione, velocità, disegno, aggiornamento dello stato
+//e la capacità di sparare
 class Invader {
   id: string;
   position: Vec2;
@@ -341,6 +367,7 @@ class Invader {
     this.position.y += args.velocity.y;
   }
 
+  //metodo per far sparare l'invasore, creando un nuovo proiettile che si muove verso il basso
   shoot(invaderProjectiles: InvaderProjectile[]): void {
     invaderProjectiles.push(
       new InvaderProjectile(this.ctx, {
@@ -350,13 +377,15 @@ class Invader {
         },
         velocity: {
           x: 0,
-          y: 7,
+          y: 6,
         },
       }),
     );
   }
 }
 
+//Classe Grid rappresenta un gruppo di invasori (distribuiti in una griglia) che si muovono insieme, gestisce la loro posizione,
+//  velocità, disegno, aggiornamento dello stato e la logica di movimento (rimbalzo ai bordi del canvas e discesa verso il giocatore)
 class Grid {
   id: string;
   position: Vec2;
@@ -382,8 +411,8 @@ class Grid {
       for (let y = 0; y < rows; y++) {
         this.invaders.push(
           new Invader(this.ctx, {
-            position: {
-              x: x * 30,
+            position: { //posiziono gli invasori in una griglia con spaziatura di 30 pixel
+              x: x * 30, 
               y: y * 30,
             },
           }),
@@ -408,6 +437,9 @@ class Grid {
   }
 }
 
+//---AI--- Classe Asteroid rappresenta gli asteroidi che appaiono casualmente e si muovono verso il giocatore, gestisce la loro posizione,
+//velocità, disegno, aggiornamento dello stato, rotazione e logica di collisione con il giocatore e i proiettili.
+//Gli asteroidi hanno anche una barra della salute che diminuisce quando vengono colpiti dai proiettili del giocatore.
 class Asteroid {
   id: string;
   position: Vec2;
@@ -426,7 +458,7 @@ class Asteroid {
   ) {
     this.id = nextId("asteroid");
 
-    this.radius = Math.random() * 24 + 18;
+    this.radius = Math.random() * 24 + 18; // raggio casuale tra 18 e 42 pixel
 
     if (this.radius < 26) this.maxHealth = 2;
     else if (this.radius < 34) this.maxHealth = 3;
@@ -436,19 +468,18 @@ class Asteroid {
     this.rotation = 0;
     this.rotationSpeed = (Math.random() - 0.5) * 0.05;
 
+    //posiziono l'asteroide in modo casuale fuori dallo schermo, scegliendo un lato a caso da cui farlo entrare
     const spawnSide = Math.floor(Math.random() * 4);
     let startX = 0;
     let startY = 0;
 
+    //spawnSide: 0 = sopra, 1 = destra, 3 = sinistra
     if (spawnSide === 0) {
       startX = Math.random() * this.canvas.width;
       startY = -this.radius - 20;
     } else if (spawnSide === 1) {
       startX = this.canvas.width + this.radius + 20;
       startY = Math.random() * this.canvas.height;
-    } else if (spawnSide === 2) {
-      startX = Math.random() * this.canvas.width;
-      startY = this.canvas.height + this.radius + 20;
     } else {
       startX = -this.radius - 20;
       startY = Math.random() * this.canvas.height;
@@ -456,6 +487,7 @@ class Asteroid {
 
     this.position = { x: startX, y: startY };
 
+    //calcolo l'angolo di movimento verso il target (posizione del giocatore) e una velocità casuale per l'asteroide
     const angle = Math.atan2(args.target.y - startY, args.target.x - startX);
     const speed = Math.random() * 1.1 + 1.2;
 
@@ -464,6 +496,7 @@ class Asteroid {
       y: Math.sin(angle) * speed,
     };
 
+   //---AI--- generazione asteroide con forma irregolare
     const pointsCount = Math.floor(Math.random() * 4) + 8;
     this.points = [];
 
@@ -474,27 +507,30 @@ class Asteroid {
     }
   }
 
-  private drawCracks(): void {
-    const damageRatio = 1 - this.health / this.maxHealth;
-    if (damageRatio <= 0) return;
 
-    this.ctx.save();
-    this.ctx.strokeStyle = `rgba(80, 80, 80, ${0.55 + damageRatio * 0.3})`;
-    this.ctx.lineWidth = 1.2;
+  //---AI--- metodo per disegnare la barra della salute sopra l'asteroide, mostrando la salute residua in modo visivo
+  private drawHealthBar(): void {
+    const width = this.radius * 1.8;
+    const height = 5;
+    const left = this.position.x - width / 2;
+    const top = this.position.y - this.radius - 14;
 
-    for (let i = 0; i < Math.ceil(damageRatio * 4); i++) {
-      this.ctx.beginPath();
-      this.ctx.moveTo(0, 0);
-      this.ctx.lineTo(
-        (Math.random() - 0.5) * this.radius * 1.2,
-        (Math.random() - 0.5) * this.radius * 1.2,
-      );
-      this.ctx.stroke();
-    }
+    this.ctx.fillStyle = "rgba(255,255,255,0.18)";
+    this.ctx.fillRect(left, top, width, height);
 
-    this.ctx.restore();
+    this.ctx.fillStyle = "#00ffff";
+    this.ctx.fillRect(left, top, width * (this.health / this.maxHealth), height);
   }
 
+  update(): void {
+    this.rotation += this.rotationSpeed;
+    this.position.x += this.velocity.x;
+    this.position.y += this.velocity.y;
+    this.draw();
+  }
+
+  //---AI--- metodo per disegnare l'asteroide, applicando rotazione e disegnando una forma irregolare basata sui punti generati
+  //casualmente
   draw(): void {
     this.ctx.save();
     this.ctx.translate(this.position.x, this.position.y);
@@ -524,34 +560,17 @@ class Asteroid {
     this.ctx.fill();
     this.ctx.stroke();
 
-    this.drawCracks();
     this.ctx.restore();
 
     this.drawHealthBar();
   }
-
-  private drawHealthBar(): void {
-    const width = this.radius * 1.8;
-    const height = 5;
-    const left = this.position.x - width / 2;
-    const top = this.position.y - this.radius - 14;
-
-    this.ctx.fillStyle = "rgba(255,255,255,0.18)";
-    this.ctx.fillRect(left, top, width, height);
-
-    this.ctx.fillStyle = "#00ffff";
-    this.ctx.fillRect(left, top, width * (this.health / this.maxHealth), height);
-  }
-
-  update(): void {
-    this.rotation += this.rotationSpeed;
-    this.position.x += this.velocity.x;
-    this.position.y += this.velocity.y;
-    this.draw();
-  }
+  
 }
 
+//Classe LocalGameEngine è la classe principale che gestisce l'intero gioco locale
 class LocalGameEngine {
+//definisce tutte le proprietà necessarie per gestire il gioco, come il canvas, il contesto, le entità di gioco, lo stato dei tasti,
+//il punteggio, lo stato del gioco e le funzioni di callback per comunicare con il publisher
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private onSnapshot: (snapshot: GameSnapshot) => void;
@@ -609,6 +628,7 @@ class LocalGameEngine {
     this.animate = this.animate.bind(this);
   }
 
+  //metodo per avviare il gioco, aggiungendo i listener per i tasti e il click, e avviando il ciclo di animazione
   start(): void {
     window.addEventListener("keydown", this.handleKeyDown);
     window.addEventListener("keyup", this.handleKeyUp);
@@ -616,6 +636,8 @@ class LocalGameEngine {
     this.animate();
   }
 
+  //metodo per distruggere il gioco, rimuovendo i listener e cancellando l'animazione, così da liberare risorse quando il gioco
+  //non è più necessario
   destroy(): void {
     this.destroyed = true;
 
@@ -757,6 +779,8 @@ class LocalGameEngine {
       count: 30,
     });
 
+    //dopo 2 secondi, se il gioco non è stato distrutto nel frattempo, imposto lo stato del gioco su inattivo per fermare
+    //l'animazione e le logiche di gioco
     window.setTimeout(() => {
       if (!this.destroyed) {
         this.game.active = false;
@@ -764,6 +788,7 @@ class LocalGameEngine {
     }, 2000);
   }
 
+  //---AI--- metodo per disegnare la schermata di game over, mostrando il punteggio finale e un pulsante per riavviare il gioco
   private drawGameOver(): void {
     this.ctx.save();
 
@@ -816,6 +841,7 @@ class LocalGameEngine {
     this.ctx.restore();
   }
 
+  //Metodo per riavviare il gioco, resettando tutte le entità, lo stato e il punteggio, e inviando un nuovo snapshot al publisher
   private restartGame(): void {
   this.player = new Player(this.ctx, this.canvas);
   this.player.opacity = 1;
@@ -851,6 +877,10 @@ class LocalGameEngine {
   this.emitSnapshot();
 }
 
+//Metodo per emettere uno snapshot dello stato attuale del gioco, raccogliendo tutte le informazioni rilevanti sulle entità di gioco
+//e lo stato del gioco in un oggetto GameSnapshot e inviandolo al publisher tramite la funzione di callback onSnapshot.
+//Prendo tutto quello che esiste nel gioco e lo impacchetto in un oggetto che rappresenta lo stato completo del gioco in quel momento,
+//così da poterlo inviare al publisher e sincronizzare i client connessi
   private emitSnapshot(): void {
     const snapshot: GameSnapshot = {
       tick: this.frames,
@@ -864,6 +894,7 @@ class LocalGameEngine {
         rotation: this.player.rotation,
         opacity: this.player.opacity,
       },
+      //per ciascun...
       projectiles: this.projectiles.map((p) => ({
         id: p.id,
         x: p.position.x,
@@ -919,6 +950,7 @@ class LocalGameEngine {
         maxHealth: asteroid.maxHealth,
         points: asteroid.points,
       })),
+      //invio anche lo stato del gioco e il punteggio attuale
       score: this.score,
       gameOver: this.game.over,
       gameActive: this.game.active,
@@ -990,8 +1022,8 @@ class LocalGameEngine {
         break;
     }
   }
-
-  private handleClick(event: MouseEvent): void {
+//per il restartButton
+  private handleClick(event: MouseEvent): void { 
   if (this.game.active || !this.game.over) return;
 
   const rect = this.canvas.getBoundingClientRect();
@@ -1016,9 +1048,11 @@ class LocalGameEngine {
 
   private animate(): void {
     if (this.destroyed) return;
-
+    //chiedo al browser di chiamare nuovamente questo metodo al prossimo frame, creando un ciclo di animazione continuo
     this.animationId = requestAnimationFrame(this.animate);
 
+    //fill dello sfondo di nero ad ogni frame per cancellare il disegno precedente e ridisegnare tutto da capo, così da creare
+    //l'illusione del movimento
     this.ctx.fillStyle = "black";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
@@ -1030,6 +1064,8 @@ class LocalGameEngine {
 
     this.player.update();
 
+    //ciclo inverso per iterare sulle particelle, aggiornare il loro stato e rimuovere quelle che sono completamente trasparenti 
+    // o che sono uscite dallo schermo (per le particelle che non svaniscono)
     for (let i = this.particles.length - 1; i >= 0; i--) {
       const particle = this.particles[i];
 
@@ -1048,6 +1084,8 @@ class LocalGameEngine {
       }
     }
 
+    //ciclo inverso per iterare sugli asteroidi, aggiornare il loro stato, gestire la logica di rimozione quando escono dallo schermo
+    //  o quando colpiscono il giocatore,
     for (let asteroidIndex = this.asteroids.length - 1; asteroidIndex >= 0; asteroidIndex--) {
       const asteroid = this.asteroids[asteroidIndex];
       asteroid.update();
@@ -1072,6 +1110,9 @@ class LocalGameEngine {
         continue;
       }
 
+      //ciclo inverso per iterare sui proiettili del giocatore e verificare se colpiscono l'asteroide, gestendo la logica di danno,
+      // rimozione del proiettile, creazione di particelle di impatto e, se la salute dell'asteroide arriva a 0, 
+      // creazione dell'esplosione, aumento del punteggio.
       for (let projectileIndex = this.projectiles.length - 1; projectileIndex >= 0; projectileIndex--) {
         const projectile = this.projectiles[projectileIndex];
 
@@ -1093,6 +1134,7 @@ class LocalGameEngine {
       }
     }
 
+    //ciclo inverso per iterare sui proiettili degli invasori, aggiornare il loro stato
     for (let i = this.invaderProjectiles.length - 1; i >= 0; i--) {
       const invaderProjectile = this.invaderProjectiles[i];
 
@@ -1114,6 +1156,7 @@ class LocalGameEngine {
       }
     }
 
+    //ciclo inverso per iterare sui proiettili del giocatore, aggiornare il loro stato e rimuovere quelli che sono usciti dallo schermo
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
 
@@ -1124,16 +1167,19 @@ class LocalGameEngine {
       }
     }
 
+    //ciclo inverso per iterare sulle griglie di invasori, aggiornare lo stato di ciascuna griglia e dei suoi invasori
     for (let gridIndex = this.grids.length - 1; gridIndex >= 0; gridIndex--) {
       const grid = this.grids[gridIndex];
       grid.update();
 
-      if (this.frames % 45 === 0 && grid.invaders.length > 0) {
-        grid.invaders[
-          Math.floor(Math.random() * grid.invaders.length)
+      //ogni 60 frame, se ci sono invasori nella griglia, ne scelgo uno a caso per farlo sparare un proiettile verso il basso
+      if (this.frames % 60 === 0 && grid.invaders.length > 0) {
+        grid.invaders[ 
+          Math.floor(Math.random() * grid.invaders.length) //scelgo un invasore a caso dalla griglia
         ]?.shoot(this.invaderProjectiles);
       }
 
+      //gestione collisione tra invasore e giocatore che porta alla morte del giocatore
       for (let i = grid.invaders.length - 1; i >= 0; i--) {
         const invader = grid.invaders[i];
 
@@ -1160,6 +1206,7 @@ class LocalGameEngine {
           continue;
         }
 
+        //gestione collisione tra invasore e proiettile del giocatore, con rimozione di entrambi, creazione di particelle di impatto
         for (let j = this.projectiles.length - 1; j >= 0; j--) {
           const projectile = this.projectiles[j];
 
@@ -1170,6 +1217,8 @@ class LocalGameEngine {
             projectile.position.y + projectile.radius >= invader.position.y
           ) {
             setTimeout(() => {
+              //---AI--- utilizzo un timeout a 0 per posticipare l'esecuzione di questo blocco di codice alla fine del ciclo corrente,
+             //  così da evitare problemi di sincronizzazione quando rimuovo l'invasore e il proiettile dagli array durante l'iterazione
               const invaderFound = grid.invaders.find((candidate) => candidate === invader);
               const projectileFound = this.projectiles.find((candidate) => candidate === projectile);
 
@@ -1204,6 +1253,7 @@ class LocalGameEngine {
       }
     }
 
+
     this.player.velocity.x = 0;
     this.player.velocity.y = 0;
 
@@ -1225,12 +1275,15 @@ class LocalGameEngine {
       this.player.velocity.y = 3;
     }
 
+    //ogni tot frame, in modo casuale, creo una nuova griglia di invasori e la aggiungo all'array delle griglie, così da far apparire 
+    // nuovi invasori
     if (this.frames % this.randomInterval === 0) {
       this.grids.push(new Grid(this.ctx, this.canvas));
       this.randomInterval = Math.floor(Math.random() * 500 + 500);
       this.frames = 0;
     }
 
+    //ogni tot frame, in modo casuale, creo un nuovo asteroide che si muove verso il giocatore
     if (this.frames % this.asteroidSpawnInterval === 0) {
       this.asteroids.push(
         new Asteroid(this.ctx, this.canvas, {

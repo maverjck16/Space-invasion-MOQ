@@ -1,4 +1,4 @@
-//Questo file gestisce la connessione al relay utilizzando il pacchetto @moq/lite. Sioccupa di stabilire la
+//Questo file gestisce la connessione al relay utilizzando il pacchetto @moq/lite. Si occupa di stabilire la
 //connessione, mantenerla attiva e gestire la disconnessione quando necessario. 
 
 import * as Moq from "@moq/lite"; //installo il pacchetto @moq/lite per la connessione al relay

@@ -5,7 +5,7 @@ import type { GameSnapshot } from "./publisher";
 
 let abortController: AbortController | null = null;
 
-// Manteniamo anche una piccola mappa degli utenti remoti presenti nella room,
+//  Mantengo una piccola mappa degli utenti remoti presenti nella room,
 // utile più avanti per lobby / waiting room / gestione presenza.
 let remoteUsers: string[] = [];
 

@@ -14,6 +14,9 @@ import {
 } from "./moq/publisher";
 import { startSubscriber, stopSubscriber } from "./moq/subscriber";
 
+//allo start dell'applicazione mostro la lobby, da cui l'utente può inserire username e room a cui connettersi.
+//  Una volta connesso, mostro la schermata di gioco, e avvio publisher e subscriber. Se l'utente lascia la room, 
+// o se c'è un errore di connessione, torno alla lobby.
 function start() {
   renderLobby(async (username, room) => {
     try {

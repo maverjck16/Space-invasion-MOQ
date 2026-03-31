@@ -8,7 +8,7 @@ export type Vec2 = {
 };
 
 export type PlayerSnapshot = {
-  x: number;
+  x: number; 
   y: number;
   width: number;
   height: number;

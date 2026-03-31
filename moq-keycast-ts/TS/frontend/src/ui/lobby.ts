@@ -1,3 +1,5 @@
+//---AI--- lobby UI e gestione presenza utenti nella room
+
 export function renderLobby(
   onJoin: (username: string, room: string) => void,
 ): void {
