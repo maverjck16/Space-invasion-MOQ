@@ -1,0 +1,27 @@
+services:
+  relay:
+    build: ./relay
+    command:
+      - moq-relay
+      - --server-bind
+      - "[::]:4443"
+      - --web-http-listen
+      - "[::]:4443"
+      - --tls-generate
+      - localhost
+      - --auth-public
+      - ""
+    ports:
+      - "4443:4443/tcp"
+      - "4443:4443/udp"
+
+  frontend:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ./TS/frontend:/app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports:
+      - "5173:5173"
+    depends_on:
+      - relay
