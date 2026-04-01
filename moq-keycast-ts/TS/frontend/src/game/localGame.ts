@@ -496,6 +496,8 @@ class Asteroid {
       y: Math.sin(angle) * speed,
     };
 
+    //per cambiare il numero di asteoridi generati devo cambiare
+
    //---AI--- generazione asteroide con forma irregolare
     const pointsCount = Math.floor(Math.random() * 4) + 8;
     this.points = [];
@@ -593,8 +595,9 @@ class LocalGameEngine {
 
   private restartButton: RestartButton;
   private frames = 0;
-  private randomInterval = Math.floor(Math.random() * 500 + 500);
-  private asteroidSpawnInterval = Math.floor(Math.random() * 260 + 360);
+  //intervallo casuale tra 500 e 1000 frame per la generazione di nuove griglie di invasori
+  private randomInterval = Math.floor(Math.random() * 500 + 500); 
+  private asteroidSpawnInterval = Math.floor(Math.random() * 260);
   private game: GameFlags = { over: false, active: true };
   private score = 0;
   private animationId: number | null = null;

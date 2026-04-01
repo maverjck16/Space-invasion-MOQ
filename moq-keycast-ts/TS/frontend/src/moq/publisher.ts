@@ -1,7 +1,10 @@
+//  Questo file contiene la logica del publisher, che si occupa di pubblicare lo stato di gioco del giocatore locale ai subscriber
+//  connessi alla stessa room.
 import * as Moq from "@moq/lite";
 import { APP_PREFIX, TRACK_GAME } from "../config";
 import { connectToRelay } from "./connection";
 
+//esporta tutti i tipi di snapshot del gioco, che vengono usati sia dal publisher che dal subscriber.
 export type Vec2 = {
   x: number;
   y: number;
@@ -96,6 +99,9 @@ export type GameSnapshot = {
 let broadcast: Moq.Broadcast | null = null;
 const activeGameTracks = new Set<Moq.Track>();
 
+//  Questa funzione si occupa di avviare il publisher, creando un nuovo broadcast e pubblicandolo sulla relay con un path specifico 
+// per la room e il nome utente. Inoltre, avvia la funzione serveTrackRequests per gestire le richieste di sottoscrizione 
+// ai track di gioco da parte dei subscriber.
 export async function startPublisher(
   room: string,
   username: string,
@@ -118,6 +124,8 @@ export function stopPublisher(): void {
   activeGameTracks.clear();
 }
 
+//  Questa funzione si occupa di pubblicare un nuovo snapshot di gioco sui track di gioco attivi, scrivendo il suo contenuto 
+// come JSON in un nuovo gruppo di ogni track.
 export function publishSnapshot(snapshot: GameSnapshot): void {
   if (activeGameTracks.size === 0) return;
 
@@ -133,6 +141,8 @@ export function publishSnapshot(snapshot: GameSnapshot): void {
   }
 }
 
+//  Questa funzione si occupa di gestire le richieste di sottoscrizione ai track di gioco da parte dei subscriber, leggendo i
+//  messaggi di richiesta dal broadcast e avviando la lettura dei track di gioco dei publisher remoti quando arrivano nuove richieste.
 async function serveTrackRequests(broadcast: Moq.Broadcast): Promise<void> {
   for (;;) {
     const request = await broadcast.requested();
@@ -157,6 +167,9 @@ async function serveTrackRequests(broadcast: Moq.Broadcast): Promise<void> {
   }
 }
 
+//  Questa funzione crea uno snapshot di gioco vuoto, con valori di default per tutte le proprietà. Viene usata quando un nuovo 
+// subscriber si connette, per inviargli subito uno snapshot iniziale così da poter mostrare lo stato di gioco anche prima di 
+// ricevere i primi aggiornamenti.
 function createEmptySnapshot(): GameSnapshot {
   return {
     tick: 0,
