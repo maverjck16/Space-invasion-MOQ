@@ -11,7 +11,7 @@ export type Vec2 = {
 };
 
 export type PlayerSnapshot = {
-  x: number; 
+  x: number;
   y: number;
   width: number;
   height: number;
@@ -85,6 +85,8 @@ export type AsteroidSnapshot = {
 
 export type GameSnapshot = {
   tick: number;
+  seq: number;
+  sentAt: number;
   player: PlayerSnapshot;
   projectiles: ProjectileSnapshot[];
   invaderProjectiles: InvaderProjectileSnapshot[];
@@ -99,8 +101,12 @@ export type GameSnapshot = {
 let broadcast: Moq.Broadcast | null = null;
 const activeGameTracks = new Set<Moq.Track>();
 
-//  Questa funzione si occupa di avviare il publisher, creando un nuovo broadcast e pubblicandolo sulla relay con un path specifico 
-// per la room e il nome utente. Inoltre, avvia la funzione serveTrackRequests per gestire le richieste di sottoscrizione 
+// Contatore progressivo degli snapshot inviati.
+// Serve al subscriber per capire se qualche aggiornamento è andato perso.
+let snapshotSequence = 0;
+
+//  Questa funzione si occupa di avviare il publisher, creando un nuovo broadcast e pubblicandolo sulla relay con un path specifico
+// per la room e il nome utente. Inoltre, avvia la funzione serveTrackRequests per gestire le richieste di sottoscrizione
 // ai track di gioco da parte dei subscriber.
 export async function startPublisher(
   room: string,
@@ -113,6 +119,9 @@ export async function startPublisher(
   broadcast = new Moq.Broadcast();
   connection.publish(path, broadcast);
 
+  // Resetto il contatore quando parte una nuova sessione di publishing.
+  snapshotSequence = 0;
+
   void serveTrackRequests(broadcast);
 }
 
@@ -122,17 +131,29 @@ export function stopPublisher(): void {
   broadcast.close();
   broadcast = null;
   activeGameTracks.clear();
+
+  // Opzionale ma utile: quando il publisher si ferma, azzero anche la sequenza.
+  snapshotSequence = 0;
 }
 
-//  Questa funzione si occupa di pubblicare un nuovo snapshot di gioco sui track di gioco attivi, scrivendo il suo contenuto 
+//  Questa funzione si occupa di pubblicare un nuovo snapshot di gioco sui track di gioco attivi, scrivendo il suo contenuto
 // come JSON in un nuovo gruppo di ogni track.
+// Prima di inviarlo, aggiunge:
+// - seq: numero progressivo dello snapshot
+// - sentAt: timestamp di invio
 export function publishSnapshot(snapshot: GameSnapshot): void {
   if (activeGameTracks.size === 0) return;
+
+  const measuredSnapshot: GameSnapshot = {
+    ...snapshot, // Copio tutte le proprietà dello snapshot originale
+    seq: snapshotSequence++, //assegna il numero corrente e incrementa il contatore per il prossimo snapshot, serve per rilevare pacchetti diversi
+    sentAt: Date.now(), //salva il timestamp, esatto momento in cui invio lo snapshot
+  };
 
   for (const track of activeGameTracks) {
     try {
       const group = track.appendGroup();
-      group.writeJson(snapshot);
+      group.writeJson(measuredSnapshot);
       group.close();
     } catch (err) {
       console.warn("[Publisher] Errore track game:", err);
@@ -167,12 +188,14 @@ async function serveTrackRequests(broadcast: Moq.Broadcast): Promise<void> {
   }
 }
 
-//  Questa funzione crea uno snapshot di gioco vuoto, con valori di default per tutte le proprietà. Viene usata quando un nuovo 
-// subscriber si connette, per inviargli subito uno snapshot iniziale così da poter mostrare lo stato di gioco anche prima di 
+//  Questa funzione crea uno snapshot di gioco vuoto, con valori di default per tutte le proprietà. Viene usata quando un nuovo
+// subscriber si connette, per inviargli subito uno snapshot iniziale così da poter mostrare lo stato di gioco anche prima di
 // ricevere i primi aggiornamenti.
 function createEmptySnapshot(): GameSnapshot {
   return {
     tick: 0,
+    seq: 0,
+    sentAt: Date.now(),
     player: {
       x: 0,
       y: 0,

@@ -604,6 +604,7 @@ class LocalGameEngine {
   private destroyed = false;
   private scoreEl: HTMLElement | null = null;
 
+  // options è un oggetto che contiene il canvas su cui disegnare
   constructor(options: LocalGameOptions) {
     this.canvas = options.canvas;
     const ctx = this.canvas.getContext("2d");
