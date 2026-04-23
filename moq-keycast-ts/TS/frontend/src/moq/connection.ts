@@ -2,7 +2,11 @@
 //connessione, mantenerla attiva e gestire la disconnessione quando necessario. 
 
 import * as Moq from "@moq/lite"; //installo il pacchetto @moq/lite per la connessione al relay
+import { install as installWebTransportPolyfill } from "@moq/web-transport-ws";
 import { RELAY_URL } from "../config"; //importo l'url del relay dal file di configurazione
+
+// Installa un polyfill WebTransport (basato su WebSocket) quando il browser non lo supporta nativamente.
+installWebTransportPolyfill();
 
 //Moq.Connection.connect restituisce una Promise che quando risolta fornisce un oggetto di tipo MoqConnection, 
 // che rappresenta la connessione al relay.
