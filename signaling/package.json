@@ -1,0 +1,15 @@
+{
+  "name": "space-invasion-webrtc-signaling",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "description": "Server di signaling WebSocket per la versione WebRTC di Space Invasion. Instrada solo SDP/ICE e presenza di stanza: nessun dato di gioco passa da qui (viaggia peer-to-peer via RTCDataChannel).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

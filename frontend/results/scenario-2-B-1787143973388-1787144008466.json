@@ -1,0 +1,1770 @@
+{
+  "runId": "scenario-2-B-1787143973388",
+  "protocol": "webrtc",
+  "scenarioId": "scenario-2",
+  "scenarioSeed": 777,
+  "scenarioDurationMs": 35000,
+  "player": "B",
+  "username": "Luca",
+  "room": "room-test-1",
+  "startedAt": "2026-08-19T12:52:53.405Z",
+  "finishedAt": "2026-08-19T12:53:28.460Z",
+  "metricsSummary": {
+    "username": "Luca",
+    "room": "room-test-1",
+    "sessionDurationSec": 35.0365,
+    "messagesSent": 874,
+    "messagesReceived": 874,
+    "bytesSent": 14050890,
+    "bytesReceived": 14016593,
+    "bandwidthUpBytesPerSec": 401035.7769754399,
+    "bandwidthDownBytesPerSec": 400056.88353574136,
+    "updateFrequencyHz": 24.945414068186036,
+    "gapTotal": 0,
+    "duplicateOrOutOfOrderTotal": 832,
+    "latencyRttMs": {
+      "avg": 25.4053899083247,
+      "min": 13,
+      "max": 40.09999999962747,
+      "p50": 25.5,
+      "p95": 29.5,
+      "p99": 31.200000000186265,
+      "count": 872
+    },
+    "latencyOneWayEstimateMs": {
+      "avg": 12.70269495416235,
+      "min": 6.5,
+      "max": 20.049999999813735,
+      "p50": 12.75,
+      "p95": 14.75,
+      "p99": 15.600000000093132
+    },
+    "jitterMs": {
+      "avg": 3.058142201828134,
+      "max": 134.79999999934807
+    },
+    "peerConnectMs": {
+      "avg": 37.5,
+      "min": 36.10000000009313,
+      "max": 38.89999999990687,
+      "p50": 36.10000000009313,
+      "p95": 38.89999999990687,
+      "p99": 38.89999999990687,
+      "count": 2
+    }
+  },
+  "gameResults": {
+    "finalScore": 300,
+    "survived": false,
+    "finalPositionX": 593,
+    "finalPositionY": 505.5,
+    "actualDurationMs": 35001.10000000009
+  },
+  "determinismCheck": {
+    "scenarioId": "scenario-2",
+    "player": "B",
+    "status": "PASS",
+    "checks": [
+      {
+        "field": "finalScore",
+        "expected": 300,
+        "actual": 300,
+        "tolerance": 0,
+        "pass": true
+      },
+      {
+        "field": "survived",
+        "expected": false,
+        "actual": false,
+        "tolerance": 0,
+        "pass": true
+      },
+      {
+        "field": "finalPositionX",
+        "expected": 593,
+        "actual": 593,
+        "tolerance": 0.5,
+        "pass": true
+      },
+      {
+        "field": "finalPositionY",
+        "expected": 505.5,
+        "actual": 505.5,
+        "tolerance": 0.5,
+        "pass": true
+      },
+      {
+        "field": "actualDurationMs",
+        "expected": 35000,
+        "actual": 35001.10000000009,
+        "tolerance": 500,
+        "pass": true
+      }
+    ]
+  },
+  "inputLog": [
+    {
+      "actionId": "input_0001",
+      "scheduledAtMs": 0,
+      "dispatchedAtMs": 1.1000000000931323,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0002",
+      "scheduledAtMs": 30,
+      "dispatchedAtMs": 30.300000000279397,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0003",
+      "scheduledAtMs": 210,
+      "dispatchedAtMs": 210.20000000018626,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0004",
+      "scheduledAtMs": 330,
+      "dispatchedAtMs": 330.20000000018626,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0005",
+      "scheduledAtMs": 420,
+      "dispatchedAtMs": 420.39999999990687,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0006",
+      "scheduledAtMs": 630,
+      "dispatchedAtMs": 630.3999999999069,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0007",
+      "scheduledAtMs": 630,
+      "dispatchedAtMs": 630.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0008",
+      "scheduledAtMs": 840,
+      "dispatchedAtMs": 840.7000000001863,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0009",
+      "scheduledAtMs": 930,
+      "dispatchedAtMs": 930.3000000002794,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0010",
+      "scheduledAtMs": 1050,
+      "dispatchedAtMs": 1050.6000000000931,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0011",
+      "scheduledAtMs": 1230,
+      "dispatchedAtMs": 1230.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0012",
+      "scheduledAtMs": 1260,
+      "dispatchedAtMs": 1260.3999999999069,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0013",
+      "scheduledAtMs": 1470,
+      "dispatchedAtMs": 1471.8999999999069,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0014",
+      "scheduledAtMs": 1530,
+      "dispatchedAtMs": 1530.3000000002794,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0015",
+      "scheduledAtMs": 1680,
+      "dispatchedAtMs": 1680.3000000002794,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0016",
+      "scheduledAtMs": 1830,
+      "dispatchedAtMs": 1830.3000000002794,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0017",
+      "scheduledAtMs": 1890,
+      "dispatchedAtMs": 1890.3000000002794,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0018",
+      "scheduledAtMs": 2100,
+      "dispatchedAtMs": 2100.3000000002794,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0019",
+      "scheduledAtMs": 2130,
+      "dispatchedAtMs": 2130.3000000002794,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0020",
+      "scheduledAtMs": 2310,
+      "dispatchedAtMs": 2310.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0021",
+      "scheduledAtMs": 2430,
+      "dispatchedAtMs": 2430.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0022",
+      "scheduledAtMs": 2520,
+      "dispatchedAtMs": 2520.3000000002794,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0023",
+      "scheduledAtMs": 2730,
+      "dispatchedAtMs": 2732,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0024",
+      "scheduledAtMs": 2730,
+      "dispatchedAtMs": 2732,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0025",
+      "scheduledAtMs": 2940,
+      "dispatchedAtMs": 2940.3000000002794,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0026",
+      "scheduledAtMs": 3030,
+      "dispatchedAtMs": 3030.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0027",
+      "scheduledAtMs": 3150,
+      "dispatchedAtMs": 3150.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0028",
+      "scheduledAtMs": 3330,
+      "dispatchedAtMs": 3330.3000000002794,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0029",
+      "scheduledAtMs": 3360,
+      "dispatchedAtMs": 3360.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0030",
+      "scheduledAtMs": 3570,
+      "dispatchedAtMs": 3572.7000000001863,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0031",
+      "scheduledAtMs": 3630,
+      "dispatchedAtMs": 3630.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0032",
+      "scheduledAtMs": 3780,
+      "dispatchedAtMs": 3780.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0033",
+      "scheduledAtMs": 3930,
+      "dispatchedAtMs": 3930.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0034",
+      "scheduledAtMs": 3990,
+      "dispatchedAtMs": 3991.100000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0035",
+      "scheduledAtMs": 4200,
+      "dispatchedAtMs": 4200.300000000279,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0036",
+      "scheduledAtMs": 4230,
+      "dispatchedAtMs": 4230.300000000279,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0037",
+      "scheduledAtMs": 4410,
+      "dispatchedAtMs": 4410.200000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0038",
+      "scheduledAtMs": 4530,
+      "dispatchedAtMs": 4530.300000000279,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0039",
+      "scheduledAtMs": 4620,
+      "dispatchedAtMs": 4620.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0040",
+      "scheduledAtMs": 4830,
+      "dispatchedAtMs": 4830.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0041",
+      "scheduledAtMs": 4830,
+      "dispatchedAtMs": 4830.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0042",
+      "scheduledAtMs": 5040,
+      "dispatchedAtMs": 5041.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0043",
+      "scheduledAtMs": 5130,
+      "dispatchedAtMs": 5130.300000000279,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0044",
+      "scheduledAtMs": 5250,
+      "dispatchedAtMs": 5250.300000000279,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0045",
+      "scheduledAtMs": 5430,
+      "dispatchedAtMs": 5430.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0046",
+      "scheduledAtMs": 5460,
+      "dispatchedAtMs": 5460.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0047",
+      "scheduledAtMs": 5670,
+      "dispatchedAtMs": 5671.200000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0048",
+      "scheduledAtMs": 5730,
+      "dispatchedAtMs": 5730.300000000279,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0049",
+      "scheduledAtMs": 5880,
+      "dispatchedAtMs": 5880.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0050",
+      "scheduledAtMs": 6030,
+      "dispatchedAtMs": 6030.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0051",
+      "scheduledAtMs": 6090,
+      "dispatchedAtMs": 6090.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0052",
+      "scheduledAtMs": 6300,
+      "dispatchedAtMs": 6300.300000000279,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0053",
+      "scheduledAtMs": 6330,
+      "dispatchedAtMs": 6330.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0054",
+      "scheduledAtMs": 6510,
+      "dispatchedAtMs": 6510.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0055",
+      "scheduledAtMs": 6630,
+      "dispatchedAtMs": 6630.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0056",
+      "scheduledAtMs": 6720,
+      "dispatchedAtMs": 6720.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0057",
+      "scheduledAtMs": 6930,
+      "dispatchedAtMs": 6930.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0058",
+      "scheduledAtMs": 6930,
+      "dispatchedAtMs": 6930.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0059",
+      "scheduledAtMs": 7140,
+      "dispatchedAtMs": 7140.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0060",
+      "scheduledAtMs": 7230,
+      "dispatchedAtMs": 7230.300000000279,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0061",
+      "scheduledAtMs": 7350,
+      "dispatchedAtMs": 7350.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0062",
+      "scheduledAtMs": 7530,
+      "dispatchedAtMs": 7530.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0063",
+      "scheduledAtMs": 7560,
+      "dispatchedAtMs": 7560.300000000279,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0064",
+      "scheduledAtMs": 7770,
+      "dispatchedAtMs": 7773.200000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0065",
+      "scheduledAtMs": 7830,
+      "dispatchedAtMs": 7830.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0066",
+      "scheduledAtMs": 7980,
+      "dispatchedAtMs": 7980.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0067",
+      "scheduledAtMs": 8130,
+      "dispatchedAtMs": 8130.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0068",
+      "scheduledAtMs": 8190,
+      "dispatchedAtMs": 8190.300000000279,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0069",
+      "scheduledAtMs": 8400,
+      "dispatchedAtMs": 8400.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0070",
+      "scheduledAtMs": 8430,
+      "dispatchedAtMs": 8430.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0071",
+      "scheduledAtMs": 8610,
+      "dispatchedAtMs": 8610.30000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0072",
+      "scheduledAtMs": 8730,
+      "dispatchedAtMs": 8730.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0073",
+      "scheduledAtMs": 8820,
+      "dispatchedAtMs": 8820.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0074",
+      "scheduledAtMs": 9030,
+      "dispatchedAtMs": 9030.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0075",
+      "scheduledAtMs": 9030,
+      "dispatchedAtMs": 9030.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0076",
+      "scheduledAtMs": 9240,
+      "dispatchedAtMs": 9240.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0077",
+      "scheduledAtMs": 9330,
+      "dispatchedAtMs": 9330.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0078",
+      "scheduledAtMs": 9450,
+      "dispatchedAtMs": 9450.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0079",
+      "scheduledAtMs": 9630,
+      "dispatchedAtMs": 9630.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0080",
+      "scheduledAtMs": 9660,
+      "dispatchedAtMs": 9660.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0081",
+      "scheduledAtMs": 9870,
+      "dispatchedAtMs": 9871,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0082",
+      "scheduledAtMs": 9930,
+      "dispatchedAtMs": 9930.30000000028,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0083",
+      "scheduledAtMs": 10080,
+      "dispatchedAtMs": 10080.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0084",
+      "scheduledAtMs": 10230,
+      "dispatchedAtMs": 10230.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0085",
+      "scheduledAtMs": 10290,
+      "dispatchedAtMs": 10290.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0086",
+      "scheduledAtMs": 10500,
+      "dispatchedAtMs": 10500.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0087",
+      "scheduledAtMs": 10530,
+      "dispatchedAtMs": 10530.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0088",
+      "scheduledAtMs": 10710,
+      "dispatchedAtMs": 10710.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0089",
+      "scheduledAtMs": 10830,
+      "dispatchedAtMs": 10830.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0090",
+      "scheduledAtMs": 10920,
+      "dispatchedAtMs": 10925.30000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0091",
+      "scheduledAtMs": 11130,
+      "dispatchedAtMs": 11130.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0092",
+      "scheduledAtMs": 11130,
+      "dispatchedAtMs": 11130.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0093",
+      "scheduledAtMs": 11340,
+      "dispatchedAtMs": 11340.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0094",
+      "scheduledAtMs": 11430,
+      "dispatchedAtMs": 11430.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0095",
+      "scheduledAtMs": 11550,
+      "dispatchedAtMs": 11550.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0096",
+      "scheduledAtMs": 11730,
+      "dispatchedAtMs": 11730.30000000028,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0097",
+      "scheduledAtMs": 11760,
+      "dispatchedAtMs": 11760.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0098",
+      "scheduledAtMs": 11970,
+      "dispatchedAtMs": 11971.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0099",
+      "scheduledAtMs": 12030,
+      "dispatchedAtMs": 12030.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0100",
+      "scheduledAtMs": 12180,
+      "dispatchedAtMs": 12180.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0101",
+      "scheduledAtMs": 12330,
+      "dispatchedAtMs": 12330.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0102",
+      "scheduledAtMs": 12390,
+      "dispatchedAtMs": 12390.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0103",
+      "scheduledAtMs": 12600,
+      "dispatchedAtMs": 12600.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0104",
+      "scheduledAtMs": 12630,
+      "dispatchedAtMs": 12630.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0105",
+      "scheduledAtMs": 12810,
+      "dispatchedAtMs": 12810.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0106",
+      "scheduledAtMs": 12930,
+      "dispatchedAtMs": 12930.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0107",
+      "scheduledAtMs": 13020,
+      "dispatchedAtMs": 13020.30000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0108",
+      "scheduledAtMs": 13230,
+      "dispatchedAtMs": 13230.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0109",
+      "scheduledAtMs": 13230,
+      "dispatchedAtMs": 13230.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0110",
+      "scheduledAtMs": 13440,
+      "dispatchedAtMs": 13440.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0111",
+      "scheduledAtMs": 13530,
+      "dispatchedAtMs": 13530.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0112",
+      "scheduledAtMs": 13650,
+      "dispatchedAtMs": 13650.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0113",
+      "scheduledAtMs": 13830,
+      "dispatchedAtMs": 13830.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0114",
+      "scheduledAtMs": 13860,
+      "dispatchedAtMs": 13860.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0115",
+      "scheduledAtMs": 14070,
+      "dispatchedAtMs": 14070.899999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0116",
+      "scheduledAtMs": 14130,
+      "dispatchedAtMs": 14130.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0117",
+      "scheduledAtMs": 14280,
+      "dispatchedAtMs": 14280.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0118",
+      "scheduledAtMs": 14430,
+      "dispatchedAtMs": 14430.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0119",
+      "scheduledAtMs": 14490,
+      "dispatchedAtMs": 14491,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0120",
+      "scheduledAtMs": 14700,
+      "dispatchedAtMs": 14700.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0121",
+      "scheduledAtMs": 14730,
+      "dispatchedAtMs": 14730.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0122",
+      "scheduledAtMs": 14910,
+      "dispatchedAtMs": 14910.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0123",
+      "scheduledAtMs": 15030,
+      "dispatchedAtMs": 15030.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0124",
+      "scheduledAtMs": 15120,
+      "dispatchedAtMs": 15122.200000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0125",
+      "scheduledAtMs": 15330,
+      "dispatchedAtMs": 15330.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0126",
+      "scheduledAtMs": 15330,
+      "dispatchedAtMs": 15330.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0127",
+      "scheduledAtMs": 15540,
+      "dispatchedAtMs": 15540.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0128",
+      "scheduledAtMs": 15630,
+      "dispatchedAtMs": 15630.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0129",
+      "scheduledAtMs": 15750,
+      "dispatchedAtMs": 15750.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0130",
+      "scheduledAtMs": 15930,
+      "dispatchedAtMs": 15930.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0131",
+      "scheduledAtMs": 15960,
+      "dispatchedAtMs": 15960.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0132",
+      "scheduledAtMs": 16170,
+      "dispatchedAtMs": 16173.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0133",
+      "scheduledAtMs": 16230,
+      "dispatchedAtMs": 16230.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0134",
+      "scheduledAtMs": 16380,
+      "dispatchedAtMs": 16380.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0135",
+      "scheduledAtMs": 16530,
+      "dispatchedAtMs": 16530.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0136",
+      "scheduledAtMs": 16590,
+      "dispatchedAtMs": 16590.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0137",
+      "scheduledAtMs": 16800,
+      "dispatchedAtMs": 16800.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0138",
+      "scheduledAtMs": 16830,
+      "dispatchedAtMs": 16830.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0139",
+      "scheduledAtMs": 17010,
+      "dispatchedAtMs": 17010.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0140",
+      "scheduledAtMs": 17130,
+      "dispatchedAtMs": 17130.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0141",
+      "scheduledAtMs": 17220,
+      "dispatchedAtMs": 17220.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0142",
+      "scheduledAtMs": 17430,
+      "dispatchedAtMs": 17430.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0143",
+      "scheduledAtMs": 17430,
+      "dispatchedAtMs": 17430.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0144",
+      "scheduledAtMs": 17640,
+      "dispatchedAtMs": 17640.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0145",
+      "scheduledAtMs": 17730,
+      "dispatchedAtMs": 17730.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0146",
+      "scheduledAtMs": 17850,
+      "dispatchedAtMs": 17850.399999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0147",
+      "scheduledAtMs": 18030,
+      "dispatchedAtMs": 18030.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0148",
+      "scheduledAtMs": 18060,
+      "dispatchedAtMs": 18060.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0149",
+      "scheduledAtMs": 18270,
+      "dispatchedAtMs": 18270.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0150",
+      "scheduledAtMs": 18330,
+      "dispatchedAtMs": 18330.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0151",
+      "scheduledAtMs": 18480,
+      "dispatchedAtMs": 18480.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0152",
+      "scheduledAtMs": 18630,
+      "dispatchedAtMs": 18630.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0153",
+      "scheduledAtMs": 18690,
+      "dispatchedAtMs": 18690.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0154",
+      "scheduledAtMs": 18900,
+      "dispatchedAtMs": 18900.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0155",
+      "scheduledAtMs": 18930,
+      "dispatchedAtMs": 18930.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0156",
+      "scheduledAtMs": 19110,
+      "dispatchedAtMs": 19110.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0157",
+      "scheduledAtMs": 19230,
+      "dispatchedAtMs": 19230.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0158",
+      "scheduledAtMs": 19320,
+      "dispatchedAtMs": 19321.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0159",
+      "scheduledAtMs": 19530,
+      "dispatchedAtMs": 19530.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0160",
+      "scheduledAtMs": 19530,
+      "dispatchedAtMs": 19530.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0161",
+      "scheduledAtMs": 19740,
+      "dispatchedAtMs": 19740.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0162",
+      "scheduledAtMs": 19830,
+      "dispatchedAtMs": 19830.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0163",
+      "scheduledAtMs": 19950,
+      "dispatchedAtMs": 19950.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0164",
+      "scheduledAtMs": 20130,
+      "dispatchedAtMs": 20130.399999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0165",
+      "scheduledAtMs": 20160,
+      "dispatchedAtMs": 20160.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0166",
+      "scheduledAtMs": 20370,
+      "dispatchedAtMs": 20376,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0167",
+      "scheduledAtMs": 20430,
+      "dispatchedAtMs": 20430.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0168",
+      "scheduledAtMs": 20580,
+      "dispatchedAtMs": 20580.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0169",
+      "scheduledAtMs": 20730,
+      "dispatchedAtMs": 20730.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0170",
+      "scheduledAtMs": 20790,
+      "dispatchedAtMs": 20790.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0171",
+      "scheduledAtMs": 21000,
+      "dispatchedAtMs": 21000.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0172",
+      "scheduledAtMs": 21030,
+      "dispatchedAtMs": 21031.100000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0173",
+      "scheduledAtMs": 21210,
+      "dispatchedAtMs": 21210.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0174",
+      "scheduledAtMs": 21330,
+      "dispatchedAtMs": 21330.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0175",
+      "scheduledAtMs": 21420,
+      "dispatchedAtMs": 21420.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0176",
+      "scheduledAtMs": 21630,
+      "dispatchedAtMs": 21630.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0177",
+      "scheduledAtMs": 21630,
+      "dispatchedAtMs": 21630.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0178",
+      "scheduledAtMs": 21840,
+      "dispatchedAtMs": 21840.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0179",
+      "scheduledAtMs": 21930,
+      "dispatchedAtMs": 21930.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0180",
+      "scheduledAtMs": 22050,
+      "dispatchedAtMs": 22050.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0181",
+      "scheduledAtMs": 22230,
+      "dispatchedAtMs": 22230.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0182",
+      "scheduledAtMs": 22260,
+      "dispatchedAtMs": 22260.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0183",
+      "scheduledAtMs": 22470,
+      "dispatchedAtMs": 22471,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0184",
+      "scheduledAtMs": 22530,
+      "dispatchedAtMs": 22530.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0185",
+      "scheduledAtMs": 22680,
+      "dispatchedAtMs": 22680.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0186",
+      "scheduledAtMs": 22830,
+      "dispatchedAtMs": 22830.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0187",
+      "scheduledAtMs": 22890,
+      "dispatchedAtMs": 22890.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0188",
+      "scheduledAtMs": 23100,
+      "dispatchedAtMs": 23100.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0189",
+      "scheduledAtMs": 23130,
+      "dispatchedAtMs": 23130.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0190",
+      "scheduledAtMs": 23310,
+      "dispatchedAtMs": 23310.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0191",
+      "scheduledAtMs": 23430,
+      "dispatchedAtMs": 23430.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0192",
+      "scheduledAtMs": 23520,
+      "dispatchedAtMs": 23523.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0193",
+      "scheduledAtMs": 23730,
+      "dispatchedAtMs": 23730.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0194",
+      "scheduledAtMs": 23730,
+      "dispatchedAtMs": 23730.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0195",
+      "scheduledAtMs": 23940,
+      "dispatchedAtMs": 23940.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0196",
+      "scheduledAtMs": 24030,
+      "dispatchedAtMs": 24030.80000000028,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0197",
+      "scheduledAtMs": 24150,
+      "dispatchedAtMs": 24150.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0198",
+      "scheduledAtMs": 24330,
+      "dispatchedAtMs": 24330.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0199",
+      "scheduledAtMs": 24360,
+      "dispatchedAtMs": 24360.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0200",
+      "scheduledAtMs": 24570,
+      "dispatchedAtMs": 24571.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0201",
+      "scheduledAtMs": 24630,
+      "dispatchedAtMs": 24630.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0202",
+      "scheduledAtMs": 24780,
+      "dispatchedAtMs": 24780.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0203",
+      "scheduledAtMs": 24930,
+      "dispatchedAtMs": 24930.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0204",
+      "scheduledAtMs": 24990,
+      "dispatchedAtMs": 24990.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0205",
+      "scheduledAtMs": 25200,
+      "dispatchedAtMs": 25200.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0206",
+      "scheduledAtMs": 25230,
+      "dispatchedAtMs": 25230.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0207",
+      "scheduledAtMs": 25410,
+      "dispatchedAtMs": 25410.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0208",
+      "scheduledAtMs": 25530,
+      "dispatchedAtMs": 25530.5,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0209",
+      "scheduledAtMs": 25620,
+      "dispatchedAtMs": 25620.5,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0210",
+      "scheduledAtMs": 25830,
+      "dispatchedAtMs": 25830.80000000028,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0211",
+      "scheduledAtMs": 25830,
+      "dispatchedAtMs": 25831,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0212",
+      "scheduledAtMs": 26040,
+      "dispatchedAtMs": 26040.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0213",
+      "scheduledAtMs": 26130,
+      "dispatchedAtMs": 26130.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0214",
+      "scheduledAtMs": 26250,
+      "dispatchedAtMs": 26250.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0215",
+      "scheduledAtMs": 26430,
+      "dispatchedAtMs": 26430.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0216",
+      "scheduledAtMs": 26460,
+      "dispatchedAtMs": 26460.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0217",
+      "scheduledAtMs": 26670,
+      "dispatchedAtMs": 26670.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0218",
+      "scheduledAtMs": 26730,
+      "dispatchedAtMs": 26730.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0219",
+      "scheduledAtMs": 26880,
+      "dispatchedAtMs": 26880.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0220",
+      "scheduledAtMs": 27030,
+      "dispatchedAtMs": 27030.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0221",
+      "scheduledAtMs": 27090,
+      "dispatchedAtMs": 27090.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0222",
+      "scheduledAtMs": 27300,
+      "dispatchedAtMs": 27300.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0223",
+      "scheduledAtMs": 27330,
+      "dispatchedAtMs": 27330.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0224",
+      "scheduledAtMs": 27510,
+      "dispatchedAtMs": 27510.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0225",
+      "scheduledAtMs": 27630,
+      "dispatchedAtMs": 27630.80000000028,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0226",
+      "scheduledAtMs": 27720,
+      "dispatchedAtMs": 27721.899999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0227",
+      "scheduledAtMs": 27930,
+      "dispatchedAtMs": 27930.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0228",
+      "scheduledAtMs": 27930,
+      "dispatchedAtMs": 27930.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0229",
+      "scheduledAtMs": 28140,
+      "dispatchedAtMs": 28140.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0230",
+      "scheduledAtMs": 28230,
+      "dispatchedAtMs": 28230.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0231",
+      "scheduledAtMs": 28350,
+      "dispatchedAtMs": 28350.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0232",
+      "scheduledAtMs": 28530,
+      "dispatchedAtMs": 28530.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0233",
+      "scheduledAtMs": 28560,
+      "dispatchedAtMs": 28560.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0234",
+      "scheduledAtMs": 28770,
+      "dispatchedAtMs": 28771.899999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0235",
+      "scheduledAtMs": 28830,
+      "dispatchedAtMs": 28830.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0236",
+      "scheduledAtMs": 28980,
+      "dispatchedAtMs": 28980.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0237",
+      "scheduledAtMs": 29130,
+      "dispatchedAtMs": 29130.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0238",
+      "scheduledAtMs": 29190,
+      "dispatchedAtMs": 29190.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0239",
+      "scheduledAtMs": 29400,
+      "dispatchedAtMs": 29400.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0240",
+      "scheduledAtMs": 29430,
+      "dispatchedAtMs": 29430.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0241",
+      "scheduledAtMs": 29610,
+      "dispatchedAtMs": 29610.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0242",
+      "scheduledAtMs": 29730,
+      "dispatchedAtMs": 29730.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0243",
+      "scheduledAtMs": 29820,
+      "dispatchedAtMs": 29821.200000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0244",
+      "scheduledAtMs": 30030,
+      "dispatchedAtMs": 30030.600000000093,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0245",
+      "scheduledAtMs": 30030,
+      "dispatchedAtMs": 30030.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0246",
+      "scheduledAtMs": 30240,
+      "dispatchedAtMs": 30240.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0247",
+      "scheduledAtMs": 30330,
+      "dispatchedAtMs": 30330.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0248",
+      "scheduledAtMs": 30450,
+      "dispatchedAtMs": 30450.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0249",
+      "scheduledAtMs": 30630,
+      "dispatchedAtMs": 30630.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0250",
+      "scheduledAtMs": 30660,
+      "dispatchedAtMs": 30660.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0251",
+      "scheduledAtMs": 30870,
+      "dispatchedAtMs": 30870.600000000093,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0252",
+      "scheduledAtMs": 30930,
+      "dispatchedAtMs": 30930.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0253",
+      "scheduledAtMs": 31080,
+      "dispatchedAtMs": 31080.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0254",
+      "scheduledAtMs": 31230,
+      "dispatchedAtMs": 31230.80000000028,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0255",
+      "scheduledAtMs": 31290,
+      "dispatchedAtMs": 31290.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0256",
+      "scheduledAtMs": 31500,
+      "dispatchedAtMs": 31500.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0257",
+      "scheduledAtMs": 31530,
+      "dispatchedAtMs": 31530.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0258",
+      "scheduledAtMs": 31710,
+      "dispatchedAtMs": 31710.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0259",
+      "scheduledAtMs": 31830,
+      "dispatchedAtMs": 31830.80000000028,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0260",
+      "scheduledAtMs": 31920,
+      "dispatchedAtMs": 31920.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0261",
+      "scheduledAtMs": 32130,
+      "dispatchedAtMs": 32130.700000000186,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0262",
+      "scheduledAtMs": 32130,
+      "dispatchedAtMs": 32130.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0263",
+      "scheduledAtMs": 32340,
+      "dispatchedAtMs": 32340.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0264",
+      "scheduledAtMs": 32430,
+      "dispatchedAtMs": 32430.899999999907,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0265",
+      "scheduledAtMs": 32550,
+      "dispatchedAtMs": 32550.899999999907,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0266",
+      "scheduledAtMs": 32730,
+      "dispatchedAtMs": 32730.80000000028,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0267",
+      "scheduledAtMs": 32760,
+      "dispatchedAtMs": 32760.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0268",
+      "scheduledAtMs": 32970,
+      "dispatchedAtMs": 32971.10000000009,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0269",
+      "scheduledAtMs": 33030,
+      "dispatchedAtMs": 33030.89999999991,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0270",
+      "scheduledAtMs": 33180,
+      "dispatchedAtMs": 33180.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0271",
+      "scheduledAtMs": 33330,
+      "dispatchedAtMs": 33330.80000000028,
+      "type": "shoot"
+    },
+    {
+      "actionId": "input_0272",
+      "scheduledAtMs": 33390,
+      "dispatchedAtMs": 33390.80000000028,
+      "type": "moveX"
+    },
+    {
+      "actionId": "input_0273",
+      "scheduledAtMs": 33600,
+      "dispatchedAtMs": 33600.700000000186,
+      "type": "moveX"
+    },
+    {
+      "actionId": "shot_0274",
+      "scheduledAtMs": 33800,
+      "dispatchedAtMs": 33800.80000000028,
+      "type": "shoot"
+    },
+    {
+      "actionId": "shot_0275",
+      "scheduledAtMs": 34080,
+      "dispatchedAtMs": 34080.80000000028,
+      "type": "shoot"
+    },
+    {
+      "actionId": "shot_0276",
+      "scheduledAtMs": 34360,
+      "dispatchedAtMs": 34360.89999999991,
+      "type": "shoot"
+    },
+    {
+      "actionId": "shot_0277",
+      "scheduledAtMs": 34640,
+      "dispatchedAtMs": 34640.80000000028,
+      "type": "shoot"
+    }
+  ],
+  "errors": []
+}

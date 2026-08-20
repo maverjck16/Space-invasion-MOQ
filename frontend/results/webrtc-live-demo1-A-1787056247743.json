@@ -1,0 +1,64 @@
+{
+  "runId": "webrtc-live-demo1-A",
+  "protocol": "webrtc",
+  "scenarioId": "scenario-1",
+  "scenarioSeed": 250,
+  "scenarioDurationMs": 45000,
+  "player": "A",
+  "username": "Fra",
+  "room": "room-live-demo1",
+  "startedAt": "2026-08-18T12:30:39.345Z",
+  "finishedAt": "2026-08-18T12:30:47.738Z",
+  "metricsSummary": {
+    "username": "",
+    "room": "",
+    "sessionDurationSec": 8.987600000000093,
+    "messagesSent": 0,
+    "messagesReceived": 0,
+    "bytesSent": 0,
+    "bytesReceived": 0,
+    "bandwidthUpBytesPerSec": 0,
+    "bandwidthDownBytesPerSec": 0,
+    "updateFrequencyHz": 0,
+    "gapTotal": 0,
+    "duplicateOrOutOfOrderTotal": 0,
+    "latencyRttMs": {
+      "avg": null,
+      "min": null,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "count": 0
+    },
+    "latencyOneWayEstimateMs": {
+      "avg": null,
+      "min": null,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null
+    },
+    "jitterMs": {
+      "avg": null,
+      "max": null
+    },
+    "peerConnectMs": {
+      "avg": null,
+      "min": null,
+      "max": null,
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "count": 0
+    }
+  },
+  "gameResults": null,
+  "determinismCheck": null,
+  "stateSequenceHash": "811c9dc5",
+  "stateSequenceTickCount": 0,
+  "inputLog": [],
+  "errors": [
+    "Error: Timeout connessione al signaling (8s) verso wss://space-invasion-signaling-fb.loca.lt. Verifica che il server di signaling sia avviato e raggiungibile."
+  ]
+}

@@ -1,5 +1,16 @@
 {
+  "name": "space-invasion-webrtc",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Versione WebRTC di Space Invasion, controparte sperimentale della versione MoQ in Space-invasion-MOQ-provaF/moq-keycast-ts, per confronto delle due tecnologie di comunicazione real-time.",
+  "scripts": {
+    "install:all": "npm install --prefix signaling && npm install --prefix frontend",
+    "dev:signaling": "npm run dev --prefix signaling",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev": "concurrently -n signaling,frontend -c yellow,cyan \"npm:dev:signaling\" \"npm:dev:frontend\"",
+    "typecheck": "npm run typecheck --prefix frontend"
+  },
   "devDependencies": {
-    "@types/node": "^25.6.2"
+    "concurrently": "^9.0.1"
   }
 }
