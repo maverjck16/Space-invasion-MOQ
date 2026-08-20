@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@moq/lite": "^0.1.5"
+  }
+}
