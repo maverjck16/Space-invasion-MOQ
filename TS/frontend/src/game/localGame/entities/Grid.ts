@@ -22,6 +22,10 @@ export class Grid {
   velocity: Vec2;
   invaders: Invader[];
   width: number;
+  // TESTBED: se false, nessun invasore di questa griglia sparera' mai (vedi ScriptedWave.canShoot
+  // in game/localGame/types.ts e il ciclo di sparo in LocalGameEngine.animate()). true di default
+  // cosi' ogni "new Grid(...)" esistente (gioco manuale, spawner casuale) resta invariato.
+  canShoot = true;
 
   constructor(
     private ctx: CanvasRenderingContext2D,

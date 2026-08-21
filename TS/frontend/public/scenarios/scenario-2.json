@@ -1,21 +1,41 @@
 {
   "scenarioId": "scenario-2",
-  "description": "Medium/realistic: griglie piu' popolate (piu' invasori) e qualche asteroide (ne' assenti come nello scenario-1 ne' particolarmente frequenti), sparo a raffiche intervallate da pause (non continuo, niente 'sparo a manetta') e beccheggio verticale periodico - pensato per assomigliare a una partita giocata da una persona, restando comunque scriptato e deterministico.",
+  "description": "Come scenario-1 (10s movimento libero, poi ondata 4x7 alieni che non sparano, poi riga di 10 alieni che spara) ma con un asteroide aggiuntivo in ciascuna delle tre fasi (fase 1, fase 2 e fase 3, al momento dello spawn di ciascuna).",
   "seed": 6200,
-  "durationMs": 40000,
+  "durationMs": 50000,
   "room": "room-test-2",
-  "durationToleranceMs": 500,
+  "durationToleranceMs": 600,
   "gameConfig": {
-    "gridSpawnIntervalFramesMin": 500,
-    "gridSpawnIntervalFramesMax": 750,
-    "gridColumnsMin": 4,
-    "gridColumnsMax": 6,
+    "gridSpawnIntervalFramesMin": 999999,
+    "gridSpawnIntervalFramesMax": 999999,
+    "gridColumnsMin": 2,
+    "gridColumnsMax": 4,
     "gridRowsMin": 1,
-    "gridRowsMax": 3,
-    "asteroidSpawnIntervalFramesMin": 380,
-    "asteroidSpawnIntervalFramesMax": 580,
-    "asteroidsEnabled": true,
-    "asteroidMaxCount": 2
+    "gridRowsMax": 2,
+    "asteroidSpawnIntervalFramesMin": 999999,
+    "asteroidSpawnIntervalFramesMax": 999999,
+    "asteroidsEnabled": false,
+    "scriptedWaves": [
+      {
+        "minStartFrame": 600,
+        "columns": 7,
+        "rows": 4,
+        "canShoot": false,
+        "spawnAsteroid": true
+      },
+      {
+        "minStartFrame": 0,
+        "columns": 10,
+        "rows": 1,
+        "canShoot": true,
+        "spawnAsteroid": true
+      }
+    ],
+    "scriptedAsteroids": [
+      {
+        "minStartFrame": 300
+      }
+    ]
   },
   "players": {
     "A": {
@@ -27,1196 +47,2424 @@
           "dir": "left"
         },
         {
-          "id": "shot_0094",
-          "timeMs": 300,
+          "id": "shot_0011",
+          "timeMs": 500,
           "type": "shoot"
         },
         {
           "id": "input_0002",
-          "timeMs": 500,
+          "timeMs": 1600,
           "type": "moveX",
-          "dir": "left"
+          "dir": "right"
         },
         {
-          "id": "shot_0095",
-          "timeMs": 850,
+          "id": "shot_0012",
+          "timeMs": 2600,
           "type": "shoot"
         },
         {
           "id": "input_0003",
-          "timeMs": 1000,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0096",
-          "timeMs": 1400,
-          "type": "shoot"
+          "timeMs": 3200,
+          "type": "moveY",
+          "dir": "down"
         },
         {
           "id": "input_0004",
-          "timeMs": 1500,
-          "type": "moveX",
-          "dir": "right"
+          "timeMs": 3500,
+          "type": "moveY",
+          "dir": "none"
         },
         {
           "id": "input_0005",
-          "timeMs": 2000,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0006",
-          "timeMs": 2500,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0097",
-          "timeMs": 2500,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0007",
-          "timeMs": 3000,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0098",
-          "timeMs": 3050,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0008",
-          "timeMs": 3500,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0099",
           "timeMs": 3600,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0009",
-          "timeMs": 4000,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "input_0010",
-          "timeMs": 4500,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0100",
+          "id": "shot_0013",
           "timeMs": 4700,
           "type": "shoot"
         },
         {
-          "id": "input_0011",
-          "timeMs": 5000,
-          "type": "moveX",
-          "dir": "left"
+          "id": "input_0437",
+          "timeMs": 5040,
+          "type": "moveY",
+          "dir": "up"
         },
         {
-          "id": "shot_0101",
-          "timeMs": 5250,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0012",
-          "timeMs": 5500,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0102",
-          "timeMs": 5800,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0013",
-          "timeMs": 6000,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0014",
-          "timeMs": 6500,
+          "id": "input_0006",
+          "timeMs": 5200,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0103",
-          "timeMs": 6900,
+          "id": "input_0438",
+          "timeMs": 5840,
+          "type": "moveY",
+          "dir": "none"
+        },
+        {
+          "id": "input_0007",
+          "timeMs": 6800,
+          "type": "moveY",
+          "dir": "up"
+        },
+        {
+          "id": "shot_0014",
+          "timeMs": 6800,
           "type": "shoot"
         },
         {
-          "id": "input_0015",
-          "timeMs": 7000,
+          "id": "input_0008",
+          "timeMs": 7100,
+          "type": "moveY",
+          "dir": "none"
+        },
+        {
+          "id": "input_0009",
+          "timeMs": 7200,
           "type": "moveX",
-          "dir": "right"
+          "dir": "left"
         },
         {
-          "id": "shot_0104",
-          "timeMs": 7450,
+          "id": "shot_0015",
+          "timeMs": 8600,
           "type": "shoot"
+        },
+        {
+          "id": "input_0010",
+          "timeMs": 9600,
+          "type": "moveX",
+          "dir": "none"
         },
         {
           "id": "input_0016",
-          "timeMs": 7500,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0105",
-          "timeMs": 7550,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0106",
-          "timeMs": 7650,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0107",
-          "timeMs": 7750,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0108",
-          "timeMs": 7850,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0109",
-          "timeMs": 7950,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0017",
-          "timeMs": 8000,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0110",
-          "timeMs": 8050,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0111",
-          "timeMs": 8150,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0112",
-          "timeMs": 8250,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0113",
-          "timeMs": 8350,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0114",
-          "timeMs": 8450,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0018",
-          "timeMs": 8500,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0115",
-          "timeMs": 8550,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0116",
-          "timeMs": 8650,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0117",
-          "timeMs": 8750,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0118",
-          "timeMs": 8850,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0119",
-          "timeMs": 8950,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0019",
-          "timeMs": 9000,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0120",
-          "timeMs": 9050,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0121",
-          "timeMs": 9150,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0122",
-          "timeMs": 9250,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0123",
-          "timeMs": 9350,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0124",
-          "timeMs": 9450,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0020",
-          "timeMs": 9500,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0125",
-          "timeMs": 9550,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0126",
-          "timeMs": 9650,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0127",
-          "timeMs": 9750,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0128",
-          "timeMs": 9850,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0129",
-          "timeMs": 9950,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0021",
           "timeMs": 10000,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0130",
-          "timeMs": 10050,
+          "id": "shot_0017",
+          "timeMs": 10030,
           "type": "shoot"
         },
         {
-          "id": "shot_0131",
-          "timeMs": 10150,
-          "type": "shoot"
+          "id": "input_0439",
+          "timeMs": 10040,
+          "type": "moveY",
+          "dir": "down"
         },
         {
-          "id": "shot_0132",
-          "timeMs": 10250,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0133",
-          "timeMs": 10350,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0134",
-          "timeMs": 10450,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0022",
-          "timeMs": 10500,
+          "id": "input_0018",
+          "timeMs": 10200,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0135",
-          "timeMs": 10550,
+          "id": "shot_0019",
+          "timeMs": 10210,
           "type": "shoot"
         },
         {
-          "id": "shot_0136",
-          "timeMs": 10650,
+          "id": "input_0440",
+          "timeMs": 10340,
+          "type": "moveY",
+          "dir": "none"
+        },
+        {
+          "id": "shot_0020",
+          "timeMs": 10390,
           "type": "shoot"
         },
         {
-          "id": "shot_0137",
-          "timeMs": 10750,
-          "type": "shoot"
+          "id": "input_0021",
+          "timeMs": 10400,
+          "type": "moveX",
+          "dir": "left"
         },
         {
-          "id": "shot_0138",
-          "timeMs": 10850,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0139",
-          "timeMs": 10950,
+          "id": "shot_0022",
+          "timeMs": 10570,
           "type": "shoot"
         },
         {
           "id": "input_0023",
+          "timeMs": 10600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0024",
+          "timeMs": 10750,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0025",
+          "timeMs": 10800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0026",
+          "timeMs": 10930,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0027",
           "timeMs": 11000,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0140",
-          "timeMs": 11050,
+          "id": "shot_0028",
+          "timeMs": 11110,
           "type": "shoot"
         },
         {
-          "id": "shot_0141",
-          "timeMs": 11150,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0142",
-          "timeMs": 11250,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0078",
-          "timeMs": 11300,
-          "type": "moveY",
-          "dir": "up"
-        },
-        {
-          "id": "shot_0143",
-          "timeMs": 11350,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0144",
-          "timeMs": 11450,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0024",
-          "timeMs": 11500,
+          "id": "input_0029",
+          "timeMs": 11200,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0145",
-          "timeMs": 11550,
+          "id": "shot_0030",
+          "timeMs": 11290,
           "type": "shoot"
         },
         {
-          "id": "shot_0146",
+          "id": "input_0031",
+          "timeMs": 11400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0032",
+          "timeMs": 11470,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0033",
+          "timeMs": 11600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0034",
           "timeMs": 11650,
           "type": "shoot"
         },
         {
-          "id": "shot_0147",
-          "timeMs": 11750,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0079",
+          "id": "input_0035",
           "timeMs": 11800,
-          "type": "moveY",
-          "dir": "none"
+          "type": "moveX",
+          "dir": "right"
         },
         {
-          "id": "shot_0148",
-          "timeMs": 11850,
+          "id": "shot_0036",
+          "timeMs": 11830,
           "type": "shoot"
         },
         {
-          "id": "shot_0149",
-          "timeMs": 11950,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0025",
+          "id": "input_0037",
           "timeMs": 12000,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0150",
-          "timeMs": 12050,
+          "id": "shot_0038",
+          "timeMs": 12010,
           "type": "shoot"
         },
         {
-          "id": "shot_0151",
-          "timeMs": 12150,
+          "id": "shot_0039",
+          "timeMs": 12190,
           "type": "shoot"
         },
         {
-          "id": "shot_0152",
-          "timeMs": 12250,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0153",
-          "timeMs": 12350,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0154",
-          "timeMs": 12450,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0026",
-          "timeMs": 12500,
+          "id": "input_0040",
+          "timeMs": 12200,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0155",
+          "id": "shot_0041",
+          "timeMs": 12370,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0042",
+          "timeMs": 12400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0043",
           "timeMs": 12550,
           "type": "shoot"
         },
         {
-          "id": "shot_0156",
-          "timeMs": 12650,
+          "id": "input_0044",
+          "timeMs": 12600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0045",
+          "timeMs": 12730,
           "type": "shoot"
         },
         {
-          "id": "shot_0157",
-          "timeMs": 12750,
+          "id": "input_0046",
+          "timeMs": 12800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0047",
+          "timeMs": 12910,
           "type": "shoot"
         },
         {
-          "id": "shot_0158",
-          "timeMs": 12850,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0159",
-          "timeMs": 12950,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0027",
+          "id": "input_0048",
           "timeMs": 13000,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0160",
-          "timeMs": 13050,
+          "id": "shot_0049",
+          "timeMs": 13090,
           "type": "shoot"
         },
         {
-          "id": "shot_0161",
-          "timeMs": 13150,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0162",
-          "timeMs": 13250,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0163",
-          "timeMs": 13350,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0164",
-          "timeMs": 13450,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0028",
-          "timeMs": 13500,
+          "id": "input_0050",
+          "timeMs": 13200,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0165",
-          "timeMs": 13550,
+          "id": "shot_0051",
+          "timeMs": 13270,
           "type": "shoot"
         },
         {
-          "id": "shot_0166",
-          "timeMs": 13650,
+          "id": "input_0052",
+          "timeMs": 13400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0053",
+          "timeMs": 13450,
           "type": "shoot"
         },
         {
-          "id": "shot_0167",
-          "timeMs": 13750,
+          "id": "input_0054",
+          "timeMs": 13600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0055",
+          "timeMs": 13630,
           "type": "shoot"
         },
         {
-          "id": "shot_0168",
-          "timeMs": 13850,
+          "id": "input_0056",
+          "timeMs": 13800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0057",
+          "timeMs": 13810,
           "type": "shoot"
         },
         {
-          "id": "shot_0169",
-          "timeMs": 13950,
+          "id": "shot_0058",
+          "timeMs": 13990,
           "type": "shoot"
         },
         {
-          "id": "input_0029",
+          "id": "input_0059",
           "timeMs": 14000,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0170",
-          "timeMs": 14050,
+          "id": "shot_0060",
+          "timeMs": 14170,
           "type": "shoot"
         },
         {
-          "id": "shot_0171",
-          "timeMs": 14150,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0172",
-          "timeMs": 14250,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0173",
-          "timeMs": 14350,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0174",
-          "timeMs": 14450,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0030",
-          "timeMs": 14500,
+          "id": "input_0061",
+          "timeMs": 14200,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0175",
-          "timeMs": 14550,
+          "id": "shot_0062",
+          "timeMs": 14350,
           "type": "shoot"
         },
         {
-          "id": "shot_0176",
-          "timeMs": 14650,
+          "id": "input_0063",
+          "timeMs": 14400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0064",
+          "timeMs": 14530,
           "type": "shoot"
         },
         {
-          "id": "shot_0177",
-          "timeMs": 14750,
+          "id": "input_0065",
+          "timeMs": 14600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0066",
+          "timeMs": 14710,
           "type": "shoot"
         },
         {
-          "id": "shot_0178",
-          "timeMs": 14850,
+          "id": "input_0067",
+          "timeMs": 14800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0068",
+          "timeMs": 14890,
           "type": "shoot"
         },
         {
-          "id": "input_0080",
-          "timeMs": 14900,
-          "type": "moveY",
-          "dir": "down"
-        },
-        {
-          "id": "shot_0179",
-          "timeMs": 14950,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0031",
+          "id": "input_0069",
           "timeMs": 15000,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0180",
-          "timeMs": 15050,
+          "id": "shot_0070",
+          "timeMs": 15070,
           "type": "shoot"
         },
         {
-          "id": "shot_0181",
-          "timeMs": 15150,
-          "type": "shoot"
+          "id": "input_0071",
+          "timeMs": 15200,
+          "type": "moveX",
+          "dir": "left"
         },
         {
-          "id": "shot_0182",
+          "id": "shot_0072",
           "timeMs": 15250,
           "type": "shoot"
         },
         {
-          "id": "shot_0183",
-          "timeMs": 15350,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0081",
+          "id": "input_0073",
           "timeMs": 15400,
-          "type": "moveY",
-          "dir": "none"
-        },
-        {
-          "id": "shot_0184",
-          "timeMs": 15450,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0032",
-          "timeMs": 15500,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0185",
-          "timeMs": 15550,
+          "id": "shot_0074",
+          "timeMs": 15430,
           "type": "shoot"
         },
         {
-          "id": "shot_0186",
-          "timeMs": 15650,
+          "id": "input_0075",
+          "timeMs": 15600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0076",
+          "timeMs": 15610,
           "type": "shoot"
         },
         {
-          "id": "shot_0187",
-          "timeMs": 15750,
+          "id": "shot_0077",
+          "timeMs": 15790,
           "type": "shoot"
         },
         {
-          "id": "shot_0188",
-          "timeMs": 15850,
+          "id": "input_0078",
+          "timeMs": 15800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0079",
+          "timeMs": 15970,
           "type": "shoot"
         },
         {
-          "id": "shot_0189",
-          "timeMs": 15950,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0033",
+          "id": "input_0080",
           "timeMs": 16000,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0190",
-          "timeMs": 16050,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0034",
-          "timeMs": 16500,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0191",
-          "timeMs": 16600,
+          "id": "shot_0081",
+          "timeMs": 16150,
           "type": "shoot"
         },
         {
-          "id": "input_0035",
+          "id": "input_0082",
+          "timeMs": 16200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0083",
+          "timeMs": 16330,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0084",
+          "timeMs": 16400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0085",
+          "timeMs": 16510,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0086",
+          "timeMs": 16600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0087",
+          "timeMs": 16690,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0088",
+          "timeMs": 16800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0089",
+          "timeMs": 16870,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0090",
           "timeMs": 17000,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "input_0036",
-          "timeMs": 17500,
+          "id": "shot_0091",
+          "timeMs": 17050,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0092",
+          "timeMs": 17200,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0192",
-          "timeMs": 17700,
+          "id": "shot_0093",
+          "timeMs": 17230,
           "type": "shoot"
         },
         {
-          "id": "input_0037",
+          "id": "input_0094",
+          "timeMs": 17400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0095",
+          "timeMs": 17410,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0096",
+          "timeMs": 17590,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0097",
+          "timeMs": 17600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0098",
+          "timeMs": 17770,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0099",
+          "timeMs": 17800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0100",
+          "timeMs": 17950,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0101",
           "timeMs": 18000,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0193",
-          "timeMs": 18250,
+          "id": "shot_0102",
+          "timeMs": 18130,
           "type": "shoot"
         },
         {
-          "id": "input_0038",
-          "timeMs": 18500,
+          "id": "input_0103",
+          "timeMs": 18200,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "input_0082",
-          "timeMs": 18500,
-          "type": "moveY",
-          "dir": "up"
+          "id": "shot_0104",
+          "timeMs": 18310,
+          "type": "shoot"
         },
         {
-          "id": "shot_0194",
+          "id": "input_0105",
+          "timeMs": 18400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0106",
+          "timeMs": 18490,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0107",
+          "timeMs": 18600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0108",
+          "timeMs": 18670,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0109",
           "timeMs": 18800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0110",
+          "timeMs": 18850,
           "type": "shoot"
         },
         {
-          "id": "input_0039",
+          "id": "input_0111",
           "timeMs": 19000,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "input_0083",
-          "timeMs": 19000,
-          "type": "moveY",
-          "dir": "none"
+          "id": "shot_0112",
+          "timeMs": 19030,
+          "type": "shoot"
         },
         {
-          "id": "input_0040",
-          "timeMs": 19500,
+          "id": "input_0113",
+          "timeMs": 19200,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0195",
-          "timeMs": 19900,
+          "id": "shot_0114",
+          "timeMs": 19210,
           "type": "shoot"
         },
         {
-          "id": "input_0041",
+          "id": "shot_0115",
+          "timeMs": 19390,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0116",
+          "timeMs": 19400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0117",
+          "timeMs": 19570,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0118",
+          "timeMs": 19600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0119",
+          "timeMs": 19750,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0120",
+          "timeMs": 19800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0121",
+          "timeMs": 19930,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0122",
           "timeMs": 20000,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0196",
-          "timeMs": 20450,
+          "id": "shot_0123",
+          "timeMs": 20110,
           "type": "shoot"
         },
         {
-          "id": "input_0042",
-          "timeMs": 20500,
+          "id": "input_0124",
+          "timeMs": 20200,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "input_0043",
-          "timeMs": 21000,
+          "id": "shot_0125",
+          "timeMs": 20290,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0126",
+          "timeMs": 20400,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0197",
-          "timeMs": 21000,
+          "id": "shot_0127",
+          "timeMs": 20470,
           "type": "shoot"
         },
         {
-          "id": "input_0044",
-          "timeMs": 21500,
+          "id": "input_0128",
+          "timeMs": 20600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0129",
+          "timeMs": 20650,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0130",
+          "timeMs": 20800,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "input_0045",
+          "id": "shot_0131",
+          "timeMs": 20830,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0132",
+          "timeMs": 21000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0133",
+          "timeMs": 21010,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0134",
+          "timeMs": 21190,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0135",
+          "timeMs": 21200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0136",
+          "timeMs": 21370,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0137",
+          "timeMs": 21400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0138",
+          "timeMs": 21550,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0139",
+          "timeMs": 21600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0140",
+          "timeMs": 21730,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0141",
+          "timeMs": 21800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0142",
+          "timeMs": 21910,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0143",
           "timeMs": 22000,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "input_0084",
-          "timeMs": 22100,
-          "type": "moveY",
-          "dir": "down"
-        },
-        {
-          "id": "shot_0198",
-          "timeMs": 22100,
+          "id": "shot_0144",
+          "timeMs": 22090,
           "type": "shoot"
         },
         {
-          "id": "input_0046",
-          "timeMs": 22500,
+          "id": "input_0145",
+          "timeMs": 22200,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "input_0085",
-          "timeMs": 22600,
-          "type": "moveY",
-          "dir": "none"
-        },
-        {
-          "id": "shot_0199",
-          "timeMs": 22650,
+          "id": "shot_0146",
+          "timeMs": 22270,
           "type": "shoot"
         },
         {
-          "id": "input_0047",
+          "id": "input_0147",
+          "timeMs": 22400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0148",
+          "timeMs": 22450,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0149",
+          "timeMs": 22600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0150",
+          "timeMs": 22630,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0151",
+          "timeMs": 22800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0152",
+          "timeMs": 22810,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0153",
+          "timeMs": 22990,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0154",
           "timeMs": 23000,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0200",
-          "timeMs": 23200,
+          "id": "shot_0155",
+          "timeMs": 23170,
           "type": "shoot"
         },
         {
-          "id": "input_0048",
-          "timeMs": 23500,
+          "id": "input_0156",
+          "timeMs": 23200,
           "type": "moveX",
-          "dir": "right"
+          "dir": "left"
         },
         {
-          "id": "input_0049",
+          "id": "shot_0157",
+          "timeMs": 23350,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0158",
+          "timeMs": 23400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0159",
+          "timeMs": 23530,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0160",
+          "timeMs": 23600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0161",
+          "timeMs": 23710,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0162",
+          "timeMs": 23800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0163",
+          "timeMs": 23890,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0164",
           "timeMs": 24000,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0201",
-          "timeMs": 24300,
+          "id": "shot_0165",
+          "timeMs": 24070,
           "type": "shoot"
         },
         {
-          "id": "input_0050",
-          "timeMs": 24500,
+          "id": "input_0166",
+          "timeMs": 24200,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0202",
-          "timeMs": 24850,
+          "id": "shot_0167",
+          "timeMs": 24250,
           "type": "shoot"
         },
         {
-          "id": "input_0051",
+          "id": "input_0168",
+          "timeMs": 24400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0169",
+          "timeMs": 24430,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0170",
+          "timeMs": 24600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0171",
+          "timeMs": 24610,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0172",
+          "timeMs": 24790,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0173",
+          "timeMs": 24800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0174",
+          "timeMs": 24970,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0175",
           "timeMs": 25000,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0203",
-          "timeMs": 25400,
+          "id": "shot_0176",
+          "timeMs": 25150,
           "type": "shoot"
         },
         {
-          "id": "input_0052",
-          "timeMs": 25500,
+          "id": "input_0177",
+          "timeMs": 25200,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "input_0086",
-          "timeMs": 25700,
-          "type": "moveY",
-          "dir": "up"
+          "id": "shot_0178",
+          "timeMs": 25330,
+          "type": "shoot"
         },
         {
-          "id": "input_0053",
-          "timeMs": 26000,
+          "id": "input_0179",
+          "timeMs": 25400,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "input_0087",
-          "timeMs": 26200,
-          "type": "moveY",
-          "dir": "none"
+          "id": "shot_0180",
+          "timeMs": 25510,
+          "type": "shoot"
         },
         {
-          "id": "input_0054",
-          "timeMs": 26500,
+          "id": "input_0181",
+          "timeMs": 25600,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0204",
-          "timeMs": 26500,
+          "id": "shot_0182",
+          "timeMs": 25690,
           "type": "shoot"
         },
         {
-          "id": "input_0055",
+          "id": "input_0183",
+          "timeMs": 25800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0184",
+          "timeMs": 25870,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0185",
+          "timeMs": 26000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0186",
+          "timeMs": 26050,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0187",
+          "timeMs": 26200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0188",
+          "timeMs": 26230,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0189",
+          "timeMs": 26400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0190",
+          "timeMs": 26410,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0191",
+          "timeMs": 26590,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0192",
+          "timeMs": 26600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0193",
+          "timeMs": 26770,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0194",
+          "timeMs": 26800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0195",
+          "timeMs": 26950,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0196",
           "timeMs": 27000,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0205",
-          "timeMs": 27050,
+          "id": "shot_0197",
+          "timeMs": 27130,
           "type": "shoot"
         },
         {
-          "id": "input_0056",
-          "timeMs": 27500,
+          "id": "input_0198",
+          "timeMs": 27200,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0206",
-          "timeMs": 27600,
+          "id": "shot_0199",
+          "timeMs": 27310,
           "type": "shoot"
         },
         {
-          "id": "input_0057",
+          "id": "input_0200",
+          "timeMs": 27400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0201",
+          "timeMs": 27490,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0202",
+          "timeMs": 27600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0203",
+          "timeMs": 27670,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0204",
+          "timeMs": 27800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0205",
+          "timeMs": 27850,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0206",
           "timeMs": 28000,
           "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0058",
-          "timeMs": 28500,
-          "type": "moveX",
-          "dir": "right"
+          "dir": "left"
         },
         {
           "id": "shot_0207",
-          "timeMs": 28700,
+          "timeMs": 28030,
           "type": "shoot"
         },
         {
-          "id": "input_0059",
-          "timeMs": 29000,
+          "id": "input_0208",
+          "timeMs": 28200,
           "type": "moveX",
           "dir": "left"
-        },
-        {
-          "id": "shot_0208",
-          "timeMs": 29250,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0088",
-          "timeMs": 29300,
-          "type": "moveY",
-          "dir": "down"
-        },
-        {
-          "id": "input_0060",
-          "timeMs": 29500,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0089",
-          "timeMs": 29800,
-          "type": "moveY",
-          "dir": "none"
         },
         {
           "id": "shot_0209",
-          "timeMs": 29800,
+          "timeMs": 28210,
           "type": "shoot"
-        },
-        {
-          "id": "input_0061",
-          "timeMs": 30000,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0062",
-          "timeMs": 30500,
-          "type": "moveX",
-          "dir": "left"
         },
         {
           "id": "shot_0210",
-          "timeMs": 30900,
+          "timeMs": 28390,
           "type": "shoot"
         },
         {
-          "id": "input_0063",
-          "timeMs": 31000,
+          "id": "input_0211",
+          "timeMs": 28400,
           "type": "moveX",
           "dir": "left"
-        },
-        {
-          "id": "shot_0211",
-          "timeMs": 31450,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0064",
-          "timeMs": 31500,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0065",
-          "timeMs": 32000,
-          "type": "moveX",
-          "dir": "right"
         },
         {
           "id": "shot_0212",
-          "timeMs": 32000,
+          "timeMs": 28570,
           "type": "shoot"
         },
         {
-          "id": "input_0066",
-          "timeMs": 32500,
+          "id": "input_0213",
+          "timeMs": 28600,
           "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0090",
-          "timeMs": 32900,
-          "type": "moveY",
-          "dir": "up"
-        },
-        {
-          "id": "input_0067",
-          "timeMs": 33000,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0213",
-          "timeMs": 33100,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0091",
-          "timeMs": 33400,
-          "type": "moveY",
-          "dir": "none"
-        },
-        {
-          "id": "input_0068",
-          "timeMs": 33500,
-          "type": "moveX",
-          "dir": "right"
+          "dir": "left"
         },
         {
           "id": "shot_0214",
-          "timeMs": 33650,
+          "timeMs": 28750,
           "type": "shoot"
         },
         {
-          "id": "input_0069",
-          "timeMs": 34000,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0215",
-          "timeMs": 34200,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0070",
-          "timeMs": 34500,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0071",
-          "timeMs": 35000,
+          "id": "input_0215",
+          "timeMs": 28800,
           "type": "moveX",
           "dir": "left"
         },
         {
           "id": "shot_0216",
-          "timeMs": 35300,
+          "timeMs": 28930,
           "type": "shoot"
         },
         {
-          "id": "input_0072",
-          "timeMs": 35500,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0217",
-          "timeMs": 35850,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0073",
-          "timeMs": 36000,
+          "id": "input_0217",
+          "timeMs": 29000,
           "type": "moveX",
           "dir": "left"
         },
         {
           "id": "shot_0218",
-          "timeMs": 36400,
+          "timeMs": 29110,
           "type": "shoot"
         },
         {
-          "id": "input_0074",
-          "timeMs": 36500,
+          "id": "input_0219",
+          "timeMs": 29200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0220",
+          "timeMs": 29290,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0221",
+          "timeMs": 29400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0222",
+          "timeMs": 29470,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0223",
+          "timeMs": 29600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0224",
+          "timeMs": 29650,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0225",
+          "timeMs": 29800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0226",
+          "timeMs": 29830,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0227",
+          "timeMs": 30000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0228",
+          "timeMs": 30010,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0229",
+          "timeMs": 30190,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0230",
+          "timeMs": 30200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0231",
+          "timeMs": 30370,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0232",
+          "timeMs": 30400,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "input_0092",
-          "timeMs": 36500,
+          "id": "shot_0233",
+          "timeMs": 30550,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0234",
+          "timeMs": 30600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0235",
+          "timeMs": 30730,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0236",
+          "timeMs": 30800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0237",
+          "timeMs": 30910,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0238",
+          "timeMs": 31000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0239",
+          "timeMs": 31090,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0240",
+          "timeMs": 31200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0241",
+          "timeMs": 31270,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0242",
+          "timeMs": 31400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0243",
+          "timeMs": 31450,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0244",
+          "timeMs": 31600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0245",
+          "timeMs": 31630,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0246",
+          "timeMs": 31800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0247",
+          "timeMs": 31810,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0248",
+          "timeMs": 31990,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0249",
+          "timeMs": 32000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0250",
+          "timeMs": 32170,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0251",
+          "timeMs": 32200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0252",
+          "timeMs": 32350,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0253",
+          "timeMs": 32400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0254",
+          "timeMs": 32530,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0255",
+          "timeMs": 32600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0256",
+          "timeMs": 32710,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0257",
+          "timeMs": 32800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0258",
+          "timeMs": 32890,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0259",
+          "timeMs": 33000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0260",
+          "timeMs": 33070,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0261",
+          "timeMs": 33200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0262",
+          "timeMs": 33250,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0263",
+          "timeMs": 33400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0264",
+          "timeMs": 33430,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0265",
+          "timeMs": 33600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0266",
+          "timeMs": 33610,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0267",
+          "timeMs": 33790,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0268",
+          "timeMs": 33800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0269",
+          "timeMs": 33970,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0270",
+          "timeMs": 34000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0271",
+          "timeMs": 34150,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0272",
+          "timeMs": 34200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0273",
+          "timeMs": 34330,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0274",
+          "timeMs": 34400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0275",
+          "timeMs": 34510,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0276",
+          "timeMs": 34600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0277",
+          "timeMs": 34690,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0278",
+          "timeMs": 34800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0279",
+          "timeMs": 34870,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0280",
+          "timeMs": 35000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0281",
+          "timeMs": 35050,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0282",
+          "timeMs": 35200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0283",
+          "timeMs": 35230,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0284",
+          "timeMs": 35400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0285",
+          "timeMs": 35410,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0286",
+          "timeMs": 35590,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0287",
+          "timeMs": 35600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0288",
+          "timeMs": 35770,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0289",
+          "timeMs": 35800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0290",
+          "timeMs": 35950,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0291",
+          "timeMs": 36000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0292",
+          "timeMs": 36130,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0293",
+          "timeMs": 36200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0294",
+          "timeMs": 36310,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0295",
+          "timeMs": 36400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0296",
+          "timeMs": 36490,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0297",
+          "timeMs": 36600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0298",
+          "timeMs": 36670,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0299",
+          "timeMs": 36800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0300",
+          "timeMs": 36850,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0301",
+          "timeMs": 37000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0302",
+          "timeMs": 37030,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0303",
+          "timeMs": 37200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0304",
+          "timeMs": 37210,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0305",
+          "timeMs": 37390,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0306",
+          "timeMs": 37400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0307",
+          "timeMs": 37570,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0308",
+          "timeMs": 37600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0309",
+          "timeMs": 37750,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0310",
+          "timeMs": 37800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0311",
+          "timeMs": 37930,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0312",
+          "timeMs": 38000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0313",
+          "timeMs": 38110,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0314",
+          "timeMs": 38200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0315",
+          "timeMs": 38290,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0316",
+          "timeMs": 38400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0317",
+          "timeMs": 38470,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0318",
+          "timeMs": 38600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0319",
+          "timeMs": 38650,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0320",
+          "timeMs": 38800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0321",
+          "timeMs": 38830,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0322",
+          "timeMs": 39000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0323",
+          "timeMs": 39010,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0324",
+          "timeMs": 39190,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0325",
+          "timeMs": 39200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0326",
+          "timeMs": 39370,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0327",
+          "timeMs": 39400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0328",
+          "timeMs": 39550,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0329",
+          "timeMs": 39600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0330",
+          "timeMs": 39730,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0331",
+          "timeMs": 39800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0332",
+          "timeMs": 39910,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0441",
+          "timeMs": 39923,
           "type": "moveY",
           "dir": "down"
         },
         {
-          "id": "input_0075",
-          "timeMs": 37000,
+          "id": "input_0333",
+          "timeMs": 40000,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "input_0093",
-          "timeMs": 37000,
+          "id": "shot_0334",
+          "timeMs": 40090,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0335",
+          "timeMs": 40200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0336",
+          "timeMs": 40270,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0442",
+          "timeMs": 40323,
           "type": "moveY",
           "dir": "none"
         },
         {
-          "id": "input_0076",
-          "timeMs": 37500,
+          "id": "input_0337",
+          "timeMs": 40400,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "shot_0219",
-          "timeMs": 37500,
+          "id": "shot_0338",
+          "timeMs": 40450,
           "type": "shoot"
         },
         {
-          "id": "input_0077",
-          "timeMs": 38000,
+          "id": "input_0339",
+          "timeMs": 40600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0340",
+          "timeMs": 40630,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0341",
+          "timeMs": 40800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0342",
+          "timeMs": 40810,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0343",
+          "timeMs": 40990,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0344",
+          "timeMs": 41000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0345",
+          "timeMs": 41170,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0346",
+          "timeMs": 41200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0347",
+          "timeMs": 41350,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0348",
+          "timeMs": 41400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0349",
+          "timeMs": 41530,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0350",
+          "timeMs": 41600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0351",
+          "timeMs": 41710,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0352",
+          "timeMs": 41800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0353",
+          "timeMs": 41890,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0354",
+          "timeMs": 42000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0355",
+          "timeMs": 42070,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0356",
+          "timeMs": 42200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0357",
+          "timeMs": 42250,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0358",
+          "timeMs": 42400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0359",
+          "timeMs": 42430,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0360",
+          "timeMs": 42600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0361",
+          "timeMs": 42610,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0362",
+          "timeMs": 42790,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0363",
+          "timeMs": 42800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0364",
+          "timeMs": 42970,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0365",
+          "timeMs": 43000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0366",
+          "timeMs": 43150,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0367",
+          "timeMs": 43200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0368",
+          "timeMs": 43330,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0369",
+          "timeMs": 43400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0370",
+          "timeMs": 43510,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0371",
+          "timeMs": 43600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0372",
+          "timeMs": 43690,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0373",
+          "timeMs": 43800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0374",
+          "timeMs": 43870,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0375",
+          "timeMs": 44000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0376",
+          "timeMs": 44050,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0377",
+          "timeMs": 44200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0378",
+          "timeMs": 44230,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0379",
+          "timeMs": 44400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0380",
+          "timeMs": 44410,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0381",
+          "timeMs": 44590,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0382",
+          "timeMs": 44600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0383",
+          "timeMs": 44770,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0384",
+          "timeMs": 44800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0385",
+          "timeMs": 44950,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0386",
+          "timeMs": 45000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0387",
+          "timeMs": 45130,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0388",
+          "timeMs": 45200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0389",
+          "timeMs": 45310,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0390",
+          "timeMs": 45400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0391",
+          "timeMs": 45490,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0392",
+          "timeMs": 45600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0393",
+          "timeMs": 45670,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0394",
+          "timeMs": 45800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0395",
+          "timeMs": 45850,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0396",
+          "timeMs": 46000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0397",
+          "timeMs": 46030,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0398",
+          "timeMs": 46200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0399",
+          "timeMs": 46210,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0400",
+          "timeMs": 46390,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0401",
+          "timeMs": 46400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0402",
+          "timeMs": 46570,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0403",
+          "timeMs": 46600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0404",
+          "timeMs": 46750,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0405",
+          "timeMs": 46800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0406",
+          "timeMs": 46930,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0407",
+          "timeMs": 47000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0408",
+          "timeMs": 47110,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0409",
+          "timeMs": 47200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0410",
+          "timeMs": 47290,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0411",
+          "timeMs": 47400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0412",
+          "timeMs": 47470,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0413",
+          "timeMs": 47600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0414",
+          "timeMs": 47650,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0415",
+          "timeMs": 47800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0416",
+          "timeMs": 47830,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0417",
+          "timeMs": 48000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0418",
+          "timeMs": 48010,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0419",
+          "timeMs": 48190,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0420",
+          "timeMs": 48200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0421",
+          "timeMs": 48370,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0422",
+          "timeMs": 48400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0423",
+          "timeMs": 48550,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0424",
+          "timeMs": 48600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0425",
+          "timeMs": 48730,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0426",
+          "timeMs": 48800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0427",
+          "timeMs": 48910,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0428",
+          "timeMs": 49000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0429",
+          "timeMs": 49090,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0430",
+          "timeMs": 49200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0431",
+          "timeMs": 49270,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0432",
+          "timeMs": 49400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0433",
+          "timeMs": 49450,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0434",
+          "timeMs": 49600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0435",
+          "timeMs": 49630,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0436",
+          "timeMs": 49800,
           "type": "moveX",
           "dir": "none"
-        },
-        {
-          "id": "shot_0220",
-          "timeMs": 38050,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0221",
-          "timeMs": 38600,
-          "type": "shoot"
         }
       ]
     },
@@ -1229,423 +2477,188 @@
           "dir": "right"
         },
         {
-          "id": "shot_0120",
-          "timeMs": 300,
+          "id": "shot_0011",
+          "timeMs": 700,
           "type": "shoot"
         },
         {
           "id": "input_0002",
-          "timeMs": 380,
+          "timeMs": 1600,
           "type": "moveX",
-          "dir": "right"
+          "dir": "left"
+        },
+        {
+          "id": "shot_0012",
+          "timeMs": 2800,
+          "type": "shoot"
         },
         {
           "id": "input_0003",
-          "timeMs": 760,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0121",
-          "timeMs": 1000,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0004",
-          "timeMs": 1140,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0005",
-          "timeMs": 1520,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0006",
-          "timeMs": 1900,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0007",
-          "timeMs": 2280,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0122",
-          "timeMs": 2400,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0008",
-          "timeMs": 2660,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0009",
-          "timeMs": 3040,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0123",
-          "timeMs": 3100,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0010",
-          "timeMs": 3420,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0011",
-          "timeMs": 3800,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0012",
-          "timeMs": 4180,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0124",
-          "timeMs": 4500,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0013",
-          "timeMs": 4560,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0014",
-          "timeMs": 4940,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0125",
-          "timeMs": 5200,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0015",
-          "timeMs": 5320,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0016",
-          "timeMs": 5700,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0017",
-          "timeMs": 6080,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0018",
-          "timeMs": 6460,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0126",
-          "timeMs": 6600,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0019",
-          "timeMs": 6840,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0020",
-          "timeMs": 7220,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0127",
-          "timeMs": 7300,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0128",
-          "timeMs": 7400,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0129",
-          "timeMs": 7500,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0021",
-          "timeMs": 7600,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0130",
-          "timeMs": 7600,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0131",
-          "timeMs": 7700,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0132",
-          "timeMs": 7800,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0133",
-          "timeMs": 7900,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0022",
-          "timeMs": 7980,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0134",
-          "timeMs": 8000,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0135",
-          "timeMs": 8100,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0136",
-          "timeMs": 8200,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0137",
-          "timeMs": 8300,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0023",
-          "timeMs": 8360,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0138",
-          "timeMs": 8400,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0139",
-          "timeMs": 8500,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0140",
-          "timeMs": 8600,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0141",
-          "timeMs": 8700,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0024",
-          "timeMs": 8740,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0142",
-          "timeMs": 8800,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0143",
-          "timeMs": 8900,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0144",
-          "timeMs": 9000,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0145",
-          "timeMs": 9100,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0025",
-          "timeMs": 9120,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0146",
-          "timeMs": 9200,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0147",
-          "timeMs": 9300,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0148",
-          "timeMs": 9400,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0026",
-          "timeMs": 9500,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0149",
-          "timeMs": 9500,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0150",
-          "timeMs": 9600,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0151",
-          "timeMs": 9700,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0152",
-          "timeMs": 9800,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0027",
-          "timeMs": 9880,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0153",
-          "timeMs": 9900,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0154",
-          "timeMs": 10000,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0155",
-          "timeMs": 10100,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0156",
-          "timeMs": 10200,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0028",
-          "timeMs": 10260,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0157",
-          "timeMs": 10300,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0158",
-          "timeMs": 10400,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0159",
-          "timeMs": 10500,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0160",
-          "timeMs": 10600,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0029",
-          "timeMs": 10640,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0161",
-          "timeMs": 10700,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0162",
-          "timeMs": 10800,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0163",
-          "timeMs": 10900,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0164",
-          "timeMs": 11000,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0030",
-          "timeMs": 11020,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0165",
-          "timeMs": 11100,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0102",
-          "timeMs": 11200,
+          "timeMs": 3200,
           "type": "moveY",
           "dir": "down"
         },
         {
-          "id": "shot_0166",
-          "timeMs": 11200,
+          "id": "input_0004",
+          "timeMs": 3500,
+          "type": "moveY",
+          "dir": "none"
+        },
+        {
+          "id": "input_0005",
+          "timeMs": 3600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0013",
+          "timeMs": 4900,
           "type": "shoot"
         },
         {
-          "id": "shot_0167",
-          "timeMs": 11300,
+          "id": "input_0437",
+          "timeMs": 5040,
+          "type": "moveY",
+          "dir": "up"
+        },
+        {
+          "id": "input_0006",
+          "timeMs": 5200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "input_0438",
+          "timeMs": 5840,
+          "type": "moveY",
+          "dir": "none"
+        },
+        {
+          "id": "input_0007",
+          "timeMs": 6800,
+          "type": "moveY",
+          "dir": "up"
+        },
+        {
+          "id": "shot_0014",
+          "timeMs": 7000,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0008",
+          "timeMs": 7100,
+          "type": "moveY",
+          "dir": "none"
+        },
+        {
+          "id": "input_0009",
+          "timeMs": 7200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0015",
+          "timeMs": 8800,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0010",
+          "timeMs": 9600,
+          "type": "moveX",
+          "dir": "none"
+        },
+        {
+          "id": "input_0016",
+          "timeMs": 10000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0017",
+          "timeMs": 10030,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0439",
+          "timeMs": 10040,
+          "type": "moveY",
+          "dir": "down"
+        },
+        {
+          "id": "input_0018",
+          "timeMs": 10200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0019",
+          "timeMs": 10210,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0440",
+          "timeMs": 10340,
+          "type": "moveY",
+          "dir": "none"
+        },
+        {
+          "id": "shot_0020",
+          "timeMs": 10390,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0021",
+          "timeMs": 10400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0022",
+          "timeMs": 10570,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0023",
+          "timeMs": 10600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0024",
+          "timeMs": 10750,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0025",
+          "timeMs": 10800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0026",
+          "timeMs": 10930,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0027",
+          "timeMs": 11000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0028",
+          "timeMs": 11110,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0029",
+          "timeMs": 11200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0030",
+          "timeMs": 11290,
           "type": "shoot"
         },
         {
@@ -1655,894 +2668,2251 @@
           "dir": "left"
         },
         {
-          "id": "shot_0168",
-          "timeMs": 11400,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0169",
-          "timeMs": 11500,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0170",
-          "timeMs": 11600,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0171",
-          "timeMs": 11700,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0032",
-          "timeMs": 11780,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0103",
-          "timeMs": 11800,
-          "type": "moveY",
-          "dir": "none"
-        },
-        {
-          "id": "shot_0172",
-          "timeMs": 11800,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0173",
-          "timeMs": 11900,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0174",
-          "timeMs": 12000,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0175",
-          "timeMs": 12100,
+          "id": "shot_0032",
+          "timeMs": 11470,
           "type": "shoot"
         },
         {
           "id": "input_0033",
-          "timeMs": 12160,
+          "timeMs": 11600,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0176",
-          "timeMs": 12200,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0177",
-          "timeMs": 12300,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0178",
-          "timeMs": 12400,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0179",
-          "timeMs": 12500,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0034",
-          "timeMs": 12540,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0180",
-          "timeMs": 12600,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0181",
-          "timeMs": 12700,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0182",
-          "timeMs": 12800,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0183",
-          "timeMs": 12900,
+          "id": "shot_0034",
+          "timeMs": 11650,
           "type": "shoot"
         },
         {
           "id": "input_0035",
-          "timeMs": 12920,
+          "timeMs": 11800,
           "type": "moveX",
-          "dir": "right"
+          "dir": "left"
         },
         {
-          "id": "shot_0184",
-          "timeMs": 13000,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0185",
-          "timeMs": 13100,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0186",
-          "timeMs": 13200,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0036",
-          "timeMs": 13300,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0187",
-          "timeMs": 13300,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0188",
-          "timeMs": 13400,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0189",
-          "timeMs": 13500,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0190",
-          "timeMs": 13600,
+          "id": "shot_0036",
+          "timeMs": 11830,
           "type": "shoot"
         },
         {
           "id": "input_0037",
-          "timeMs": 13680,
+          "timeMs": 12000,
           "type": "moveX",
-          "dir": "right"
+          "dir": "left"
         },
         {
-          "id": "shot_0191",
-          "timeMs": 13700,
+          "id": "shot_0038",
+          "timeMs": 12010,
           "type": "shoot"
         },
         {
-          "id": "shot_0192",
-          "timeMs": 13800,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0193",
-          "timeMs": 13900,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0194",
-          "timeMs": 14000,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0038",
-          "timeMs": 14060,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0195",
-          "timeMs": 14100,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0196",
-          "timeMs": 14200,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0197",
-          "timeMs": 14300,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0104",
-          "timeMs": 14400,
-          "type": "moveY",
-          "dir": "up"
-        },
-        {
-          "id": "shot_0198",
-          "timeMs": 14400,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0039",
-          "timeMs": 14440,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0199",
-          "timeMs": 14500,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0200",
-          "timeMs": 14600,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0201",
-          "timeMs": 14700,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0202",
-          "timeMs": 14800,
+          "id": "shot_0039",
+          "timeMs": 12190,
           "type": "shoot"
         },
         {
           "id": "input_0040",
-          "timeMs": 14820,
+          "timeMs": 12200,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0203",
-          "timeMs": 14900,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0105",
-          "timeMs": 15000,
-          "type": "moveY",
-          "dir": "none"
-        },
-        {
-          "id": "shot_0204",
-          "timeMs": 15000,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0205",
-          "timeMs": 15100,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0041",
-          "timeMs": 15200,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0206",
-          "timeMs": 15200,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0207",
-          "timeMs": 15300,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0208",
-          "timeMs": 15400,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0209",
-          "timeMs": 15500,
+          "id": "shot_0041",
+          "timeMs": 12370,
           "type": "shoot"
         },
         {
           "id": "input_0042",
-          "timeMs": 15580,
+          "timeMs": 12400,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "shot_0210",
-          "timeMs": 15600,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0211",
-          "timeMs": 15700,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0212",
-          "timeMs": 15800,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0213",
-          "timeMs": 15900,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0043",
-          "timeMs": 15960,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0214",
-          "timeMs": 16000,
-          "type": "shoot"
-        },
-        {
-          "id": "shot_0215",
-          "timeMs": 16100,
+          "id": "shot_0043",
+          "timeMs": 12550,
           "type": "shoot"
         },
         {
           "id": "input_0044",
-          "timeMs": 16340,
+          "timeMs": 12600,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "input_0045",
-          "timeMs": 16720,
-          "type": "moveX",
-          "dir": "left"
+          "id": "shot_0045",
+          "timeMs": 12730,
+          "type": "shoot"
         },
         {
           "id": "input_0046",
-          "timeMs": 17100,
+          "timeMs": 12800,
           "type": "moveX",
-          "dir": "right"
+          "dir": "left"
         },
         {
-          "id": "input_0047",
-          "timeMs": 17480,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0216",
-          "timeMs": 17500,
+          "id": "shot_0047",
+          "timeMs": 12910,
           "type": "shoot"
-        },
-        {
-          "id": "input_0106",
-          "timeMs": 17600,
-          "type": "moveY",
-          "dir": "down"
         },
         {
           "id": "input_0048",
-          "timeMs": 17860,
+          "timeMs": 13000,
           "type": "moveX",
-          "dir": "right"
+          "dir": "left"
         },
         {
-          "id": "input_0107",
-          "timeMs": 18200,
-          "type": "moveY",
-          "dir": "none"
-        },
-        {
-          "id": "shot_0217",
-          "timeMs": 18200,
+          "id": "shot_0049",
+          "timeMs": 13090,
           "type": "shoot"
         },
         {
-          "id": "input_0049",
-          "timeMs": 18240,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
           "id": "input_0050",
-          "timeMs": 18620,
+          "timeMs": 13200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0051",
+          "timeMs": 13270,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0052",
+          "timeMs": 13400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0053",
+          "timeMs": 13450,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0054",
+          "timeMs": 13600,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "input_0051",
+          "id": "shot_0055",
+          "timeMs": 13630,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0056",
+          "timeMs": 13800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0057",
+          "timeMs": 13810,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0058",
+          "timeMs": 13990,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0059",
+          "timeMs": 14000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0060",
+          "timeMs": 14170,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0061",
+          "timeMs": 14200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0062",
+          "timeMs": 14350,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0063",
+          "timeMs": 14400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0064",
+          "timeMs": 14530,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0065",
+          "timeMs": 14600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0066",
+          "timeMs": 14710,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0067",
+          "timeMs": 14800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0068",
+          "timeMs": 14890,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0069",
+          "timeMs": 15000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0070",
+          "timeMs": 15070,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0071",
+          "timeMs": 15200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0072",
+          "timeMs": 15250,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0073",
+          "timeMs": 15400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0074",
+          "timeMs": 15430,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0075",
+          "timeMs": 15600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0076",
+          "timeMs": 15610,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0077",
+          "timeMs": 15790,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0078",
+          "timeMs": 15800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0079",
+          "timeMs": 15970,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0080",
+          "timeMs": 16000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0081",
+          "timeMs": 16150,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0082",
+          "timeMs": 16200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0083",
+          "timeMs": 16330,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0084",
+          "timeMs": 16400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0085",
+          "timeMs": 16510,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0086",
+          "timeMs": 16600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0087",
+          "timeMs": 16690,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0088",
+          "timeMs": 16800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0089",
+          "timeMs": 16870,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0090",
+          "timeMs": 17000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0091",
+          "timeMs": 17050,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0092",
+          "timeMs": 17200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0093",
+          "timeMs": 17230,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0094",
+          "timeMs": 17400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0095",
+          "timeMs": 17410,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0096",
+          "timeMs": 17590,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0097",
+          "timeMs": 17600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0098",
+          "timeMs": 17770,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0099",
+          "timeMs": 17800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0100",
+          "timeMs": 17950,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0101",
+          "timeMs": 18000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0102",
+          "timeMs": 18130,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0103",
+          "timeMs": 18200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0104",
+          "timeMs": 18310,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0105",
+          "timeMs": 18400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0106",
+          "timeMs": 18490,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0107",
+          "timeMs": 18600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0108",
+          "timeMs": 18670,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0109",
+          "timeMs": 18800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0110",
+          "timeMs": 18850,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0111",
           "timeMs": 19000,
           "type": "moveX",
           "dir": "right"
         },
         {
-          "id": "input_0052",
-          "timeMs": 19380,
+          "id": "shot_0112",
+          "timeMs": 19030,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0113",
+          "timeMs": 19200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0114",
+          "timeMs": 19210,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0115",
+          "timeMs": 19390,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0116",
+          "timeMs": 19400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0117",
+          "timeMs": 19570,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0118",
+          "timeMs": 19600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0119",
+          "timeMs": 19750,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0120",
+          "timeMs": 19800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0121",
+          "timeMs": 19930,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0122",
+          "timeMs": 20000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0123",
+          "timeMs": 20110,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0124",
+          "timeMs": 20200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0125",
+          "timeMs": 20290,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0126",
+          "timeMs": 20400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0127",
+          "timeMs": 20470,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0128",
+          "timeMs": 20600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0129",
+          "timeMs": 20650,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0130",
+          "timeMs": 20800,
           "type": "moveX",
           "dir": "left"
+        },
+        {
+          "id": "shot_0131",
+          "timeMs": 20830,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0132",
+          "timeMs": 21000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0133",
+          "timeMs": 21010,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0134",
+          "timeMs": 21190,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0135",
+          "timeMs": 21200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0136",
+          "timeMs": 21370,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0137",
+          "timeMs": 21400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0138",
+          "timeMs": 21550,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0139",
+          "timeMs": 21600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0140",
+          "timeMs": 21730,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0141",
+          "timeMs": 21800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0142",
+          "timeMs": 21910,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0143",
+          "timeMs": 22000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0144",
+          "timeMs": 22090,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0145",
+          "timeMs": 22200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0146",
+          "timeMs": 22270,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0147",
+          "timeMs": 22400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0148",
+          "timeMs": 22450,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0149",
+          "timeMs": 22600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0150",
+          "timeMs": 22630,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0151",
+          "timeMs": 22800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0152",
+          "timeMs": 22810,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0153",
+          "timeMs": 22990,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0154",
+          "timeMs": 23000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0155",
+          "timeMs": 23170,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0156",
+          "timeMs": 23200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0157",
+          "timeMs": 23350,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0158",
+          "timeMs": 23400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0159",
+          "timeMs": 23530,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0160",
+          "timeMs": 23600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0161",
+          "timeMs": 23710,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0162",
+          "timeMs": 23800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0163",
+          "timeMs": 23890,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0164",
+          "timeMs": 24000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0165",
+          "timeMs": 24070,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0166",
+          "timeMs": 24200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0167",
+          "timeMs": 24250,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0168",
+          "timeMs": 24400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0169",
+          "timeMs": 24430,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0170",
+          "timeMs": 24600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0171",
+          "timeMs": 24610,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0172",
+          "timeMs": 24790,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0173",
+          "timeMs": 24800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0174",
+          "timeMs": 24970,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0175",
+          "timeMs": 25000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0176",
+          "timeMs": 25150,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0177",
+          "timeMs": 25200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0178",
+          "timeMs": 25330,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0179",
+          "timeMs": 25400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0180",
+          "timeMs": 25510,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0181",
+          "timeMs": 25600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0182",
+          "timeMs": 25690,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0183",
+          "timeMs": 25800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0184",
+          "timeMs": 25870,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0185",
+          "timeMs": 26000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0186",
+          "timeMs": 26050,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0187",
+          "timeMs": 26200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0188",
+          "timeMs": 26230,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0189",
+          "timeMs": 26400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0190",
+          "timeMs": 26410,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0191",
+          "timeMs": 26590,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0192",
+          "timeMs": 26600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0193",
+          "timeMs": 26770,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0194",
+          "timeMs": 26800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0195",
+          "timeMs": 26950,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0196",
+          "timeMs": 27000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0197",
+          "timeMs": 27130,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0198",
+          "timeMs": 27200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0199",
+          "timeMs": 27310,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0200",
+          "timeMs": 27400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0201",
+          "timeMs": 27490,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0202",
+          "timeMs": 27600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0203",
+          "timeMs": 27670,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0204",
+          "timeMs": 27800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0205",
+          "timeMs": 27850,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0206",
+          "timeMs": 28000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0207",
+          "timeMs": 28030,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0208",
+          "timeMs": 28200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0209",
+          "timeMs": 28210,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0210",
+          "timeMs": 28390,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0211",
+          "timeMs": 28400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0212",
+          "timeMs": 28570,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0213",
+          "timeMs": 28600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0214",
+          "timeMs": 28750,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0215",
+          "timeMs": 28800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0216",
+          "timeMs": 28930,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0217",
+          "timeMs": 29000,
+          "type": "moveX",
+          "dir": "right"
         },
         {
           "id": "shot_0218",
-          "timeMs": 19600,
+          "timeMs": 29110,
           "type": "shoot"
         },
         {
-          "id": "input_0053",
-          "timeMs": 19760,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0054",
-          "timeMs": 20140,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0219",
-          "timeMs": 20300,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0055",
-          "timeMs": 20520,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0108",
-          "timeMs": 20800,
-          "type": "moveY",
-          "dir": "up"
-        },
-        {
-          "id": "input_0056",
-          "timeMs": 20900,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0057",
-          "timeMs": 21280,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0109",
-          "timeMs": 21400,
-          "type": "moveY",
-          "dir": "none"
-        },
-        {
-          "id": "input_0058",
-          "timeMs": 21660,
+          "id": "input_0219",
+          "timeMs": 29200,
           "type": "moveX",
           "dir": "right"
         },
         {
           "id": "shot_0220",
-          "timeMs": 21700,
+          "timeMs": 29290,
           "type": "shoot"
         },
         {
-          "id": "input_0059",
-          "timeMs": 22040,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0221",
-          "timeMs": 22400,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0060",
-          "timeMs": 22420,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0061",
-          "timeMs": 22800,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0062",
-          "timeMs": 23180,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0063",
-          "timeMs": 23560,
+          "id": "input_0221",
+          "timeMs": 29400,
           "type": "moveX",
           "dir": "right"
         },
         {
           "id": "shot_0222",
-          "timeMs": 23800,
+          "timeMs": 29470,
           "type": "shoot"
         },
         {
-          "id": "input_0064",
-          "timeMs": 23940,
+          "id": "input_0223",
+          "timeMs": 29600,
           "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0110",
-          "timeMs": 24000,
-          "type": "moveY",
-          "dir": "down"
-        },
-        {
-          "id": "input_0065",
-          "timeMs": 24320,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0223",
-          "timeMs": 24500,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0111",
-          "timeMs": 24600,
-          "type": "moveY",
-          "dir": "none"
-        },
-        {
-          "id": "input_0066",
-          "timeMs": 24700,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0067",
-          "timeMs": 25080,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0068",
-          "timeMs": 25460,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0069",
-          "timeMs": 25840,
-          "type": "moveX",
-          "dir": "left"
+          "dir": "right"
         },
         {
           "id": "shot_0224",
-          "timeMs": 25900,
+          "timeMs": 29650,
           "type": "shoot"
         },
         {
-          "id": "input_0070",
-          "timeMs": 26220,
+          "id": "input_0225",
+          "timeMs": 29800,
           "type": "moveX",
           "dir": "right"
-        },
-        {
-          "id": "input_0071",
-          "timeMs": 26600,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0225",
-          "timeMs": 26600,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0072",
-          "timeMs": 26980,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0112",
-          "timeMs": 27200,
-          "type": "moveY",
-          "dir": "up"
-        },
-        {
-          "id": "input_0073",
-          "timeMs": 27360,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0074",
-          "timeMs": 27740,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0113",
-          "timeMs": 27800,
-          "type": "moveY",
-          "dir": "none"
         },
         {
           "id": "shot_0226",
-          "timeMs": 28000,
+          "timeMs": 29830,
           "type": "shoot"
         },
         {
-          "id": "input_0075",
-          "timeMs": 28120,
+          "id": "input_0227",
+          "timeMs": 30000,
           "type": "moveX",
           "dir": "right"
-        },
-        {
-          "id": "input_0076",
-          "timeMs": 28500,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "shot_0227",
-          "timeMs": 28700,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0077",
-          "timeMs": 28880,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0078",
-          "timeMs": 29260,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0079",
-          "timeMs": 29640,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0080",
-          "timeMs": 30020,
-          "type": "moveX",
-          "dir": "left"
         },
         {
           "id": "shot_0228",
-          "timeMs": 30100,
+          "timeMs": 30010,
           "type": "shoot"
-        },
-        {
-          "id": "input_0081",
-          "timeMs": 30400,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0114",
-          "timeMs": 30400,
-          "type": "moveY",
-          "dir": "down"
-        },
-        {
-          "id": "input_0082",
-          "timeMs": 30780,
-          "type": "moveX",
-          "dir": "right"
         },
         {
           "id": "shot_0229",
-          "timeMs": 30800,
+          "timeMs": 30190,
           "type": "shoot"
         },
         {
-          "id": "input_0115",
-          "timeMs": 31000,
-          "type": "moveY",
-          "dir": "none"
-        },
-        {
-          "id": "input_0083",
-          "timeMs": 31160,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0084",
-          "timeMs": 31540,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0085",
-          "timeMs": 31920,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0230",
-          "timeMs": 32200,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0086",
-          "timeMs": 32300,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0087",
-          "timeMs": 32680,
+          "id": "input_0230",
+          "timeMs": 30200,
           "type": "moveX",
           "dir": "right"
         },
         {
           "id": "shot_0231",
-          "timeMs": 32900,
+          "timeMs": 30370,
           "type": "shoot"
         },
         {
-          "id": "input_0088",
-          "timeMs": 33060,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0089",
-          "timeMs": 33440,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0116",
-          "timeMs": 33600,
-          "type": "moveY",
-          "dir": "up"
-        },
-        {
-          "id": "input_0090",
-          "timeMs": 33820,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0091",
-          "timeMs": 34200,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0117",
-          "timeMs": 34200,
-          "type": "moveY",
-          "dir": "none"
-        },
-        {
-          "id": "shot_0232",
-          "timeMs": 34300,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0092",
-          "timeMs": 34580,
-          "type": "moveX",
-          "dir": "left"
-        },
-        {
-          "id": "input_0093",
-          "timeMs": 34960,
+          "id": "input_0232",
+          "timeMs": 30400,
           "type": "moveX",
           "dir": "left"
         },
         {
           "id": "shot_0233",
-          "timeMs": 35000,
+          "timeMs": 30550,
           "type": "shoot"
         },
         {
-          "id": "input_0094",
-          "timeMs": 35340,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0095",
-          "timeMs": 35720,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0096",
-          "timeMs": 36100,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0234",
-          "timeMs": 36400,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0097",
-          "timeMs": 36480,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0118",
-          "timeMs": 36800,
-          "type": "moveY",
-          "dir": "down"
-        },
-        {
-          "id": "input_0098",
-          "timeMs": 36860,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "shot_0235",
-          "timeMs": 37100,
-          "type": "shoot"
-        },
-        {
-          "id": "input_0099",
-          "timeMs": 37240,
-          "type": "moveX",
-          "dir": "right"
-        },
-        {
-          "id": "input_0119",
-          "timeMs": 37400,
-          "type": "moveY",
-          "dir": "none"
-        },
-        {
-          "id": "input_0100",
-          "timeMs": 37620,
+          "id": "input_0234",
+          "timeMs": 30600,
           "type": "moveX",
           "dir": "left"
         },
         {
-          "id": "input_0101",
-          "timeMs": 38000,
-          "type": "moveX",
-          "dir": "none"
+          "id": "shot_0235",
+          "timeMs": 30730,
+          "type": "shoot"
         },
         {
-          "id": "shot_0236",
-          "timeMs": 38500,
-          "type": "shoot"
+          "id": "input_0236",
+          "timeMs": 30800,
+          "type": "moveX",
+          "dir": "left"
         },
         {
           "id": "shot_0237",
-          "timeMs": 39200,
+          "timeMs": 30910,
           "type": "shoot"
+        },
+        {
+          "id": "input_0238",
+          "timeMs": 31000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0239",
+          "timeMs": 31090,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0240",
+          "timeMs": 31200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0241",
+          "timeMs": 31270,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0242",
+          "timeMs": 31400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0243",
+          "timeMs": 31450,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0244",
+          "timeMs": 31600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0245",
+          "timeMs": 31630,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0246",
+          "timeMs": 31800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0247",
+          "timeMs": 31810,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0248",
+          "timeMs": 31990,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0249",
+          "timeMs": 32000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0250",
+          "timeMs": 32170,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0251",
+          "timeMs": 32200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0252",
+          "timeMs": 32350,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0253",
+          "timeMs": 32400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0254",
+          "timeMs": 32530,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0255",
+          "timeMs": 32600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0256",
+          "timeMs": 32710,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0257",
+          "timeMs": 32800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0258",
+          "timeMs": 32890,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0259",
+          "timeMs": 33000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0260",
+          "timeMs": 33070,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0261",
+          "timeMs": 33200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0262",
+          "timeMs": 33250,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0263",
+          "timeMs": 33400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0264",
+          "timeMs": 33430,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0265",
+          "timeMs": 33600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0266",
+          "timeMs": 33610,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0267",
+          "timeMs": 33790,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0268",
+          "timeMs": 33800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0269",
+          "timeMs": 33970,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0270",
+          "timeMs": 34000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0271",
+          "timeMs": 34150,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0272",
+          "timeMs": 34200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0273",
+          "timeMs": 34330,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0274",
+          "timeMs": 34400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0275",
+          "timeMs": 34510,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0276",
+          "timeMs": 34600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0277",
+          "timeMs": 34690,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0278",
+          "timeMs": 34800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0279",
+          "timeMs": 34870,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0280",
+          "timeMs": 35000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0281",
+          "timeMs": 35050,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0282",
+          "timeMs": 35200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0283",
+          "timeMs": 35230,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0284",
+          "timeMs": 35400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0285",
+          "timeMs": 35410,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0286",
+          "timeMs": 35590,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0287",
+          "timeMs": 35600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0288",
+          "timeMs": 35770,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0289",
+          "timeMs": 35800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0290",
+          "timeMs": 35950,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0291",
+          "timeMs": 36000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0292",
+          "timeMs": 36130,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0293",
+          "timeMs": 36200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0294",
+          "timeMs": 36310,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0295",
+          "timeMs": 36400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0296",
+          "timeMs": 36490,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0297",
+          "timeMs": 36600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0298",
+          "timeMs": 36670,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0299",
+          "timeMs": 36800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0300",
+          "timeMs": 36850,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0441",
+          "timeMs": 36890,
+          "type": "moveY",
+          "dir": "down"
+        },
+        {
+          "id": "input_0301",
+          "timeMs": 37000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0302",
+          "timeMs": 37030,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0303",
+          "timeMs": 37200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0304",
+          "timeMs": 37210,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0305",
+          "timeMs": 37390,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0306",
+          "timeMs": 37400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0307",
+          "timeMs": 37570,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0442",
+          "timeMs": 37590,
+          "type": "moveY",
+          "dir": "none"
+        },
+        {
+          "id": "input_0308",
+          "timeMs": 37600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0309",
+          "timeMs": 37750,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0310",
+          "timeMs": 37800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0311",
+          "timeMs": 37930,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0312",
+          "timeMs": 38000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0313",
+          "timeMs": 38110,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0314",
+          "timeMs": 38200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0315",
+          "timeMs": 38290,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0316",
+          "timeMs": 38400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0317",
+          "timeMs": 38470,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0318",
+          "timeMs": 38600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0319",
+          "timeMs": 38650,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0320",
+          "timeMs": 38800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0321",
+          "timeMs": 38830,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0322",
+          "timeMs": 39000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0323",
+          "timeMs": 39010,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0324",
+          "timeMs": 39190,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0325",
+          "timeMs": 39200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0326",
+          "timeMs": 39370,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0327",
+          "timeMs": 39400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0328",
+          "timeMs": 39550,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0329",
+          "timeMs": 39600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0330",
+          "timeMs": 39730,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0331",
+          "timeMs": 39800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0332",
+          "timeMs": 39910,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0333",
+          "timeMs": 40000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0334",
+          "timeMs": 40090,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0335",
+          "timeMs": 40200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0336",
+          "timeMs": 40270,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0337",
+          "timeMs": 40400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0338",
+          "timeMs": 40450,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0339",
+          "timeMs": 40600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0340",
+          "timeMs": 40630,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0341",
+          "timeMs": 40800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0342",
+          "timeMs": 40810,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0343",
+          "timeMs": 40990,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0344",
+          "timeMs": 41000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0345",
+          "timeMs": 41170,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0346",
+          "timeMs": 41200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0347",
+          "timeMs": 41350,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0348",
+          "timeMs": 41400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0349",
+          "timeMs": 41530,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0350",
+          "timeMs": 41600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0351",
+          "timeMs": 41710,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0352",
+          "timeMs": 41800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0353",
+          "timeMs": 41890,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0354",
+          "timeMs": 42000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0355",
+          "timeMs": 42070,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0356",
+          "timeMs": 42200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0357",
+          "timeMs": 42250,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0358",
+          "timeMs": 42400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0359",
+          "timeMs": 42430,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0360",
+          "timeMs": 42600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0361",
+          "timeMs": 42610,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0362",
+          "timeMs": 42790,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0363",
+          "timeMs": 42800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0364",
+          "timeMs": 42970,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0365",
+          "timeMs": 43000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0366",
+          "timeMs": 43150,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0367",
+          "timeMs": 43200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0368",
+          "timeMs": 43330,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0369",
+          "timeMs": 43400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0370",
+          "timeMs": 43510,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0371",
+          "timeMs": 43600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0372",
+          "timeMs": 43690,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0373",
+          "timeMs": 43800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0374",
+          "timeMs": 43870,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0375",
+          "timeMs": 44000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0376",
+          "timeMs": 44050,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0377",
+          "timeMs": 44200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0378",
+          "timeMs": 44230,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0379",
+          "timeMs": 44400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0380",
+          "timeMs": 44410,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0381",
+          "timeMs": 44590,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0382",
+          "timeMs": 44600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0383",
+          "timeMs": 44770,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0384",
+          "timeMs": 44800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0385",
+          "timeMs": 44950,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0386",
+          "timeMs": 45000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0387",
+          "timeMs": 45130,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0388",
+          "timeMs": 45200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0389",
+          "timeMs": 45310,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0390",
+          "timeMs": 45400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0391",
+          "timeMs": 45490,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0392",
+          "timeMs": 45600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0393",
+          "timeMs": 45670,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0394",
+          "timeMs": 45800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0395",
+          "timeMs": 45850,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0396",
+          "timeMs": 46000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0397",
+          "timeMs": 46030,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0398",
+          "timeMs": 46200,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0399",
+          "timeMs": 46210,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0400",
+          "timeMs": 46390,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0401",
+          "timeMs": 46400,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0402",
+          "timeMs": 46570,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0403",
+          "timeMs": 46600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0404",
+          "timeMs": 46750,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0405",
+          "timeMs": 46800,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0406",
+          "timeMs": 46930,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0407",
+          "timeMs": 47000,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0408",
+          "timeMs": 47110,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0409",
+          "timeMs": 47200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0410",
+          "timeMs": 47290,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0411",
+          "timeMs": 47400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0412",
+          "timeMs": 47470,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0413",
+          "timeMs": 47600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0414",
+          "timeMs": 47650,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0415",
+          "timeMs": 47800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0416",
+          "timeMs": 47830,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0417",
+          "timeMs": 48000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0418",
+          "timeMs": 48010,
+          "type": "shoot"
+        },
+        {
+          "id": "shot_0419",
+          "timeMs": 48190,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0420",
+          "timeMs": 48200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0421",
+          "timeMs": 48370,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0422",
+          "timeMs": 48400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0423",
+          "timeMs": 48550,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0424",
+          "timeMs": 48600,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0425",
+          "timeMs": 48730,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0426",
+          "timeMs": 48800,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0427",
+          "timeMs": 48910,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0428",
+          "timeMs": 49000,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0429",
+          "timeMs": 49090,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0430",
+          "timeMs": 49200,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0431",
+          "timeMs": 49270,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0432",
+          "timeMs": 49400,
+          "type": "moveX",
+          "dir": "right"
+        },
+        {
+          "id": "shot_0433",
+          "timeMs": 49450,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0434",
+          "timeMs": 49600,
+          "type": "moveX",
+          "dir": "left"
+        },
+        {
+          "id": "shot_0435",
+          "timeMs": 49630,
+          "type": "shoot"
+        },
+        {
+          "id": "input_0436",
+          "timeMs": 49800,
+          "type": "moveX",
+          "dir": "none"
         }
       ]
     }
   },
   "expected": {
     "A": {
-      "finalScore": 600,
+      "finalScore": 3980,
       "survived": false,
       "finalPositionX": 523,
-      "finalPositionY": 415.5,
-      "actualDurationMs": 40016.66666666657
+      "finalPositionY": 463.5,
+      "actualDurationMs": 50016.666666665114
     },
     "B": {
-      "finalScore": 1420,
-      "survived": false,
-      "finalPositionX": 467,
-      "finalPositionY": 427.5,
-      "actualDurationMs": 40016.66666666657
+      "finalScore": 4150,
+      "survived": true,
+      "finalPositionX": 859,
+      "finalPositionY": 517.5,
+      "actualDurationMs": 50016.666666665114
     }
   }
 }

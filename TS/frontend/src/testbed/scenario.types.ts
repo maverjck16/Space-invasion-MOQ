@@ -53,6 +53,28 @@ export type ScenarioGameConfig = {
   // game/localGame/types.ts) - usato ad es. da scenario-4 per un pericolo iniziale controllato
   // che non continua a ripresentarsi se il giocatore sopravvive piu' a lungo del previsto.
   asteroidMaxCount?: number;
+  // Ondate di griglie scriptate (dimensione/capacita' di sparo esatte, spawn legato alla
+  // distruzione completa dell'ondata precedente) - vedi ScriptedWave in game/localGame/types.ts,
+  // identico campo per campo. Se assente/vuoto, spawner casuale di sempre.
+  scriptedWaves?: ScenarioScriptedWave[];
+  // Asteroidi scriptati indipendenti dalle ondate, vedi ScriptedAsteroidEvent in
+  // game/localGame/types.ts.
+  scriptedAsteroids?: ScenarioScriptedAsteroidEvent[];
+};
+
+// Duplicato (stessa forma) di ScriptedWave/ScriptedAsteroidEvent in game/localGame/types.ts: i due
+// file non condividono import (come il resto di questo schema, vedi ScenarioGameConfig sopra vs
+// GameDifficultyConfig), mantenuti identici a mano.
+export type ScenarioScriptedWave = {
+  minStartFrame: number;
+  columns: number;
+  rows: number;
+  canShoot: boolean;
+  spawnAsteroid?: boolean;
+};
+
+export type ScenarioScriptedAsteroidEvent = {
+  minStartFrame: number;
 };
 
 //  Risultato atteso per un giocatore, calcolato offline con il simulatore headless deterministico
