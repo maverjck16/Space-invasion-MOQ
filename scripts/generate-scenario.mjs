@@ -1,6 +1,6 @@
-// Genera i 3 file di scenario deterministico (scenario-1.json, scenario-2.json, scenario-3.json)
-// usati dal testbed al posto del controllo manuale da tastiera (vedi
-// frontend/src/testbed/scenarioPlayer.ts e frontend/src/testbed/scenario.types.ts per lo schema).
+// Genera i 2 file di scenario deterministico (scenario-1.json, scenario-2.json) usati dal
+// testbed al posto del controllo manuale da tastiera (vedi frontend/src/testbed/scenarioPlayer.ts
+// e frontend/src/testbed/scenario.types.ts per lo schema).
 //
 //  Ogni scenario contiene DUE timeline di input indipendenti (players.A / players.B): stesso seed
 // RNG (quindi stesso "mondo": stessi spawn di griglie/asteroidi) ma azioni diverse, cosi' i due
@@ -18,6 +18,16 @@
 // per WebRTC - una differenza storica di struttura tra i due progetti) e scrive in
 // <frontend>/public/scenarios/scenario-N.json in entrambi, cosi' lo stesso comando produce file
 // byte-identici nei due repository (verificabile con "diff").
+//
+//  Storico: originariamente c'erano 4 scenari (scenario-1 "baseline", scenario-2 "medium load",
+// scenario-3 "long/stress", scenario-4 "medium/realistic"). scenario-1 e scenario-2 originali sono
+// stati rimossi; scenario-3 e scenario-4 sono diventati rispettivamente lo scenario-1 e lo
+// scenario-2 attuali. Lo scenario-1 attuale (ex scenario-3) e' stato inoltre riscritto per usare
+// buildRealisticActions() invece del vecchio pattern "spazza lo schermo sparando in continuazione"
+// (buildSweepActions/buildStressActions, rimosse insieme agli scenari che le usavano): stesso
+// seed/gameConfig di prima (60s, asteroidi disattivati, griglie molto frequenti), ma sparo a
+// raffiche brevi separate da pause e beccheggio verticale periodico come nello scenario-2, con
+// cadenza piu' serrata per reggere il carico piu' alto di questo scenario.
 
 import fs from "fs";
 import path from "path";
@@ -34,6 +44,7 @@ function resolveOutDir() {
   throw new Error(`Impossibile trovare la cartella public/ (provati: ${candidates.join(", ")})`);
 }
 
+
 const CANVAS_WIDTH = 1024;
 // Larghezza REALE dello sprite del giocatore dopo il caricamento dell'immagine (450px * scala 0.18,
 // vedi entities/Player.ts): usata solo per tenere le traiettorie generate dentro lo schermo, non
@@ -47,265 +58,12 @@ function makeAction(timeMs, type, extra = {}) {
   return { id: `${prefix}_${String(idCounter++).padStart(4, "0")}`, timeMs, type, ...extra };
 }
 
-//  Genera una timeline "sweep": il giocatore attraversa ripetutamente lo schermo da un lato
-// all'altro, sparando a intervalli regolari, con un'eventuale variazione di cadenza nel tempo
-// (usata dallo scenario 3 per i 4 periodi di attivita' diversa, vedi sotto). E' la stessa strategia
-// (spazzare tutta la larghezza, sparare con continuita') gia' individuata empiricamente nella
-// versione originale di questo script come efficace per ridurre in fretta il numero di invasori
-// attivi (vedi il commento storico conservato piu' sotto in buildScenario1Actions per riferimento).
-function buildSweepActions({
-  durationMs,
-  startDir, // "left" | "right"
-  legMs, // durata di ogni tratto orizzontale (piu' basso = piu' cambi di direzione)
-  shootEveryMsAt, // (timeMs) => intervallo tra uno sparo e il successivo in quell'istante
-  verticalDir, // "up" | "down" | "none": spostamento verticale iniziale una tantum
-  tailShootEveryMs = 300,
-  movementEndMarginMs = 1500,
-}) {
-  idCounter = 1;
-  const actions = [];
-  const push = (timeMs, type, extra) => actions.push(makeAction(timeMs, type, extra));
-
-  if (verticalDir !== "none") {
-    push(0, "moveY", { dir: verticalDir });
-    push(250, "moveY", { dir: "none" });
-  }
-
-  const endMovementMs = durationMs - movementEndMarginMs;
-  let dir = startDir;
-  let x = CANVAS_WIDTH / 2 - PLAYER_WIDTH / 2;
-  let t = 0;
-  let nextShoot = 30;
-
-  while (t < endMovementMs) {
-    push(t, "moveX", { dir });
-
-    const shootInterval = shootEveryMsAt(t);
-    while (nextShoot <= t + legMs && nextShoot < endMovementMs) {
-      push(nextShoot, "shoot");
-      nextShoot += shootInterval;
-    }
-
-    const delta = (dir === "right" ? 1 : -1) * legMs * PLAYER_SPEED_PX_PER_MS;
-    x = Math.max(0, Math.min(CANVAS_WIDTH - PLAYER_WIDTH, x + delta));
-    if (x <= 4) dir = "right";
-    else if (x >= CANVAS_WIDTH - PLAYER_WIDTH - 4) dir = "left";
-
-    t += legMs;
-  }
-
-  push(t, "moveX", { dir: "none" });
-  if (verticalDir !== "none") push(t, "moveY", { dir: "none" });
-
-  let shootT = Math.max(t + 200, nextShoot);
-  while (shootT < durationMs - 300) {
-    push(shootT, "shoot");
-    shootT += tailShootEveryMs;
-  }
-
-  actions.sort((a, b) => a.timeMs - b.timeMs);
-  return actions;
-}
-
 // -------------------------------------------------------------------------------------------
-// SCENARIO 1 - Baseline: carico leggero, deve essere robusto e completarsi sempre. Player A e B
-// hanno traiettorie/cadenze di sparo semplici e diverse (A parte a sinistra e spara piu' spesso, B
-// parte a destra con cadenza piu' rilassata), cosi' i due punteggi finali sono diversi per
-// costruzione pur condividendo lo stesso mondo (stesso seed => stessi spawn).
+// buildRealisticActions: timeline di sweep orizzontale + sparo a raffiche brevi separate da pause
+// (invece del pattern "spazza lo schermo sparando in continuazione") + beccheggio verticale
+// periodico, pensata per assomigliare a una partita giocata da una persona vera pur restando
+// scriptata e deterministica. Usata da entrambi gli scenari attuali.
 // -------------------------------------------------------------------------------------------
-const SCENARIO_1 = {
-  scenarioId: "scenario-1",
-  description:
-    "Baseline: carico leggero (griglie/asteroidi poco frequenti), traiettorie semplici. Riferimento robusto per il confronto MoQ/WebRTC.",
-  seed: 250,
-  durationMs: 45000,
-  room: "room-test-1",
-  durationToleranceMs: 500,
-  gameConfig: {
-    gridSpawnIntervalFramesMin: 2100,
-    gridSpawnIntervalFramesMax: 2700,
-    gridColumnsMin: 2,
-    gridColumnsMax: 3,
-    gridRowsMin: 1,
-    gridRowsMax: 1,
-    asteroidSpawnIntervalFramesMin: 3600,
-    asteroidSpawnIntervalFramesMax: 4200,
-    asteroidsEnabled: true,
-  },
-  players: {
-    A: {
-      actions: buildSweepActions({
-        durationMs: 45000,
-        startDir: "left",
-        legMs: 220,
-        shootEveryMsAt: () => 220,
-        verticalDir: "down",
-        tailShootEveryMs: 250,
-      }),
-    },
-    B: {
-      actions: buildSweepActions({
-        durationMs: 45000,
-        startDir: "right",
-        legMs: 260,
-        shootEveryMsAt: () => 260,
-        verticalDir: "down",
-        tailShootEveryMs: 280,
-      }),
-    },
-  },
-  expected: {},
-};
-
-// -------------------------------------------------------------------------------------------
-// SCENARIO 2 - Medium load: griglie/asteroidi piu' frequenti, sweep piu' rapido, sparo piu'
-// frequente per entrambi i giocatori rispetto allo scenario 1 - piu' aggiornamenti/messaggi
-// scambiati (piu' entita' contemporaneamente a schermo), ma ancora una partita "vera".
-// -------------------------------------------------------------------------------------------
-const SCENARIO_2 = {
-  scenarioId: "scenario-2",
-  description:
-    "Medium load: griglie/asteroidi piu' frequenti, movimento e sparo piu' rapidi di scenario-1 - piu' traffico applicativo generato.",
-  seed: 777,
-  durationMs: 35000,
-  room: "room-test-2",
-  durationToleranceMs: 500,
-  gameConfig: {
-    gridSpawnIntervalFramesMin: 700,
-    gridSpawnIntervalFramesMax: 1099,
-    gridColumnsMin: 3,
-    gridColumnsMax: 4,
-    gridRowsMin: 1,
-    gridRowsMax: 2,
-    asteroidSpawnIntervalFramesMin: 1000,
-    asteroidSpawnIntervalFramesMax: 1499,
-    asteroidsEnabled: true,
-  },
-  players: {
-    A: {
-      actions: buildSweepActions({
-        durationMs: 35000,
-        startDir: "left",
-        legMs: 170,
-        shootEveryMsAt: () => 220,
-        verticalDir: "down",
-        tailShootEveryMs: 220,
-      }),
-    },
-    B: {
-      actions: buildSweepActions({
-        durationMs: 35000,
-        startDir: "right",
-        legMs: 210,
-        shootEveryMsAt: () => 300,
-        verticalDir: "none",
-        tailShootEveryMs: 280,
-      }),
-    },
-  },
-  expected: {},
-};
-
-// -------------------------------------------------------------------------------------------
-// SCENARIO 3 - Long/stress: 60s, asteroidi disattivati (riduce una fonte di variabilita', vedi
-// gameConfig.asteroidsEnabled), griglie molto frequenti, 4 periodi di attivita' diversa ottenuti
-// variando la cadenza di sparo/movimento dei due giocatori nel tempo (0-15s moderata, 15-30s alta,
-// 30-45s bassa, 45-60s molto alta) - vedi shootEveryMsAt qui sotto.
-// -------------------------------------------------------------------------------------------
-function scenario3ShootEveryMsAt(t) {
-  if (t < 15000) return 400; // 0-15s: moderata
-  if (t < 30000) return 180; // 15-30s: elevata
-  if (t < 45000) return 500; // 30-45s: piu' bassa
-  return 130; // 45-60s: molto elevata
-}
-function scenario3LegMsAt(t) {
-  if (t < 15000) return 260;
-  if (t < 30000) return 160;
-  if (t < 45000) return 300;
-  return 140;
-}
-
-//  A differenza di buildSweepActions (leg fisso), qui il "leg" cambia nel tempo insieme alla
-// cadenza di sparo: ricalcoliamo il prossimo leg ad ogni iterazione invece di passare un legMs
-// costante, per ottenere i 4 periodi di attivita' richiesti mantenendo la stessa logica di sweep.
-function buildStressActions({ durationMs, startDir, verticalDir, shootPhaseOffsetMs = 0 }) {
-  idCounter = 1;
-  const actions = [];
-  const push = (timeMs, type, extra) => actions.push(makeAction(timeMs, type, extra));
-
-  if (verticalDir !== "none") {
-    push(0, "moveY", { dir: verticalDir });
-    push(250, "moveY", { dir: "none" });
-  }
-
-  const movementEndMarginMs = 1500;
-  const endMovementMs = durationMs - movementEndMarginMs;
-  let dir = startDir;
-  let x = CANVAS_WIDTH / 2 - PLAYER_WIDTH / 2;
-  let t = 0;
-  let nextShoot = 30 + shootPhaseOffsetMs;
-
-  while (t < endMovementMs) {
-    push(t, "moveX", { dir });
-
-    const legMs = scenario3LegMsAt(t);
-    const shootInterval = scenario3ShootEveryMsAt(t);
-    while (nextShoot <= t + legMs && nextShoot < endMovementMs) {
-      push(nextShoot, "shoot");
-      nextShoot += shootInterval;
-    }
-
-    const delta = (dir === "right" ? 1 : -1) * legMs * PLAYER_SPEED_PX_PER_MS;
-    x = Math.max(0, Math.min(CANVAS_WIDTH - PLAYER_WIDTH, x + delta));
-    if (x <= 4) dir = "right";
-    else if (x >= CANVAS_WIDTH - PLAYER_WIDTH - 4) dir = "left";
-
-    t += legMs;
-  }
-
-  push(t, "moveX", { dir: "none" });
-  if (verticalDir !== "none") push(t, "moveY", { dir: "none" });
-
-  let shootT = Math.max(t + 200, nextShoot);
-  while (shootT < durationMs - 300) {
-    push(shootT, "shoot");
-    shootT += 200;
-  }
-
-  actions.sort((a, b) => a.timeMs - b.timeMs);
-  return actions;
-}
-
-const SCENARIO_3 = {
-  scenarioId: "scenario-3",
-  description:
-    "Long/stress: 60s, asteroidi disattivati, griglie frequenti, 4 periodi di attivita' diversa (moderata/elevata/bassa/molto elevata) ottenuti variando cadenza di movimento e sparo nel tempo.",
-  seed: 4242,
-  durationMs: 60000,
-  room: "room-test-3",
-  durationToleranceMs: 600,
-  gameConfig: {
-    gridSpawnIntervalFramesMin: 480,
-    gridSpawnIntervalFramesMax: 779,
-    gridColumnsMin: 3,
-    gridColumnsMax: 4,
-    gridRowsMin: 1,
-    gridRowsMax: 2,
-    asteroidSpawnIntervalFramesMin: 999999,
-    asteroidSpawnIntervalFramesMax: 999999,
-    asteroidsEnabled: false,
-  },
-  players: {
-    A: {
-      actions: buildStressActions({ durationMs: 60000, startDir: "left", verticalDir: "down", shootPhaseOffsetMs: 0 }),
-    },
-    B: {
-      actions: buildStressActions({ durationMs: 60000, startDir: "right", verticalDir: "none", shootPhaseOffsetMs: 90 }),
-    },
-  },
-  expected: {},
-};
-
 // -------------------------------------------------------------------------------------------
 // SCENARIO 4 - Medium/realistic: griglie piu' popolate (piu' invasori per griglia) e qualche
 // asteroide (ne' assenti come scenario-3 ne' frequenti come scenario-2), pensato per assomigliare
@@ -412,13 +170,71 @@ function buildRealisticActions({
   return actions;
 }
 
-const SCENARIO_4 = {
-  scenarioId: "scenario-4",
+// -------------------------------------------------------------------------------------------
+// SCENARIO 1 (ex scenario-3) - Long/stress: 60s, asteroidi disattivati (riduce una fonte di
+// variabilita', vedi gameConfig.asteroidsEnabled), griglie molto frequenti. Stesso seed/gameConfig
+// della versione precedente di questo scenario (stesso "mondo": stessi spawn di griglie), ma
+// azioni riscritte con buildRealisticActions() invece del vecchio sweep-e-spara continuo: sparo a
+// raffiche brevi separate da pause e beccheggio verticale periodico come scenario-2, con cadenza
+// piu' serrata (legMs/pausa piu' brevi) per reggere il carico piu' alto di questo scenario.
+// -------------------------------------------------------------------------------------------
+const SCENARIO_1 = {
+  scenarioId: "scenario-1",
   description:
-    "Medium/realistic: griglie piu' popolate (piu' invasori) e qualche asteroide (ne' assenti come scenario-3 ne' frequenti come scenario-2), sparo a raffiche intervallate da pause (non continuo, niente 'sparo a manetta') e beccheggio verticale periodico - pensato per assomigliare a una partita giocata da una persona, restando comunque scriptato e deterministico.",
+    "Long: 60s, asteroidi disattivati, griglie molto frequenti - stesso stile di scenario-2 (sparo a raffiche brevi separate da pause, beccheggio verticale periodico, niente 'sparo a manetta' continuo), ma con cadenza piu' serrata per reggere il carico piu' alto di questo scenario.",
+  seed: 4242,
+  durationMs: 60000,
+  room: "room-test-1",
+  durationToleranceMs: 600,
+  gameConfig: {
+    gridSpawnIntervalFramesMin: 480,
+    gridSpawnIntervalFramesMax: 779,
+    gridColumnsMin: 3,
+    gridColumnsMax: 4,
+    gridRowsMin: 1,
+    gridRowsMax: 2,
+    asteroidSpawnIntervalFramesMin: 999999,
+    asteroidSpawnIntervalFramesMax: 999999,
+    asteroidsEnabled: false,
+  },
+  players: {
+    A: {
+      actions: buildRealisticActions({
+        durationMs: 60000,
+        startDir: "left",
+        legMs: 280,
+        shootBurstPattern: [200, 200, 350],
+        verticalPeriodMs: 3400,
+        verticalHoldMs: 400,
+        verticalStartDir: "down",
+        verticalPhaseOffsetMs: 500,
+        verticalStartAfterMs: 0,
+      }),
+    },
+    B: {
+      actions: buildRealisticActions({
+        durationMs: 60000,
+        startDir: "right",
+        legMs: 180,
+        shootBurstPattern: [170, 170, 300],
+        verticalPeriodMs: 3400,
+        verticalHoldMs: 400,
+        verticalStartDir: "down",
+        verticalPhaseOffsetMs: 800,
+        verticalStartAfterMs: 0,
+      }),
+    },
+  },
+  expected: {},
+};
+
+const SCENARIO_2 = {
+  scenarioId: "scenario-2",
+  description:
+    "Medium/realistic: griglie piu' popolate (piu' invasori) e qualche asteroide (ne' assenti come nello scenario-1 ne' particolarmente frequenti), sparo a raffiche intervallate da pause (non continuo, niente 'sparo a manetta') e beccheggio verticale periodico - pensato per assomigliare a una partita giocata da una persona, restando comunque scriptato e deterministico.",
   seed: 6200,
   durationMs: 40000,
-  room: "room-test-4",
+  room: "room-test-2",
   durationToleranceMs: 500,
   gameConfig: {
     // TESTBED: nota implementativa importante (vedi LocalGameEngine.animate()) - lo spawn di una
@@ -495,10 +311,11 @@ const SCENARIO_4 = {
   expected: {},
 };
 
+
 const outDir = resolveOutDir();
 fs.mkdirSync(outDir, { recursive: true });
 
-for (const scenario of [SCENARIO_1, SCENARIO_2, SCENARIO_3, SCENARIO_4]) {
+for (const scenario of [SCENARIO_1, SCENARIO_2]) {
   const outPath = path.join(outDir, `${scenario.scenarioId}.json`);
   fs.writeFileSync(outPath, JSON.stringify(scenario, null, 2) + "\n");
   console.log(`Scritto ${outPath}`);
