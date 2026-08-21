@@ -5,7 +5,7 @@ FROM rust:slim-bullseye AS builder
 # By default, this compiles WITHOUT the broken jemalloc feature!
 # --features qlog aggiunge (senza rimuovere i default: iroh, quinn, websocket, uds) il supporto
 # per --server-quic-qlog, usato per esportare le tracce QUIC in formato qlog a scopo di misura.
-RUN cargo install moq-relay --features qlog
+RUN cargo install moq-relay --version 0.14.12 --features qlog --locked
 
 FROM debian:bullseye-slim
 # Install required certificates for WebTransport
