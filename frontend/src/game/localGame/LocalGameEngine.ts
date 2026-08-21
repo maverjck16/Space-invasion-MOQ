@@ -76,6 +76,14 @@ export class LocalGameEngine {
   // TESTBED: conta gli asteroidi generati finora, per rispettare l'eventuale tetto opzionale
   // "gameConfig.asteroidMaxCount" (vedi types.ts) - 0 se non presente in "gameConfig".
   private asteroidsSpawned = 0;
+  // TESTBED: usati SOLO quando gameConfig.scriptedWaves/scriptedAsteroids sono presenti (vedi
+  // animate() e types.ts) - indice della prossima ondata/asteroide scriptato da generare, e un
+  // contatore di frame dedicato che, a differenza di "this.frames", non si azzera MAI (this.frames
+  // viene azzerato ad ogni spawno di griglia per lo spawner casuale legacy - vedi piu' sotto - il
+  // che lo rende inadatto a un "non prima di X secondi dall'inizio partita" assoluto).
+  private nextScriptedWaveIndex = 0;
+  private nextScriptedAsteroidIndex = 0;
+  private scriptedClock = 0;
   private game: GameFlags = { over: false, active: true };
   private score = 0;
   // TESTBED: il tick di simulazione (animate(), sotto) e' richiamato da setInterval invece che da
@@ -444,6 +452,9 @@ export class LocalGameEngine {
   this.updateScoreUI();
 
   this.asteroidsSpawned = 0;
+  this.nextScriptedWaveIndex = 0;
+  this.nextScriptedAsteroidIndex = 0;
+  this.scriptedClock = 0;
   this.frames = 0;
   this.randomInterval = randomIntervalIn(
     this.gameConfig.gridSpawnIntervalFramesMin,
@@ -762,7 +773,7 @@ export class LocalGameEngine {
       // qualunque N, quindi senza questa guardia ogni partita comincerebbe SEMPRE con una minaccia
       // istantanea, prima ancora che un input scriptato (o umano) possa reagire. Identico in
       // entrambi i testbed.
-      if (this.frames > 0 && this.frames % 60 === 0 && grid.invaders.length > 0) {
+      if (this.frames > 0 && this.frames % 60 === 0 && grid.invaders.length > 0 && grid.canShoot) {
         grid.invaders[
           Math.floor(Math.random() * grid.invaders.length) //scelgo un invasore a caso dalla griglia
         ]?.shoot(this.invaderProjectiles);
@@ -871,7 +882,38 @@ export class LocalGameEngine {
     // controllo dell'asteroide qui sotto quando una griglia azzera this.frames: prima, ogni
     // respawn di griglia generava SEMPRE anche un asteroide fresco mirato alla posizione corrente
     // del giocatore nello stesso istante, un'imboscata ripetuta ad ogni nuova ondata.
-    if (this.frames > 0 && this.frames % this.randomInterval === 0) {
+    // TESTBED: quando lo scenario fornisce "gameConfig.scriptedWaves" (non vuoto), lo spawner
+    // casuale di griglie qui sotto e' del tutto bypassato: le ondate spawnano una alla volta, nello
+    // stesso ordine dell'array, ciascuna solo dopo che (a) la precedente e' stata completamente
+    // distrutta (this.grids.length === 0) e (b) sono trascorsi almeno "minStartFrame" frame
+    // dall'inizio della partita (this.scriptedClock, mai azzerato - vedi il campo sopra) - permette
+    // di scriptare sia fasi "aspetta che il campo sia libero" sia "non prima di X secondi
+    // dall'inizio", anche insieme. Quando assente/vuoto il comportamento (spawner casuale a
+    // intervallo, invariato) resta esattamente quello di sempre.
+    if (this.gameConfig.scriptedWaves && this.gameConfig.scriptedWaves.length > 0) {
+      const nextWave = this.gameConfig.scriptedWaves[this.nextScriptedWaveIndex];
+      if (nextWave && this.grids.length === 0 && this.scriptedClock >= nextWave.minStartFrame) {
+        const grid = new Grid(this.ctx, this.canvas, {
+          gridColumnsMin: nextWave.columns,
+          gridColumnsMax: nextWave.columns,
+          gridRowsMin: nextWave.rows,
+          gridRowsMax: nextWave.rows,
+        });
+        grid.canShoot = nextWave.canShoot;
+        this.grids.push(grid);
+        if (nextWave.spawnAsteroid) {
+          this.asteroids.push(
+            new Asteroid(this.ctx, this.canvas, {
+              target: {
+                x: this.player.position.x + this.player.width / 2,
+                y: this.player.position.y + this.player.height / 2,
+              },
+            }),
+          );
+        }
+        this.nextScriptedWaveIndex += 1;
+      }
+    } else if (this.frames > 0 && this.frames % this.randomInterval === 0) {
       this.grids.push(new Grid(this.ctx, this.canvas, this.gameConfig));
       this.randomInterval = randomIntervalIn(
         this.gameConfig.gridSpawnIntervalFramesMin,
@@ -879,6 +921,25 @@ export class LocalGameEngine {
       );
       this.frames = 0;
     }
+
+    // TESTBED: asteroidi scriptati, indipendenti dall'eventuale spawner casuale sopra (vedi
+    // gameConfig.scriptedAsteroids in types.ts) - stessa logica di spawn/target dell'asteroide
+    // casuale, ma all'istante esatto invece che a intervallo casuale. Nessun impatto se assente.
+    if (this.gameConfig.scriptedAsteroids) {
+      const nextAsteroidEvent = this.gameConfig.scriptedAsteroids[this.nextScriptedAsteroidIndex];
+      if (nextAsteroidEvent && this.scriptedClock >= nextAsteroidEvent.minStartFrame) {
+        this.asteroids.push(
+          new Asteroid(this.ctx, this.canvas, {
+            target: {
+              x: this.player.position.x + this.player.width / 2,
+              y: this.player.position.y + this.player.height / 2,
+            },
+          }),
+        );
+        this.nextScriptedAsteroidIndex += 1;
+      }
+    }
+    this.scriptedClock += 1;
 
     //ogni tot frame, in modo casuale, creo un nuovo asteroide che si muove verso il giocatore
     // TESTBED: gli asteroidi possono essere disattivati del tutto per uno scenario (vedi

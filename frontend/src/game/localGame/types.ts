@@ -21,6 +21,40 @@ export type GameDifficultyConfig = {
   // altri se il giocatore sopravvive piu' a lungo del previsto. Se assente, nessun limite (comportamento
   // di sempre).
   asteroidMaxCount?: number;
+  // TESTBED: ondate di griglie "scriptate" (dimensione e capacita' di sparo esatte, invece che
+  // scelte a caso in un intervallo) usate al posto dello spawner casuale (gridSpawnIntervalFrames*)
+  // quando presenti e non vuote - vedi ScriptedWave sotto e LocalGameEngine.animate(). OPZIONALE:
+  // se assente/vuoto il motore usa lo spawner casuale di sempre, nessun impatto sul gioco manuale.
+  scriptedWaves?: ScriptedWave[];
+  // TESTBED: asteroidi "scriptati" (istante esatto invece che intervallo casuale), indipendenti
+  // dallo spawner casuale di asteroidi (asteroidSpawnIntervalFrames*/asteroidsEnabled, che restano
+  // invariati e possono restare disattivati quando si usa questo). OPZIONALE.
+  scriptedAsteroids?: ScriptedAsteroidEvent[];
+};
+
+// TESTBED: una singola ondata scriptata. Spawna non appena (a) tutte le ondate precedenti sono
+// state completamente distrutte (this.grids.length === 0) E (b) sono trascorsi almeno
+// "minStartFrame" frame dall'inizio della partita (contati con un contatore dedicato che, a
+// differenza di "this.frames", non si azzera mai - vedi LocalGameEngine.scriptedClock) - cosi' si
+// puo' scriptare sia "aspetta che il giocatore liberi il campo prima di continuare" sia "non prima
+// di X secondi dall'inizio" (es. per una fase iniziale senza nemici), anche insieme.
+export type ScriptedWave = {
+  minStartFrame: number;
+  columns: number;
+  rows: number;
+  // Se false, nessun invasore di questa ondata sparera' mai (vedi Grid.canShoot e il ciclo di
+  // sparo in LocalGameEngine.animate()) - a differenza di asteroidsEnabled/gridSpawnInterval*, che
+  // sono globali per tutto lo scenario, questo si applica ondata per ondata.
+  canShoot: boolean;
+  // Se true, un asteroide (mirato alla posizione del giocatore in quell'istante, stessa logica
+  // dello spawner casuale) viene generato nello stesso momento in cui questa ondata spawna.
+  spawnAsteroid?: boolean;
+};
+
+// TESTBED: un asteroide scriptato "a se stante" (non legato allo spawn di un'ondata) - usato ad
+// es. per una fase iniziale senza nemici che comunque deve contenere un asteroide.
+export type ScriptedAsteroidEvent = {
+  minStartFrame: number;
 };
 
 //definisco i tipi per le entità di gioco e le loro proprietà, così come le opzioni per inizializzare il gioco locale
