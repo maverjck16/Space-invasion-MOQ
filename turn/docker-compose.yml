@@ -1,0 +1,22 @@
+# Avvia un server TURN (coturn) per il Testbed WebRTC. Uso:
+#   cd turn/
+#   docker compose up -d
+#
+# Poi in frontend/src/config.ts impostare:
+#   TURN_URL = "turn:<IP_O_DOMINIO_DI_QUESTA_MACCHINA>:3478"
+#   TURN_USERNAME = "spaceinvasion"
+#   TURN_CREDENTIAL = "<la stessa password messa in turnserver.conf>"
+#
+# network_mode: host e' la scelta piu' semplice per coturn: il range min-port/max-port in
+# turnserver.conf richiede molte porte UDP aperte, che con un mapping Docker "classico" (-p)
+# andrebbero elencate una per una. Con host networking coturn ascolta direttamente sulle porte
+# della macchina, quindi vanno aperte sul firewall quelle stesse porte (3478, 5349, 49152-49452).
+services:
+  coturn:
+    image: coturn/coturn:latest
+    container_name: space-invasion-turn
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./turnserver.conf:/etc/coturn/turnserver.conf:ro
+    command: ["-c", "/etc/coturn/turnserver.conf"]

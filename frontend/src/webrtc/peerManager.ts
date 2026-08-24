@@ -10,7 +10,7 @@
 // verso ciascun peer gia' presente; chi era gia' in room non inizia mai un'offerta di propria
 // iniziativa, si limita a rispondere. Questo rende impossibile una doppia offerta simultanea senza
 // bisogno di logica di "rollback" della negoziazione.
-import { CHANNEL_GAME, ICE_SERVERS } from "../config";
+import { CHANNEL_GAME, ICE_SERVERS, ICE_TRANSPORT_POLICY } from "../config";
 import {
   connectSignaling,
   disconnectSignaling,
@@ -149,7 +149,15 @@ function ensurePeerConnection(username: string, initiator: boolean): PeerLink {
   const existing = peers.get(username);
   if (existing) return existing;
 
-  const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
+  //  iceTransportPolicy: quando e' impostato un TURN e FORCE_TURN_RELAY e' true (vedi
+  // src/config.ts), vale "relay" e costringe ANCHE WebRTC a passare da un relay remoto, come fa
+  // sempre MoQ col proprio relay: serve a rendere il confronto di rete tra le due tecnologie equo
+  // anche quando i due client girano sulla stessa macchina/rete locale (dove altrimenti ICE
+  // sceglierebbe quasi certamente un candidato diretto, un solo hop, avvantaggiando WebRTC).
+  const pc = new RTCPeerConnection({
+    iceServers: ICE_SERVERS,
+    iceTransportPolicy: ICE_TRANSPORT_POLICY,
+  });
   const link: PeerLink = {
     pc,
     channel: null,

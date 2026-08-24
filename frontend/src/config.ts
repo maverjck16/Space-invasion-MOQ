@@ -10,14 +10,49 @@ export const SIGNALING_URL = "ws://localhost:8080";
 // Nome del DataChannel usato per lo stato di gioco, equivalente della TRACK_GAME MoQ.
 export const CHANNEL_GAME = "game";
 
-// Server ICE per la negoziazione WebRTC. Uno STUN pubblico basta per NAT traversal in rete
-// locale/la maggior parte delle reti domestiche (che e' il contesto di questo esperimento, analogo
-// a quello della versione MoQ con relay unico). Per reti con NAT simmetrico/restrittivo servirebbe
-// anche un server TURN, non incluso qui per restare aderenti al principio "nessuna dipendenza non
-// necessaria" (vedi README, sezione differenze inevitabili).
+// Server TURN opzionale (es. coturn, vedi cartella turn/ nella root del progetto e turn/README.md).
+//
+// Perche' serve: il relay MoQ instrada SEMPRE il traffico su una macchina remota (client -> relay
+// -> client, due hop di rete). WebRTC invece, quando i due client sono sulla stessa rete/macchina
+// (come nell'uso tipico del Testbed in locale), sceglie quasi certamente un candidato ICE diretto
+// (host o server-reflexive via STUN, un solo hop): il confronto tra le due tecnologie risulta cosi'
+// sbilanciato a favore di WebRTC non per il trasporto in se', ma perche' sta percorrendo una strada
+// piu' corta (vedi relazione, capitolo "Un punto aperto: rete locale e rete reale per WebRTC").
+//
+// Configurando qui l'URL/le credenziali di un server TURN e lasciando FORCE_TURN_RELAY = true (di
+// default sotto), ENTRAMBI i client WebRTC sono costretti a scambiarsi i dati passando dal relay
+// TURN, replicando la stessa topologia a due hop del relay MoQ: un confronto molto piu' equo dal
+// punto di vista della rete effettivamente attraversata.
+//
+// Lasciare TURN_URL vuoto per tornare al comportamento originale (solo STUN pubblico, nessun TURN).
+const TURN_URL = ""; // es. "turn:IP_O_DOMINIO_DEL_TUO_SERVER:3478" oppure "turns:dominio:5349" (TLS)
+const TURN_USERNAME = ""; // deve combaciare con "user=" in turn/turnserver.conf
+const TURN_CREDENTIAL = ""; // deve combaciare con la password dopo i due punti in "user=...:PASSWORD"
+
 export const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun.l.google.com:19302" },
+  ...(TURN_URL
+    ? [
+        {
+          urls: TURN_URL,
+          username: TURN_USERNAME,
+          credential: TURN_CREDENTIAL,
+        },
+      ]
+    : []),
 ];
+
+// Se true (e TURN_URL e' configurato), forza TUTTO il traffico ICE a passare dal server TURN
+// sopra: vengono usati solo candidati di tipo "relay", niente host/server-reflexive diretti. E'
+// l'impostazione da usare per gli esperimenti di confronto con MoQ descritti sopra.
+//
+// Se TURN_URL e' vuoto questo flag non ha effetto (nessun candidato relay disponibile: forzare
+// "relay" senza un TURN configurato farebbe fallire ogni connessione), quindi va attivato solo
+// insieme a un TURN_URL valido.
+export const FORCE_TURN_RELAY = true;
+
+export const ICE_TRANSPORT_POLICY: RTCIceTransportPolicy =
+  TURN_URL && FORCE_TURN_RELAY ? "relay" : "all";
 
 // Timeout massimo per la connessione al server di signaling: se scade, l'errore viene mostrato
 // subito invece di aspettare il timeout, molto più lungo, del browser.
