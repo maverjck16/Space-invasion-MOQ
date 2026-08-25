@@ -25,3 +25,6 @@ dist-ssr
 
 package-lock.json
 TS/frontend/results/
+
+# Deployment: file .env locali (porte specifiche della VM), mai da versionare
+deploy/.env

@@ -1,0 +1,43 @@
+# Deployment completo del Testbed WebRTC di Space Invasion: webapp (frontend + signaling)
+# + server TURN (coturn), pensati per girare sulla STESSA VM raggiungibile da entrambi i
+# client di test (vedi DEPLOY.md in questa cartella per la procedura passo-passo).
+#
+# Uso:
+#   cd deploy/
+#   cp .env.example .env        # poi modifica le porte se servono
+#   docker compose up -d --build
+#
+# Il relay MoQ (per il confronto) NON è incluso qui: vive nel branch/progetto MoQ dello
+# stesso repository (compose.yml + relay/, immagine moq-keycast-relay) e va avviato a
+# parte sulla stessa macchina — vedi la sezione dedicata in DEPLOY.md.
+
+services:
+  coturn:
+    image: coturn/coturn:latest
+    container_name: space-invasion-turn
+    restart: unless-stopped
+    # network_mode: host = coturn ascolta direttamente sulle porte della macchina: il range
+    # min-port/max-port di turnserver.conf richiede molte porte UDP, poco pratiche da mappare
+    # una per una con "ports:". Vanno aperte sul firewall le stesse porte del file di conf.
+    network_mode: host
+    volumes:
+      - ../turn/turnserver.conf:/etc/coturn/turnserver.conf:ro
+    command: ["-c", "/etc/coturn/turnserver.conf"]
+
+  signaling:
+    build: ../signaling
+    container_name: space-invasion-signaling
+    restart: unless-stopped
+    environment:
+      SIGNALING_PORT: ${SIGNALING_PORT:-8080}
+    ports:
+      - "${SIGNALING_PORT:-8080}:${SIGNALING_PORT:-8080}"
+
+  frontend:
+    build: ../frontend
+    container_name: space-invasion-webrtc-frontend
+    restart: unless-stopped
+    depends_on:
+      - signaling
+    ports:
+      - "${FRONTEND_PORT:-8081}:80"
