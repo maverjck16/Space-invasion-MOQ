@@ -1,4 +1,4 @@
-import type { GameSnapshot } from "../../webrtc/snapshot";
+import type { GameSnapshot } from "../../moq/publisher";
 import { NETWORK_TICK_HZ } from "../../config";
 import { Player } from "./entities/Player";
 import { Projectile } from "./entities/Projectile";
@@ -21,16 +21,16 @@ import type {
 // src/testbed/scenario.types.ts) puo' sovrascrivere questi valori per variare il carico applicativo
 // dell'esperimento (FASE 4 della tesi) senza toccare nessun altro percorso di codice.
 const DEFAULT_GAME_CONFIG: GameDifficultyConfig = {
-  gridSpawnIntervalFramesMin: 900,
-  gridSpawnIntervalFramesMax: 1599,
-  gridColumnsMin: 2,
-  gridColumnsMax: 4,
-  gridRowsMin: 1,
-  gridRowsMax: 2,
+  gridSpawnIntervalFramesMin: 400,
+  gridSpawnIntervalFramesMax: 700,
+  gridColumnsMin: 4,
+  gridColumnsMax: 6,
+  gridRowsMin: 3,
+  gridRowsMax: 4,
   // Nota: la primissima istanza (nel costruttore, quando "gameConfig" non e' fornito) usa invece
   // la base storica 1200-1799, diversa da questa - vedi il costruttore per il perche'.
-  asteroidSpawnIntervalFramesMin: 1400,
-  asteroidSpawnIntervalFramesMax: 1999,
+  asteroidSpawnIntervalFramesMin: 300,
+  asteroidSpawnIntervalFramesMax: 600,
   asteroidsEnabled: true,
 };
 
@@ -948,7 +948,7 @@ export class LocalGameEngine {
     if (
       this.gameConfig.asteroidsEnabled &&
       this.frames > 0 &&
-      this.frames % this.asteroidSpawnInterval === 0 &&
+      this.scriptedClock % this.asteroidSpawnInterval === 0 &&
       (this.gameConfig.asteroidMaxCount === undefined ||
         this.asteroidsSpawned < this.gameConfig.asteroidMaxCount)
     ) {
