@@ -3,7 +3,7 @@
 
 // URL del server di signaling WebSocket (equivalente, per la sola fase di rendez-vous, del
 // RELAY_URL della versione MoQ). Il traffico di gioco NON passa da qui: vedi src/webrtc/peerManager.ts.
-export const SIGNALING_URL = "ws://20.19.48.192/ws";
+export const SIGNALING_URL = "ws://localhost:8080";
 // export const SIGNALING_URL = "wss://space-invasion-signaling-fb.loca.lt"; // tunnel pubblico (loca.lt, instabile) per accesso esterno
 // export const SIGNALING_URL = "wss://spaceinvasion.ddns.net:8080"; // esempio per deployment remoto
 
@@ -25,9 +25,9 @@ export const CHANNEL_GAME = "game";
 // punto di vista della rete effettivamente attraversata.
 //
 // Lasciare TURN_URL vuoto per tornare al comportamento originale (solo STUN pubblico, nessun TURN).
-const TURN_URL = "turn:20.19.48.192:443";
-const TURN_USERNAME = "spaceinvasion";
-const TURN_CREDENTIAL = "SaraeFranci1816";
+const TURN_URL = ""; // es. "turn:IP_O_DOMINIO_DEL_TUO_SERVER:3478" oppure "turns:dominio:5349" (TLS)
+const TURN_USERNAME = ""; // deve combaciare con "user=" in turn/turnserver.conf
+const TURN_CREDENTIAL = ""; // deve combaciare con la password dopo i due punti in "user=...:PASSWORD"
 
 export const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun.l.google.com:19302" },
@@ -69,3 +69,45 @@ export const NETWORK_TICK_HZ = 25;
 // Il riepilogo completo (avg/min/max/p50/p95/p99 ecc.) viene comunque stampato sempre a fine
 // sessione, indipendentemente da questo intervallo - vedi src/metrics/metrics.ts
 export const METRICS_LOG_INTERVAL_MS = 5000;
+
+// ---------------------------------------------------------------------------------------------
+// 1v1: costanti della partita competitiva a punteggio (arena condivisa, vedi LocalGameEngine.ts).
+// Identiche nella versione MoQ (stessa struttura di file), cosi' il confronto resta a parita' di
+// regole di gioco, non solo di trasporto.
+// ---------------------------------------------------------------------------------------------
+
+// Durata di una partita: allo scadere, il motore si ferma e vince chi ha piu' punti (a parita',
+// pareggio). 3 minuti di default - facilmente regolabile per gli esperimenti.
+export const MATCH_DURATION_MS = 3 * 60 * 1000;
+
+// Vite di ciascuna navicella: colpita da invasore/asteroide/proiettile nemico, respawna invece di
+// terminare subito la partita; esaurite le vite la navicella resta fuori gioco (non piu' pilotabile
+// ne' collidibile) ma l'arena condivisa continua a girare per l'altro giocatore fino al timer.
+export const LIVES_PER_PLAYER = 3;
+
+// Tempo tra la "morte" (perdita di una vita) e il respawn della navicella, in ms - riuso dello
+// stesso ritardo gia' presente nella versione originale (playerDeath, LocalGameEngine.ts) prima di
+// mostrare la schermata di game over.
+export const RESPAWN_DELAY_MS = 2000;
+
+// Durata dell'invulnerabilita' subito dopo il respawn, in ms - evita di rimorire istantaneamente
+// se si respawna in mezzo a una minaccia gia' presente sullo schermo.
+export const RESPAWN_INVULNERABILITY_MS = 2000;
+
+// Handshake di inizio partita (vedi webrtc/peerManager.ts e main.ts): chi si accorge per ultimo
+// della presenza dell'altro genera un seed condiviso e un istante di partenza comune
+// (Date.now() + questo margine), cosi' entrambi i client hanno il tempo di ricevere/applicare il
+// seed e programmare l'avvio del proprio motore locale allo stesso istante, prima che scada.
+export const MATCH_INIT_LEAD_MS = 1200;
+
+// Il messaggio che porta il matchInit viaggia sullo stesso canale/track "game" gia' esistente, che
+// e' inaffidabile per design (WebRTC: DataChannel "unordered, maxRetransmits:0" - vedi
+// peerManager.ts; MoQ: i gruppi vecchi vengono scartati a favore dei piu' recenti - vedi
+// subscriber.ts): un singolo invio del seed potrebbe quindi perdersi. Per non rischiare che
+// l'intera partita non parta mai per un pacchetto perso, il lato che genera il matchInit continua
+// a riallegarlo (idempotente per chi riceve) a ogni snapshot in uscita per questa finestra di
+// tempo dopo averlo generato, invece che una volta sola - vedi peerManager.ts/moq/publisher.ts.
+// Va oltre MATCH_INIT_LEAD_MS per lasciare qualche tentativo di margine anche dopo l'istante di
+// partenza teorico. Dopo la finestra il traffico torna simmetrico tra i due lati per il resto della
+// partita (nessun campo extra sugli snapshot), preservando il confronto di banda a regime.
+export const MATCH_INIT_RESEND_WINDOW_MS = 2000;

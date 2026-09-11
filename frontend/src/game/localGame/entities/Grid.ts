@@ -1,4 +1,4 @@
-import { nextId } from "../id";
+import { nextArenaId } from "../id";
 import type { Vec2 } from "../types";
 import type { GameDifficultyConfig } from "../types";
 import { Invader } from "./Invader";
@@ -32,7 +32,9 @@ export class Grid {
     private canvas: HTMLCanvasElement,
     config?: Pick<GameDifficultyConfig, "gridColumnsMin" | "gridColumnsMax" | "gridRowsMin" | "gridRowsMax">,
   ) {
-    this.id = nextId("grid");
+    // 1v1: id dal contatore dedicato all'arena condivisa (vedi id.ts) - deve avanzare identico
+    // sui due client per restare comparabile via GameSnapshot.killedIds.
+    this.id = nextArenaId("grid");
     this.position = { x: 0, y: 0 };
     this.velocity = { x: 3, y: 0 };
     this.invaders = [];

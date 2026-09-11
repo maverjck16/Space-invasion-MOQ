@@ -13,14 +13,22 @@ export class Player {
   image: HTMLImageElement;
   loaded: boolean;
 
+  // 1v1: frazione orizzontale del canvas usata come punto di spawn (0.5 = centro, comportamento
+  // originale invariato per qualunque chiamante che non la passa) - serve a far comparire le due
+  // navicelle dell'arena condivisa in punti diversi invece che sovrapposte, vedi
+  // LocalGameEngine.ts (LOCAL_SPAWN_X_FRACTION/REMOTE_SPAWN_X_FRACTION).
+  private spawnXFraction: number;
+
   constructor( //accetta il contesto del canvas e l'elemento canvas per poter disegnare e gestire i limiti di movimento
     private ctx: CanvasRenderingContext2D,
     private canvas: HTMLCanvasElement,
+    args?: { spawnXFraction?: number },
   ) {
+    this.spawnXFraction = args?.spawnXFraction ?? 0.5;
     this.width = 60;
     this.height = 60;
     this.position = {
-      x: this.canvas.width / 2 - this.width / 2,
+      x: this.canvas.width * this.spawnXFraction - this.width / 2,
       y: this.canvas.height - this.height - 30,
     };
     this.velocity = { x: 0, y: 0 };
@@ -36,7 +44,7 @@ export class Player {
       const scale = 0.18;
       this.width = this.image.width * scale;
       this.height = this.image.height * scale;
-      this.position.x = this.canvas.width / 2 - this.width / 2;
+      this.position.x = this.canvas.width * this.spawnXFraction - this.width / 2;
       this.position.y = this.canvas.height - this.height - 30;
     };
   }

@@ -1,5 +1,5 @@
 import invaderImgSrc from "../../../image/invader.png";
-import { nextId } from "../id";
+import { nextArenaId } from "../id";
 import type { Vec2 } from "../types";
 import { InvaderProjectile } from "./InvaderProjectile";
 
@@ -18,7 +18,8 @@ export class Invader {
     private ctx: CanvasRenderingContext2D,
     args: { position: Vec2 },
   ) {
-    this.id = nextId("invader");
+    // 1v1: id dal contatore dedicato all'arena condivisa (vedi id.ts).
+    this.id = nextArenaId("invader");
     this.position = { ...args.position };
     this.velocity = { x: 0, y: 0 };
     this.width = 30;
