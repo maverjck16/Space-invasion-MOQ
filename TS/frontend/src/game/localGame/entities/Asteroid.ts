@@ -1,4 +1,4 @@
-import { nextId } from "../id";
+import { nextArenaId } from "../id";
 import type { Vec2 } from "../types";
 
 //---AI--- Classe Asteroid rappresenta gli asteroidi che appaiono casualmente e si muovono verso il giocatore, gestisce la loro posizione,
@@ -20,7 +20,7 @@ export class Asteroid {
     private canvas: HTMLCanvasElement,
     args: { target: Vec2 },
   ) {
-    this.id = nextId("asteroid");
+    this.id = nextArenaId("asteroid");
 
     this.radius = Math.random() * 24 + 18; // raggio casuale tra 18 e 42 pixel
 

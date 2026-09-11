@@ -3,6 +3,7 @@ import {
   renderGameRoom,
   updatePresence,
   updateRemoteGame,
+  startLocalMatch,
 } from "./ui/game-room";
 
 import { connectToRelay, disconnectFromRelay } from "./moq/connection";
@@ -10,11 +11,15 @@ import {
   startPublisher,
   stopPublisher,
   publishSnapshot,
+  setLocalMatchInitHandler,
   type GameSnapshot,
+  type MatchInit,
 } from "./moq/publisher";
 import { startSubscriber, stopSubscriber } from "./moq/subscriber";
 import { startSession, endSession } from "./metrics/metrics";
 import { installDeterministicRandom } from "./testbed/rng";
+import { resetIdCounters } from "./game/localGame/id";
+import type { GameDifficultyConfig } from "./game/localGame/types";
 import { ScenarioPlayer } from "./testbed/scenarioPlayer";
 import { startRun, finishRun, recordSnapshotForHash } from "./testbed/runLogger";
 import { toPlayerRun, type PlayerId, type Scenario } from "./testbed/scenario.types";
@@ -99,9 +104,12 @@ function waitForPeerReady(
 
 //  Esegue il join a una room (manuale o automatico) e avvia publisher/subscriber. In modalita'
 // automatica, prima di fare qualunque altra cosa: scarica lo scenario condiviso e installa il
-// generatore di numeri casuali seedato (deve succedere PRIMA che venga costruito il
-// LocalGameEngine dentro renderGameRoom, perche' Math.random() viene gia' chiamato negli
-// inizializzatori dei suoi campi).
+// generatore di numeri casuali seedato (deve succedere PRIMA che venga montato il
+// LocalGameEngine, perche' Math.random() viene gia' chiamato negli inizializzatori dei suoi
+// campi). In modalita' manuale (1v1 reale), il seed condiviso non e' noto in anticipo: arriva
+// tramite l'handshake matchInit scambiato sulla track "game" gia' esistente (vedi
+// moq/publisher.ts/moq/subscriber.ts) - il motore locale viene montato solo dopo che l'handshake e'
+// completo, vedi applyMatchInit() sotto.
 async function join(
   username: string,
   room: string,
@@ -132,21 +140,54 @@ async function join(
   let lastLocalSnapshot: GameSnapshot | null = null;
   let presenceListener: ((users: string[]) => void) | null = null;
 
+  //  1v1: true non appena il motore locale e' stato montato (via scenario automatico o via
+  // handshake matchInit) - evita di montarlo due volte se sia l'evento "sono iniziatore" sia un
+  // matchInit ricevuto dal peer arrivassero entrambi (non dovrebbe succedere, ma resta innocuo).
+  let matchStarted = false;
+
+  const onSnapshot = (snapshot: GameSnapshot) => {
+    lastLocalSnapshot = snapshot;
+    recordSnapshotForHash(snapshot);
+    publishSnapshot(snapshot);
+  };
+
+  //  1v1: installa il seed deterministico condiviso e programma l'avvio del motore locale
+  // esattamente all'istante concordato (Date.now(), confrontabile tra le due macchine) - sia che
+  // il matchInit sia stato generato da QUESTO client (siamo iniziatori, vedi
+  // setLocalMatchInitHandler piu' sotto) sia che sia stato ricevuto dall'avversario (vedi
+  // callback onGameUpdate passata a startSubscriber).
+  const applyMatchInit = (init: MatchInit, gameConfig?: GameDifficultyConfig) => {
+    if (matchStarted) return;
+    matchStarted = true;
+
+    installDeterministicRandom(init.seed);
+    resetIdCounters();
+
+    const delayMs = Math.max(0, init.startAtEpochMs - Date.now());
+    window.setTimeout(() => {
+      startLocalMatch(onSnapshot, gameConfig);
+    }, delayMs);
+  };
+
   try {
     await connectToRelay();
+
+    if (!auto) {
+      //  Solo in modalita' manuale: questo client puo' diventare iniziatore dell'handshake verso
+      // l'avversario (vedi moq/subscriber.ts per la regola con cui si decide chi lo e', diversa da
+      // quella WebRTC ma con lo stesso scopo: esattamente un lato genera il seed). L'evento arriva
+      // in modo puramente locale, non e' un messaggio di rete: il messaggio vero e proprio (che
+      // porta lo stesso seed/istante all'avversario) viene inviato da moq/publisher.ts stesso sulla
+      // track "game" gia' esistente.
+      setLocalMatchInitHandler((init) => applyMatchInit(init));
+    }
+
     await startPublisher(room, username);
     startSession(username, room);
 
     let scenarioPlayer: ScenarioPlayer | null = null;
 
     renderGameRoom(username, room, {
-      onSnapshot: (snapshot: GameSnapshot) => {
-        lastLocalSnapshot = snapshot;
-        recordSnapshotForHash(snapshot);
-        publishSnapshot(snapshot);
-      },
-      gameConfig: scenario?.gameConfig,
-
       onLeave: () => {
         scenarioPlayer?.stop();
         endSession();
@@ -157,10 +198,19 @@ async function join(
       },
     });
 
+    if (auto && scenario) {
+      //  Modalita' automatica: seed gia' installato sopra, nessun handshake da attendere - il
+      // motore locale viene montato subito con la configurazione di difficolta' dello scenario.
+      startLocalMatch(onSnapshot, scenario.gameConfig);
+    }
+
     await startSubscriber(
       room,
       username,
       (remoteUsername, snapshot) => {
+        if (!auto && snapshot.matchInit) {
+          applyMatchInit(snapshot.matchInit);
+        }
         updateRemoteGame(remoteUsername, snapshot);
       },
       (users) => {

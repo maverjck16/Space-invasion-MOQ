@@ -1,5 +1,4 @@
-import type { GameSnapshot } from "../../webrtc/snapshot";
-import type { Invader } from "./entities/Invader";
+import type { GameSnapshot } from "../../moq/publisher";
 
 //  TESTBED: parametri di difficolta'/carico opzionali (vedi src/testbed/scenario.types.ts,
 // campo "gameConfig"). OPZIONALI: se assenti (gioco manuale originale, o testbed senza scenario)
@@ -64,6 +63,16 @@ export type LocalGameOptions = {
   onSnapshot: (snapshot: GameSnapshot) => void;
   //funzione di callback opzionale per notificare il publisher quando il punteggio cambia
   onScoreChange?: (score: number) => void;
+  // 1v1: notifica quando cambiano le vite rimaste della propria navicella (per l'HUD).
+  onLivesChange?: (lives: number) => void;
+  // 1v1: notifica quando il timer di partita raggiunge lo zero e il motore si ferma - la UI puo'
+  // usarla per riabilitare i controlli (es. tasto ESCI) o mostrare un riepilogo fuori dal canvas.
+  // Il punteggio finale/vincitore viene comunque gia' disegnato direttamente sul canvas dal motore.
+  onMatchEnd?: () => void;
+  // 1v1: notifica periodica del tempo rimanente di partita in ms, per un countdown nell'HUD fuori
+  // dal canvas (il countdown "grosso" e' comunque disegnato anche a canvas, questa e' per badge/testo
+  // esterni se servono).
+  onTimeRemaining?: (msRemaining: number) => void;
   //  TESTBED: configurazione di difficolta'/carico opzionale per questo scenario (vedi sopra).
   gameConfig?: GameDifficultyConfig;
 };
@@ -91,63 +100,23 @@ export type KeysState = {
   space: { pressed: boolean };
 };
 
-//GameFlags tiene traccia dello stato del gioco, se è finito o attivo
+// 1v1: GameFlags tiene traccia dello stato della PROPRIA navicella e della partita nel suo
+// complesso (ridefinito rispetto alla versione a singolo giocatore: non c'e' piu' un game over
+// immediato al primo colpo, vedi LocalGameEngine.playerDeath()).
 export type GameFlags = {
-  over: boolean;
+  // true nel breve intervallo tra un colpo subito e il respawn: navicella nascosta, non
+  // pilotabile, non collidibile.
+  respawning: boolean;
+  // true quando le vite della propria navicella sono a 0: resta fuori gioco per il resto della
+  // partita (non pilotabile/non collidibile), ma il motore/arena condivisa continuano a girare
+  // per l'altro giocatore fino allo scadere del timer.
+  eliminated: boolean;
+  // true finche' il timer di partita non e' scaduto: quando passa a false il motore si ferma e
+  // viene mostrata la schermata finale con i due punteggi.
   active: boolean;
 };
 
-//i tipi "Like" rappresentano le proprietà  delle entità di gioco che vengono incluse negli snapshot inviati al publisher per tenere
-//traccia dello stato del gioco lato server e sincronizzare i client connessi
-export type ProjectileLike = {
-  id: string;
-  position: Vec2;
-  velocity: Vec2;
-  radius: number;
-};
-
-export type InvaderProjectileLike = {
-  id: string;
-  position: Vec2;
-  velocity: Vec2;
-  width: number;
-  height: number;
-};
-
-export type ParticleLike = {
-  id: string;
-  position: Vec2;
-  velocity: Vec2;
-  radius: number;
-  color: string;
-  opacity: number;
-  fades: boolean;
-};
-
-export type InvaderLike = {
-  id: string;
-  position: Vec2;
-  velocity: Vec2;
-  width: number;
-  height: number;
-};
-
-export type GridLike = {
-  id: string;
-  position: Vec2;
-  velocity: Vec2;
-  width: number;
-  invaders: Invader[];
-};
-
-export type AsteroidLike = {
-  id: string;
-  position: Vec2;
-  velocity: Vec2;
-  radius: number;
-  rotation: number;
-  rotationSpeed: number;
-  health: number;
-  maxHealth: number;
-  points: number[];
-};
+// 1v1: i vecchi tipi "*Like" (ProjectileLike/InvaderProjectileLike/ParticleLike/InvaderLike/
+// GridLike/AsteroidLike) sono stati rimossi: servivano solo a ombreggiare la forma delle entita'
+// nello snapshot di rete, che ora non porta piu' griglie/asteroidi/proiettili nemici/particelle
+// (vedi moq/publisher.ts) - il campo condiviso viaggia solo come stato interno del motore.

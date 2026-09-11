@@ -1,5 +1,11 @@
 import type { GameSnapshot } from "../../moq/publisher";
-import { NETWORK_TICK_HZ } from "../../config";
+import {
+  NETWORK_TICK_HZ,
+  MATCH_DURATION_MS,
+  LIVES_PER_PLAYER,
+  RESPAWN_DELAY_MS,
+  RESPAWN_INVULNERABILITY_MS,
+} from "../../config";
 import { Player } from "./entities/Player";
 import { Projectile } from "./entities/Projectile";
 import { Particle } from "./entities/Particle";
@@ -11,7 +17,6 @@ import type {
   GameFlags,
   KeysState,
   LocalGameOptions,
-  RestartButton,
   Vec2,
 } from "./types";
 
@@ -21,16 +26,16 @@ import type {
 // src/testbed/scenario.types.ts) puo' sovrascrivere questi valori per variare il carico applicativo
 // dell'esperimento (FASE 4 della tesi) senza toccare nessun altro percorso di codice.
 const DEFAULT_GAME_CONFIG: GameDifficultyConfig = {
-  gridSpawnIntervalFramesMin: 400,
-  gridSpawnIntervalFramesMax: 700,
-  gridColumnsMin: 4,
-  gridColumnsMax: 6,
-  gridRowsMin: 3,
-  gridRowsMax: 4,
+  gridSpawnIntervalFramesMin: 900,
+  gridSpawnIntervalFramesMax: 1599,
+  gridColumnsMin: 2,
+  gridColumnsMax: 4,
+  gridRowsMin: 1,
+  gridRowsMax: 2,
   // Nota: la primissima istanza (nel costruttore, quando "gameConfig" non e' fornito) usa invece
   // la base storica 1200-1799, diversa da questa - vedi il costruttore per il perche'.
-  asteroidSpawnIntervalFramesMin: 300,
-  asteroidSpawnIntervalFramesMax: 600,
+  asteroidSpawnIntervalFramesMin: 1400,
+  asteroidSpawnIntervalFramesMax: 1999,
   asteroidsEnabled: true,
 };
 
@@ -38,16 +43,49 @@ function randomIntervalIn(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-//Classe LocalGameEngine è la classe principale che gestisce l'intero gioco locale
+// 1v1: frazione orizzontale del canvas in cui compaiono/respawnano le due navicelle - separate
+// cosi' non nascono sovrapposte nell'arena condivisa (Player.ts accetta ora un "spawnXFraction"
+// opzionale apposta per questo, di default 0.5 = comportamento originale invariato per qualunque
+// altro chiamante che non lo passa).
+const LOCAL_SPAWN_X_FRACTION = 0.35;
+const REMOTE_SPAWN_X_FRACTION = 0.65;
+
+// 1v1: colore dei proiettili dell'avversario, disegnati direttamente qui (non sono simulati
+// localmente, arrivano gia' calcolati nello snapshot di rete - vedi applyRemoteSnapshot) - blu per
+// restare coerenti con la navicella avversaria (vedi drawRemotePlayer), contro il rosso "#ff4d4d"
+// dei propri proiettili (Projectile.ts, invariato).
+const REMOTE_PROJECTILE_COLOR = "#4da6ff";
+
+//Classe LocalGameEngine è la classe principale che gestisce l'intero gioco: l'arena condivisa
+//(invasori/asteroidi/proiettili nemici, simulata in modo deterministico e identico su entrambi i
+//client - vedi testbed/rng.ts) e le DUE navicelle nello stesso canvas: quella locale (pilotata da
+//tastiera, fisica reale) e quella remota (nessuna fisica locale, disegnata alla posizione ricevuta
+//nell'ultimo GameSnapshot dall'avversario - vedi applyRemoteSnapshot).
 export class LocalGameEngine {
-//definisce tutte le proprietà necessarie per gestire il gioco, come il canvas, il contesto, le entità di gioco, lo stato dei tasti,
-//il punteggio, lo stato del gioco e le funzioni di callback per comunicare con il publisher
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private onSnapshot: (snapshot: GameSnapshot) => void;
   private onScoreChange?: (score: number) => void;
+  private onLivesChange?: (lives: number) => void;
+  private onMatchEnd?: () => void;
+  private onTimeRemaining?: (msRemaining: number) => void;
 
-  private player: Player;
+  private localPlayer: Player;
+  private remotePlayer: Player;
+  // 1v1: true dopo il primo GameSnapshot ricevuto dall'avversario - prima di allora non c'e' nulla
+  // di reale da disegnare per la navicella remota (evita di mostrare un fantasma alla posizione di
+  // spawn di default prima che l'avversario abbia effettivamente pubblicato qualcosa).
+  private remoteHasData = false;
+  private remoteScore = 0;
+  private remoteLives = LIVES_PER_PLAYER;
+  // 1v1: proiettili dell'avversario, presi cosi' come sono nell'ultimo snapshot ricevuto (nessuna
+  // simulazione locale, nessuna interpolazione tra un tick di rete e l'altro - stesso limite gia'
+  // presente nella versione "a specchio" precedente).
+  private remoteProjectiles: GameSnapshot["projectiles"] = [];
+
+  // Proiettili, particelle: SOLO della propria navicella/dei propri eventi locali (id da nextId,
+  // vedi id.ts). Grid/invasori/asteroidi/proiettili nemici: campo condiviso deterministico (id da
+  // nextArenaId) - identico sui due client, MAI trasmesso in rete (vedi moq/publisher.ts).
   private projectiles: Projectile[] = [];
   private grids: Grid[] = [];
   private invaderProjectiles: InvaderProjectile[] = [];
@@ -62,7 +100,6 @@ export class LocalGameEngine {
     space: { pressed: false },
   };
 
-  private restartButton: RestartButton;
   private networkIntervalId: number | null = null;
   private frames = 0;
   // TESTBED: intervallo di spawn di griglie/asteroidi ora derivato da "gameConfig" (vedi
@@ -84,8 +121,27 @@ export class LocalGameEngine {
   private nextScriptedWaveIndex = 0;
   private nextScriptedAsteroidIndex = 0;
   private scriptedClock = 0;
-  private game: GameFlags = { over: false, active: true };
+
+  // 1v1: stato della PROPRIA navicella/della partita - vedi GameFlags in types.ts per la semantica
+  // dei tre flag (respawning/eliminated/active), ridefinita rispetto alla versione a singolo
+  // giocatore (non c'e' piu' un game over immediato al primo colpo).
+  private game: GameFlags = { respawning: false, eliminated: false, active: true };
   private score = 0;
+  private lives = LIVES_PER_PLAYER;
+  // 1v1: id delle entita' condivise eliminate da un proprio colpo dall'ultimo snapshot inviato -
+  // svuotato ad ogni emitSnapshot(), vedi moq/publisher.ts (GameSnapshot.killedIds).
+  private pendingKilledIds: string[] = [];
+  // 1v1: timestamp (performance.now()) fino al quale la propria navicella e' invulnerabile dopo un
+  // respawn - vedi respawnLocalPlayer()/RESPAWN_INVULNERABILITY_MS.
+  private invulnerableUntilMs = 0;
+  // 1v1: istante di inizio partita (performance.now()) - il tempo rimanente si calcola sempre come
+  // MATCH_DURATION_MS meno il tempo reale trascorso da qui, non contando i frame simulati: cosi'
+  // il timer scade allo stesso istante di orologio su entrambi i client anche se le due
+  // simulazioni dovessero leggermente disallinearsi in frame (vedi nota in fondo al file).
+  private matchStartAtMs = 0;
+  private matchEndNotified = false;
+  private lastShownRemainingSec = -1;
+
   // TESTBED: il tick di simulazione (animate(), sotto) e' richiamato da setInterval invece che da
   // requestAnimationFrame - IDENTICO al motivo per cui il tick di rete qui sotto (networkIntervalId)
   // usa gia' setInterval: rAF viene sospeso quando la tab non sta effettivamente compositando un
@@ -97,27 +153,27 @@ export class LocalGameEngine {
   private gameLoopIntervalId: number | null = null;
   // TESTBED: setInterval(fn, 16.67) NON garantisce che "fn" scatti esattamente ogni 16.67ms - il
   // browser reale ha jitter (qualche ms in piu' o in meno ad ogni chiamata, di piu' sotto carico).
-  // Se il numero di volte in cui animate() viene richiamato per una data finestra di tempo reale
-  // varia leggermente da un caricamento di pagina all'altro, e la logica di gioco conta i frame
-  // (this.frames) mentre gli input scriptati sono agganciati al tempo reale (ScenarioPlayer usa
-  // setTimeout con ms assoluti), lo stesso scenario puo' eseguire un numero leggermente diverso di
-  // frame di logica prima di ciascuna azione scriptata - e con finestre di collisione strette (es.
-  // distruggere un asteroide in arrivo entro un certo istante) questo puo' cambiare l'esito
-  // osservabile (punteggio) da un caricamento all'altro, anche restando lo stesso identico scenario.
   // Fix: "tick" (sotto) misura il tempo REALE trascorso con performance.now() e chiama animate() il
   // numero di volte necessario a recuperarlo (passo fisso, accumulatore) - cosi' il numero di frame
   // simulati per una data quantita' di tempo reale trascorso e' deterministico, indipendentemente da
-  // QUANTE VOLTE il timer del browser e' effettivamente scattato nel frattempo.
+  // QUANTE VOLTE il timer del browser e' effettivamente scattato nel frattempo. Nel 1v1 questo e'
+  // ANCHE cio' che tiene allineate le due simulazioni dell'arena condivisa tra i due client (stesso
+  // seed + stesso numero di frame dallo stesso istante di partenza, vedi main.ts) - vedi pero' la
+  // nota su MAX_CATCH_UP_FRAMES qui sotto per il limite noto di questo meccanismo.
   private static readonly FRAME_MS = 1000 / 60;
   // Limite di frame "di recupero" per singola chiamata di tick(), per evitare che una tab rimasta
   // sospesa a lungo (es. minimizzata per minuti) provochi un tentativo di eseguire migliaia di frame
-  // in un colpo solo e blocchi la pagina - un caso estremo, non il jitter normale che questo fix
-  // vuole risolvere.
+  // in un colpo solo e blocchi la pagina. NOTA 1v1: se questo limite scatta davvero (tab minimizzata
+  // a lungo durante una partita), i frame "persi" NON sono identici tra i due client, e le due copie
+  // dell'arena condivisa possono da quel momento divergere leggermente - vedi il meccanismo di
+  // riconciliazione in applyRemoteSnapshot()/reconcileKilledIds(), che maschera le derive minori ma
+  // non le risolve del tutto. Limite noto e accettato per un progetto di tesi con partite brevi.
   private static readonly MAX_CATCH_UP_FRAMES = 10;
   private frameAccumulatorMs = 0;
   private lastTickAtMs: number | null = null;
   private destroyed = false;
   private scoreEl: HTMLElement | null = null;
+  private livesEl: HTMLElement | null = null;
 
   constructor(options: LocalGameOptions) {
     this.canvas = options.canvas;
@@ -127,6 +183,9 @@ export class LocalGameEngine {
     this.ctx = ctx;
     this.onSnapshot = options.onSnapshot;
     this.onScoreChange = options.onScoreChange;
+    this.onLivesChange = options.onLivesChange;
+    this.onMatchEnd = options.onMatchEnd;
+    this.onTimeRemaining = options.onTimeRemaining;
 
     //  Va calcolato QUI, prima di qualunque altra chiamata a Math.random() nel costruttore (es.
     // createBackgroundStars piu' sotto), per mantenere ESATTAMENTE la stessa sequenza di chiamate
@@ -150,21 +209,19 @@ export class LocalGameEngine {
         )
       : randomIntervalIn(1200, 1799);
 
-    this.player = new Player(this.ctx, this.canvas);
-    this.restartButton = {
-      x: this.canvas.width / 2 - 160,
-      y: this.canvas.height / 2 + 100,
-      width: 320,
-      height: 70,
-    };
+    // 1v1: due navicelle nello stesso canvas, separate orizzontalmente cosi' non nascono
+    // sovrapposte (vedi LOCAL_SPAWN_X_FRACTION/REMOTE_SPAWN_X_FRACTION sopra).
+    this.localPlayer = new Player(this.ctx, this.canvas, { spawnXFraction: LOCAL_SPAWN_X_FRACTION });
+    this.remotePlayer = new Player(this.ctx, this.canvas, { spawnXFraction: REMOTE_SPAWN_X_FRACTION });
 
     this.scoreEl = document.querySelector("#localScoreEl");
+    this.livesEl = document.querySelector("#localLivesEl");
     this.updateScoreUI();
+    this.updateLivesUI();
     this.createBackgroundStars();
 
     this.handleKeyDown = this.handleKeyDown.bind(this);
     this.handleKeyUp = this.handleKeyUp.bind(this);
-    this.handleClick = this.handleClick.bind(this);
     this.animate = this.animate.bind(this);
     this.tick = this.tick.bind(this);
   }
@@ -172,8 +229,7 @@ export class LocalGameEngine {
   //  Richiamato da setInterval (vedi start()): misura il tempo reale trascorso dall'ultima chiamata
   // e simula esattamente il numero di frame corrispondente a passo fisso (FRAME_MS ciascuno), invece
   // di limitarsi a chiamare animate() una volta per chiamata - vedi il commento su frameAccumulatorMs
-  // per il motivo (jitter del timer del browser altrimenti si traduce in un numero di frame simulati
-  // diverso da un caricamento di pagina all'altro, a parita' di tempo reale trascorso).
+  // per il motivo.
   private tick(): void {
     if (this.destroyed) return;
 
@@ -198,20 +254,19 @@ export class LocalGameEngine {
     }
   }
 
-  //metodo per avviare il gioco, aggiungendo i listener per i tasti e il click, e avviando il ciclo di animazione
+  //metodo per avviare il gioco, aggiungendo i listener per i tasti e avviando il ciclo di animazione.
+  // 1v1: da chiamare SOLO dopo che Math.random e' gia' stato installato in modo deterministico
+  // (installDeterministicRandom) e all'istante concordato con l'avversario - vedi main.ts.
   start(): void {
     window.addEventListener("keydown", this.handleKeyDown);
     window.addEventListener("keyup", this.handleKeyUp);
-    this.canvas.addEventListener("click", this.handleClick);
     this.lastTickAtMs = performance.now();
+    this.matchStartAtMs = performance.now();
     this.gameLoopIntervalId = window.setInterval(this.tick, LocalGameEngine.FRAME_MS);
 
     //  Il publishing verso la rete gira su un timer indipendente da requestAnimationFrame:
-    // il rendering locale resta a 60fps (rAF), ma non ha senso (ed è dannoso per banda/backlog)
-    // pubblicare uno snapshot ad ogni frame renderizzato. Usare setInterval invece di rAF ha
-    // anche il vantaggio di continuare a girare (sia pure con un throttling del browser) quando
-    // la tab passa in background, dove invece rAF viene sostanzialmente sospeso: altrimenti il
-    // giocatore remoto vedrebbe il nostro avatar congelarsi non appena cambiamo tab.
+    // il rendering locale resta a 60fps (rAF/setInterval), ma non ha senso (ed è dannoso per
+    // banda/backlog) pubblicare uno snapshot ad ogni frame renderizzato.
     this.networkIntervalId = window.setInterval(() => {
       this.emitSnapshot();
     }, 1000 / NETWORK_TICK_HZ);
@@ -234,7 +289,6 @@ export class LocalGameEngine {
 
     window.removeEventListener("keydown", this.handleKeyDown);
     window.removeEventListener("keyup", this.handleKeyUp);
-    this.canvas.removeEventListener("click", this.handleClick);
   }
 
   private updateScoreUI(): void {
@@ -242,6 +296,13 @@ export class LocalGameEngine {
       this.scoreEl.textContent = String(this.score);
     }
     this.onScoreChange?.(this.score);
+  }
+
+  private updateLivesUI(): void {
+    if (this.livesEl) {
+      this.livesEl.textContent = String(Math.max(0, this.lives));
+    }
+    this.onLivesChange?.(this.lives);
   }
 
   private createBackgroundStars(): void {
@@ -354,143 +415,132 @@ export class LocalGameEngine {
     return distance < projectile.radius + asteroid.radius;
   }
 
-  private playerDeath(): void {
-    this.player.opacity = 0;
-    this.game.over = true;
+  // 1v1: true mentre la propria navicella non e' ne' pilotabile ne' collidibile - durante il breve
+  // intervallo di respawn, o in modo permanente per il resto della partita se le vite sono a 0, o
+  // durante l'invulnerabilita' post-respawn.
+  private isLocalPlayerVulnerable(): boolean {
+    return (
+      !this.game.respawning &&
+      !this.game.eliminated &&
+      performance.now() >= this.invulnerableUntilMs
+    );
+  }
+
+  // 1v1: sostituisce la vecchia playerDeath() (che terminava subito la partita). Ora un colpo
+  // subito costa UNA vita: se ne restano, la navicella sparisce per RESPAWN_DELAY_MS e poi
+  // ricompare con una breve invulnerabilita'; a vite esaurite resta fuori gioco per il resto della
+  // partita, ma l'arena condivisa e la navicella avversaria continuano a essere simulate/disegnate
+  // normalmente (vedi animate()) fino allo scadere del timer.
+  private loseLife(): void {
+    if (this.game.respawning || this.game.eliminated) return;
+
+    this.localPlayer.opacity = 0;
+    this.lives -= 1;
 
     this.createParticles({
-      object: this.player,
+      object: this.localPlayer,
       color: "#ffffff",
       fades: true,
       count: 30,
     });
 
-    //dopo 2 secondi, se il gioco non è stato distrutto nel frattempo, imposto lo stato del gioco su inattivo per fermare
-    //l'animazione e le logiche di gioco
+    if (this.lives <= 0) {
+      this.game.eliminated = true;
+      this.updateLivesUI();
+      return;
+    }
+
+    this.game.respawning = true;
+    this.updateLivesUI();
+
     window.setTimeout(() => {
-      if (!this.destroyed) {
-        this.game.active = false;
-      }
-    }, 2000);
+      if (this.destroyed || this.game.eliminated) return;
+      this.respawnLocalPlayer();
+    }, RESPAWN_DELAY_MS);
   }
 
-  //---AI--- metodo per disegnare la schermata di game over, mostrando il punteggio finale e un pulsante per riavviare il gioco
-  private drawGameOver(): void {
+  private respawnLocalPlayer(): void {
+    this.localPlayer.position = {
+      x: this.canvas.width * LOCAL_SPAWN_X_FRACTION - this.localPlayer.width / 2,
+      y: this.canvas.height - this.localPlayer.height - 30,
+    };
+    this.localPlayer.velocity = { x: 0, y: 0 };
+    this.localPlayer.rotation = 0;
+    this.localPlayer.opacity = 1;
+
+    this.game.respawning = false;
+    this.invulnerableUntilMs = performance.now() + RESPAWN_INVULNERABILITY_MS;
+  }
+
+  // 1v1: schermata di fine partita - mostra entrambi i punteggi e chi ha vinto (o il pareggio),
+  // al posto del vecchio "GAME OVER" a singolo giocatore con pulsante di restart (qui non c'e' un
+  // restart: una nuova partita richiede un nuovo handshake, vedi main.ts).
+  private drawMatchEnd(): void {
     this.ctx.save();
 
-    this.ctx.fillStyle = "rgba(0, 0, 0, 0.8)";
+    this.ctx.fillStyle = "rgba(0, 0, 0, 0.85)";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.ctx.textAlign = "center";
     this.ctx.textBaseline = "middle";
 
-    this.ctx.shadowColor = "#ff00ff";
-    this.ctx.shadowBlur = 25;
-    this.ctx.fillStyle = "#ffffff";
-    this.ctx.font = "bold 80px Impact, sans-serif";
-    this.ctx.fillText("GAME OVER", this.canvas.width / 2, this.canvas.height / 2 - 50);
+    let outcome = "PAREGGIO";
+    let outcomeColor = "#ffffff";
+    if (this.score > this.remoteScore) {
+      outcome = "HAI VINTO!";
+      outcomeColor = "#66ff99";
+    } else if (this.score < this.remoteScore) {
+      outcome = "HAI PERSO";
+      outcomeColor = "#ff6666";
+    }
 
-    this.ctx.shadowColor = "#00ffff";
-    this.ctx.shadowBlur = 18;
-    this.ctx.fillStyle = "#00ffff";
+    this.ctx.shadowColor = "#ff00ff";
+    this.ctx.shadowBlur = 22;
+    this.ctx.fillStyle = "#ffffff";
+    this.ctx.font = "bold 56px Impact, sans-serif";
+    this.ctx.fillText("TEMPO SCADUTO", this.canvas.width / 2, this.canvas.height / 2 - 90);
+
+    this.ctx.shadowColor = outcomeColor;
+    this.ctx.shadowBlur = 20;
+    this.ctx.fillStyle = outcomeColor;
+    this.ctx.font = "bold 40px Impact, sans-serif";
+    this.ctx.fillText(outcome, this.canvas.width / 2, this.canvas.height / 2 - 30);
+
+    this.ctx.shadowBlur = 0;
+    this.ctx.fillStyle = "#ff8080";
     this.ctx.font = '18px "Press Start 2P", monospace';
     this.ctx.fillText(
-      `SCORE: ${this.score}`,
+      `TU: ${this.score}`,
       this.canvas.width / 2,
-      this.canvas.height / 2 + 24,
+      this.canvas.height / 2 + 30,
     );
-
-    this.ctx.fillStyle = "#111111";
-    this.ctx.strokeStyle = "#ffffff";
-    this.ctx.lineWidth = 3;
-    this.ctx.fillRect(
-      this.restartButton.x,
-      this.restartButton.y,
-      this.restartButton.width,
-      this.restartButton.height,
-    );
-    this.ctx.strokeRect(
-      this.restartButton.x,
-      this.restartButton.y,
-      this.restartButton.width,
-      this.restartButton.height,
-    );
-
-    this.ctx.fillStyle = "#ffffff";
-    this.ctx.font = '20px "Press Start 2P", monospace';
+    this.ctx.fillStyle = "#80c2ff";
     this.ctx.fillText(
-      "RESTART",
-      this.restartButton.x + this.restartButton.width / 2,
-      this.restartButton.y + this.restartButton.height / 2 + 2,
+      `AVVERSARIO: ${this.remoteScore}`,
+      this.canvas.width / 2,
+      this.canvas.height / 2 + 62,
     );
 
     this.ctx.restore();
   }
 
-  //Metodo per riavviare il gioco, resettando tutte le entità, lo stato e il punteggio, e inviando un nuovo snapshot al publisher
-  private restartGame(): void {
-  this.player = new Player(this.ctx, this.canvas);
-  this.player.opacity = 1;
-
-  this.projectiles = [];
-  this.grids = [];
-  this.invaderProjectiles = [];
-  this.particles = [];
-  this.asteroids = [];
-
-  this.keys = {
-    a: { pressed: false },
-    d: { pressed: false },
-    w: { pressed: false },
-    s: { pressed: false },
-    space: { pressed: false },
-  };
-
-  this.createBackgroundStars();
-
-  this.score = 0;
-  this.updateScoreUI();
-
-  this.asteroidsSpawned = 0;
-  this.nextScriptedWaveIndex = 0;
-  this.nextScriptedAsteroidIndex = 0;
-  this.scriptedClock = 0;
-  this.frames = 0;
-  this.randomInterval = randomIntervalIn(
-    this.gameConfig.gridSpawnIntervalFramesMin,
-    this.gameConfig.gridSpawnIntervalFramesMax,
-  );
-  this.asteroidSpawnInterval = randomIntervalIn(
-    this.gameConfig.asteroidSpawnIntervalFramesMin,
-    this.gameConfig.asteroidSpawnIntervalFramesMax,
-  );
-
-  this.game = {
-    over: false,
-    active: true,
-  };
-
-  this.emitSnapshot();
-}
-
-//Metodo per emettere uno snapshot dello stato attuale del gioco, raccogliendo tutte le informazioni rilevanti sulle entità di gioco
-//e lo stato del gioco in un oggetto GameSnapshot e inviandolo al publisher tramite la funzione di callback onSnapshot.
-//Prendo tutto quello che esiste nel gioco e lo impacchetto in un oggetto che rappresenta lo stato completo del gioco in quel momento,
-//così da poterlo inviare al publisher e sincronizzare i client connessi
+  //Metodo per emettere uno snapshot dello stato attuale della PROPRIA navicella/dei propri
+  //proiettili, impacchettandolo in un GameSnapshot e inviandolo tramite la callback onSnapshot.
+  //Il campo condiviso (griglie/asteroidi/proiettili nemici) NON viene piu' incluso: ogni client lo
+  //simula in locale in modo identico (stesso seed) - vedi moq/publisher.ts.
   private emitSnapshot(): void {
     const snapshot: GameSnapshot = {
       tick: this.frames,
       player: {
-        x: this.player.position.x,
-        y: this.player.position.y,
-        width: this.player.width,
-        height: this.player.height,
-        vx: this.player.velocity.x,
-        vy: this.player.velocity.y,
-        rotation: this.player.rotation,
-        opacity: this.player.opacity,
+        x: this.localPlayer.position.x,
+        y: this.localPlayer.position.y,
+        width: this.localPlayer.width,
+        height: this.localPlayer.height,
+        vx: this.localPlayer.velocity.x,
+        vy: this.localPlayer.velocity.y,
+        rotation: this.localPlayer.rotation,
+        opacity: this.localPlayer.opacity,
       },
-      //per ciascun...
       projectiles: this.projectiles.map((p) => ({
         id: p.id,
         x: p.position.x,
@@ -499,64 +549,93 @@ export class LocalGameEngine {
         vy: p.velocity.y,
         radius: p.radius,
       })),
-      invaderProjectiles: this.invaderProjectiles.map((p) => ({
-        id: p.id,
-        x: p.position.x,
-        y: p.position.y,
-        vx: p.velocity.x,
-        vy: p.velocity.y,
-        width: p.width,
-        height: p.height,
-      })),
-      grids: this.grids.map((grid) => ({
-        id: grid.id,
-        x: grid.position.x,
-        y: grid.position.y,
-        vx: grid.velocity.x,
-        vy: grid.velocity.y,
-        width: grid.width,
-        invaders: grid.invaders.map((invader) => ({
-          id: invader.id,
-          x: invader.position.x,
-          y: invader.position.y,
-          width: invader.width,
-          height: invader.height,
-        })),
-      })),
-      particles: this.particles.map((particle) => ({
-        id: particle.id,
-        x: particle.position.x,
-        y: particle.position.y,
-        vx: particle.velocity.x,
-        vy: particle.velocity.y,
-        radius: particle.radius,
-        color: particle.color,
-        opacity: particle.opacity,
-        fades: particle.fades,
-      })),
-      asteroids: this.asteroids.map((asteroid) => ({
-        id: asteroid.id,
-        x: asteroid.position.x,
-        y: asteroid.position.y,
-        vx: asteroid.velocity.x,
-        vy: asteroid.velocity.y,
-        radius: asteroid.radius,
-        rotation: asteroid.rotation,
-        health: asteroid.health,
-        maxHealth: asteroid.maxHealth,
-        points: asteroid.points,
-      })),
-      //invio anche lo stato del gioco e il punteggio attuale
       score: this.score,
-      gameOver: this.game.over,
+      lives: this.lives,
+      gameOver: this.game.eliminated,
       gameActive: this.game.active,
     };
+
+    if (this.pendingKilledIds.length > 0) {
+      snapshot.killedIds = this.pendingKilledIds;
+      this.pendingKilledIds = [];
+    }
 
     this.onSnapshot(snapshot);
   }
 
+  //  1v1: applica l'ultimo GameSnapshot ricevuto dall'avversario - aggiorna la navicella remota
+  // (nessuna fisica locale, si disegna direttamente alla posizione ricevuta, vedi animate()), i
+  // suoi proiettili (idem), punteggio/vite per l'HUD, e riconcilia le entita' del campo condiviso
+  // che l'avversario ha eliminato (killedIds) cosi' spariscono anche dalla nostra copia locale.
+  applyRemoteSnapshot(snapshot: GameSnapshot): void {
+    this.remoteHasData = true;
+    this.remotePlayer.position.x = snapshot.player.x;
+    this.remotePlayer.position.y = snapshot.player.y;
+    this.remotePlayer.velocity.x = snapshot.player.vx;
+    this.remotePlayer.velocity.y = snapshot.player.vy;
+    this.remotePlayer.rotation = snapshot.player.rotation;
+    this.remotePlayer.opacity = snapshot.player.opacity;
+    if (snapshot.player.width) this.remotePlayer.width = snapshot.player.width;
+    if (snapshot.player.height) this.remotePlayer.height = snapshot.player.height;
+
+    this.remoteProjectiles = Array.isArray(snapshot.projectiles) ? snapshot.projectiles : [];
+    this.remoteScore = snapshot.score ?? 0;
+    this.remoteLives = snapshot.lives ?? 0;
+
+    if (snapshot.killedIds && snapshot.killedIds.length > 0) {
+      this.reconcileKilledIds(snapshot.killedIds);
+    }
+  }
+
+  //  1v1: rimuove dalla PROPRIA copia locale del campo condiviso le entita' che l'avversario ha
+  // segnalato come eliminate da un SUO colpo (GameSnapshot.killedIds) - non assegna punteggio (gia'
+  // contato sul suo lato), serve solo a far convergere le due viste della stessa arena.
+  private reconcileKilledIds(ids: string[]): void {
+    const idSet = new Set(ids);
+
+    for (let gridIndex = this.grids.length - 1; gridIndex >= 0; gridIndex--) {
+      const grid = this.grids[gridIndex];
+      let changed = false;
+
+      for (let i = grid.invaders.length - 1; i >= 0; i--) {
+        const invader = grid.invaders[i];
+        if (idSet.has(invader.id)) {
+          this.createParticles({
+            object: invader,
+            color: "#baa0de",
+            fades: true,
+            count: 15,
+          });
+          grid.invaders.splice(i, 1);
+          changed = true;
+        }
+      }
+
+      if (!changed) continue;
+
+      if (grid.invaders.length > 0) {
+        const firstInvader = grid.invaders[0];
+        const lastInvader = grid.invaders[grid.invaders.length - 1];
+        grid.width = lastInvader.position.x - firstInvader.position.x + lastInvader.width;
+        grid.position.x = firstInvader.position.x;
+      } else {
+        this.grids.splice(gridIndex, 1);
+      }
+    }
+
+    for (let i = this.asteroids.length - 1; i >= 0; i--) {
+      const asteroid = this.asteroids[i];
+      if (idSet.has(asteroid.id)) {
+        this.createAsteroidExplosion(asteroid);
+        this.asteroids.splice(i, 1);
+      }
+    }
+  }
+
   private handleKeyDown(event: KeyboardEvent): void {
-    if (this.game.over) return;
+    // 1v1: navicella non pilotabile mentre e' in respawn o fuori gioco (vite esaurite) - vedi
+    // loseLife()/GameFlags in types.ts.
+    if (this.game.respawning || this.game.eliminated) return;
 
     switch (event.key) {
       case "a":
@@ -581,8 +660,8 @@ export class LocalGameEngine {
           this.projectiles.push(
             new Projectile(this.ctx, {
               position: {
-                x: this.player.position.x + this.player.width / 2,
-                y: this.player.position.y - 5,
+                x: this.localPlayer.position.x + this.localPlayer.width / 2,
+                y: this.localPlayer.position.y - 5,
               },
               velocity: {
                 x: 0,
@@ -618,46 +697,69 @@ export class LocalGameEngine {
         break;
     }
   }
-//per il restartButton
-  private handleClick(event: MouseEvent): void {
-  if (this.game.active || !this.game.over) return;
 
-  const rect = this.canvas.getBoundingClientRect();
-
-  const scaleX = this.canvas.width / rect.width;
-  const scaleY = this.canvas.height / rect.height;
-
-  const mouse = {
-    x: (event.clientX - rect.left) * scaleX,
-    y: (event.clientY - rect.top) * scaleY,
-  };
-
-  if (
-    mouse.x >= this.restartButton.x &&
-    mouse.x <= this.restartButton.x + this.restartButton.width &&
-    mouse.y >= this.restartButton.y &&
-    mouse.y <= this.restartButton.y + this.restartButton.height
-  ) {
-    this.restartGame();
+  private drawRemotePlayer(): void {
+    if (!this.remoteHasData || this.remotePlayer.opacity <= 0) return;
+    // Nessuna fisica: la navicella remota si disegna esattamente dove l'ultimo snapshot dice che
+    // si trova (vedi applyRemoteSnapshot) - stesso comportamento/limite gia' presente nella
+    // versione "a specchio" precedente (drawRemotePlayer in ui/game-room.ts).
+    //
+    // 1v1: stesso sprite rosso (Player.ts, invariato) di quello locale, tinto di blu con un filtro
+    // canvas invece di caricare un secondo asset immagine da mantenere in sync tra i due progetti -
+    // ctx.filter si applica solo dentro questo save()/restore(), Player.draw() fa il suo
+    // save()/restore() interno senza toccare "filter", quindi non ha effetto su nient'altro.
+    this.ctx.save();
+    this.ctx.filter = "hue-rotate(200deg) saturate(1.7) brightness(1.05)";
+    this.remotePlayer.draw();
+    this.ctx.restore();
   }
-}
+
+  private drawRemoteProjectiles(): void {
+    for (const projectile of this.remoteProjectiles) {
+      this.ctx.beginPath();
+      this.ctx.arc(
+        projectile?.x ?? 0,
+        projectile?.y ?? 0,
+        projectile?.radius ?? 4,
+        0,
+        Math.PI * 2,
+      );
+      this.ctx.fillStyle = REMOTE_PROJECTILE_COLOR;
+      this.ctx.fill();
+      this.ctx.closePath();
+    }
+  }
 
   private animate(): void {
     if (this.destroyed) return;
-    // TESTBED: richiamato da setInterval (vedi gameLoopIntervalId in start()), non piu' da
-    // requestAnimationFrame - nessuna auto-schedulazione da fare qui, il timer si ripete da solo.
 
     //fill dello sfondo di nero ad ogni frame per cancellare il disegno precedente e ridisegnare tutto da capo, così da creare
     //l'illusione del movimento
     this.ctx.fillStyle = "black";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
-    if (!this.game.active) {
-      this.drawGameOver();
-      return;
+    // 1v1: il timer di partita si basa sul tempo reale trascorso, non sui frame simulati (vedi
+    // commento su matchStartAtMs) - cosi' scade allo stesso istante su entrambi i client anche in
+    // caso di lieve disallineamento dei frame.
+    const remainingMs = Math.max(0, MATCH_DURATION_MS - (performance.now() - this.matchStartAtMs));
+    const remainingSec = Math.ceil(remainingMs / 1000);
+    if (remainingSec !== this.lastShownRemainingSec) {
+      this.lastShownRemainingSec = remainingSec;
+      this.onTimeRemaining?.(remainingMs);
     }
 
-    this.player.update();
+    if (remainingMs <= 0 && this.game.active) {
+      this.game.active = false;
+    }
+
+    if (!this.game.active) {
+      this.drawMatchEnd();
+      if (!this.matchEndNotified) {
+        this.matchEndNotified = true;
+        this.onMatchEnd?.();
+      }
+      return;
+    }
 
     //ciclo inverso per iterare sulle particelle, aggiornare il loro stato e rimuovere quelle che sono completamente trasparenti
     // o che sono uscite dallo schermo (per le particelle che non svaniscono)
@@ -679,8 +781,10 @@ export class LocalGameEngine {
       }
     }
 
+    const localVulnerable = this.isLocalPlayerVulnerable();
+
     //ciclo inverso per iterare sugli asteroidi, aggiornare il loro stato, gestire la logica di rimozione quando escono dallo schermo
-    //  o quando colpiscono il giocatore,
+    //  o quando colpiscono la propria navicella, o quando vengono colpiti dai propri proiettili
     for (let asteroidIndex = this.asteroids.length - 1; asteroidIndex >= 0; asteroidIndex--) {
       const asteroid = this.asteroids[asteroidIndex];
       asteroid.update();
@@ -695,19 +799,15 @@ export class LocalGameEngine {
         continue;
       }
 
-      if (
-        !this.game.over &&
-        this.player.opacity > 0 &&
-        this.asteroidHitsPlayer(asteroid, this.player)
-      ) {
+      if (localVulnerable && this.asteroidHitsPlayer(asteroid, this.localPlayer)) {
         this.asteroids.splice(asteroidIndex, 1);
-        this.playerDeath();
+        this.loseLife();
         continue;
       }
 
-      //ciclo inverso per iterare sui proiettili del giocatore e verificare se colpiscono l'asteroide, gestendo la logica di danno,
+      //ciclo inverso per iterare sui propri proiettili e verificare se colpiscono l'asteroide, gestendo la logica di danno,
       // rimozione del proiettile, creazione di particelle di impatto e, se la salute dell'asteroide arriva a 0,
-      // creazione dell'esplosione, aumento del punteggio.
+      // creazione dell'esplosione, aumento del punteggio e segnalazione dell'eliminazione all'avversario.
       for (let projectileIndex = this.projectiles.length - 1; projectileIndex >= 0; projectileIndex--) {
         const projectile = this.projectiles[projectileIndex];
 
@@ -720,6 +820,7 @@ export class LocalGameEngine {
           if (asteroid.health <= 0) {
             this.createAsteroidExplosion(asteroid);
             this.score += asteroid.maxHealth * 70;
+            this.pendingKilledIds.push(asteroid.id);
             this.updateScoreUI();
             this.asteroids.splice(asteroidIndex, 1);
           }
@@ -741,17 +842,17 @@ export class LocalGameEngine {
       invaderProjectile.update();
 
       if (
-        !this.game.over &&
-        invaderProjectile.position.y + invaderProjectile.height >= this.player.position.y &&
-        invaderProjectile.position.x + invaderProjectile.width >= this.player.position.x &&
-        invaderProjectile.position.x <= this.player.position.x + this.player.width
+        localVulnerable &&
+        invaderProjectile.position.y + invaderProjectile.height >= this.localPlayer.position.y &&
+        invaderProjectile.position.x + invaderProjectile.width >= this.localPlayer.position.x &&
+        invaderProjectile.position.x <= this.localPlayer.position.x + this.localPlayer.width
       ) {
         this.invaderProjectiles.splice(i, 1);
-        this.playerDeath();
+        this.loseLife();
       }
     }
 
-    //ciclo inverso per iterare sui proiettili del giocatore, aggiornare il loro stato e rimuovere quelli che sono usciti dallo schermo
+    //ciclo inverso per iterare sui propri proiettili, aggiornare il loro stato e rimuovere quelli che sono usciti dallo schermo
     for (let i = this.projectiles.length - 1; i >= 0; i--) {
       const projectile = this.projectiles[i];
 
@@ -769,32 +870,29 @@ export class LocalGameEngine {
 
       //ogni 60 frame, se ci sono invasori nella griglia, ne scelgo uno a caso per farlo sparare un proiettile verso il basso
       // TESTBED: "this.frames > 0 &&" evita che il PRIMO sparo (e, per lo stesso motivo, il primo
-      // spawn di griglia/asteroide qui sotto) scatti sempre al frame zero - 0 % N e' 0 per
-      // qualunque N, quindi senza questa guardia ogni partita comincerebbe SEMPRE con una minaccia
-      // istantanea, prima ancora che un input scriptato (o umano) possa reagire. Identico in
-      // entrambi i testbed.
+      // spawn di griglia/asteroide qui sotto) scatti sempre al frame zero.
       if (this.frames > 0 && this.frames % 60 === 0 && grid.invaders.length > 0 && grid.canShoot) {
         grid.invaders[
           Math.floor(Math.random() * grid.invaders.length) //scelgo un invasore a caso dalla griglia
         ]?.shoot(this.invaderProjectiles);
       }
 
-      //gestione collisione tra invasore e giocatore che porta alla morte del giocatore
+      //gestione collisione tra invasore e propria navicella
       for (let i = grid.invaders.length - 1; i >= 0; i--) {
         const invader = grid.invaders[i];
 
         invader.update({ velocity: grid.velocity });
 
         if (
-          !this.game.over &&
-          this.player.opacity > 0 &&
-          this.player.position.x < invader.position.x + invader.width &&
-          this.player.position.x + this.player.width > invader.position.x &&
-          this.player.position.y < invader.position.y + invader.height &&
-          this.player.position.y + this.player.height > invader.position.y
+          localVulnerable &&
+          this.localPlayer.position.x < invader.position.x + invader.width &&
+          this.localPlayer.position.x + this.localPlayer.width > invader.position.x &&
+          this.localPlayer.position.y < invader.position.y + invader.height &&
+          this.localPlayer.position.y + this.localPlayer.height > invader.position.y
         ) {
           grid.invaders.splice(i, 1);
-          this.playerDeath();
+          this.pendingKilledIds.push(invader.id);
+          this.loseLife();
 
           this.createParticles({
             object: invader,
@@ -806,7 +904,8 @@ export class LocalGameEngine {
           continue;
         }
 
-        //gestione collisione tra invasore e proiettile del giocatore, con rimozione di entrambi, creazione di particelle di impatto
+        //gestione collisione tra invasore e proprio proiettile, con rimozione di entrambi, creazione di particelle di impatto,
+        //assegnazione del punteggio e segnalazione dell'eliminazione all'avversario (killedIds)
         for (let j = this.projectiles.length - 1; j >= 0; j--) {
           const projectile = this.projectiles[j];
 
@@ -824,6 +923,7 @@ export class LocalGameEngine {
 
               if (invaderFound && projectileFound) {
                 this.score += 100;
+                this.pendingKilledIds.push(invader.id);
                 this.updateScoreUI();
 
                 this.createParticles({
@@ -853,43 +953,41 @@ export class LocalGameEngine {
       }
     }
 
+    // 1v1: la propria navicella si muove/disegna SOLO se pilotabile in questo momento (non in
+    // respawn, non fuori gioco) - durante il resto del tempo resta semplicemente assente dal
+    // frame (il canvas e' comunque ripulito ad ogni giro, vedi cima del metodo).
+    if (!this.game.respawning && !this.game.eliminated) {
+      this.localPlayer.velocity.x = 0;
+      this.localPlayer.velocity.y = 0;
 
-    this.player.velocity.x = 0;
-    this.player.velocity.y = 0;
+      if (this.keys.a.pressed) {
+        this.localPlayer.velocity.x = -7;
+        this.localPlayer.rotation = -0.15;
+      } else if (this.keys.d.pressed) {
+        this.localPlayer.velocity.x = 7;
+        this.localPlayer.rotation = 0.15;
+      } else {
+        this.localPlayer.rotation = 0;
+      }
 
-    if (this.keys.a.pressed) {
-      this.player.velocity.x = -7;
-      this.player.rotation = -0.15;
-    } else if (this.keys.d.pressed) {
-      this.player.velocity.x = 7;
-      this.player.rotation = 0.15;
-    } else {
-      this.player.rotation = 0;
+      if (this.keys.w.pressed) {
+        this.localPlayer.velocity.y = -3;
+      }
+
+      if (this.keys.s.pressed) {
+        this.localPlayer.velocity.y = 3;
+      }
+
+      this.localPlayer.update();
     }
 
-    if (this.keys.w.pressed) {
-      this.player.velocity.y = -3;
-    }
-
-    if (this.keys.s.pressed) {
-      this.player.velocity.y = 3;
-    }
+    // Navicella e proiettili dell'avversario: nessuna simulazione, si disegnano cosi' come
+    // arrivati nell'ultimo GameSnapshot (vedi applyRemoteSnapshot).
+    this.drawRemotePlayer();
+    this.drawRemoteProjectiles();
 
     //ogni tot frame, in modo casuale, creo una nuova griglia di invasori e la aggiungo all'array delle griglie, così da far apparire
     // nuovi invasori
-    // TESTBED: "this.frames > 0 &&" - vedi nota sopra sullo sparo degli invasori. Ha anche
-    // l'effetto collaterale (voluto) di NON far scattare piu' nella stessa iterazione anche il
-    // controllo dell'asteroide qui sotto quando una griglia azzera this.frames: prima, ogni
-    // respawn di griglia generava SEMPRE anche un asteroide fresco mirato alla posizione corrente
-    // del giocatore nello stesso istante, un'imboscata ripetuta ad ogni nuova ondata.
-    // TESTBED: quando lo scenario fornisce "gameConfig.scriptedWaves" (non vuoto), lo spawner
-    // casuale di griglie qui sotto e' del tutto bypassato: le ondate spawnano una alla volta, nello
-    // stesso ordine dell'array, ciascuna solo dopo che (a) la precedente e' stata completamente
-    // distrutta (this.grids.length === 0) e (b) sono trascorsi almeno "minStartFrame" frame
-    // dall'inizio della partita (this.scriptedClock, mai azzerato - vedi il campo sopra) - permette
-    // di scriptare sia fasi "aspetta che il campo sia libero" sia "non prima di X secondi
-    // dall'inizio", anche insieme. Quando assente/vuoto il comportamento (spawner casuale a
-    // intervallo, invariato) resta esattamente quello di sempre.
     if (this.gameConfig.scriptedWaves && this.gameConfig.scriptedWaves.length > 0) {
       const nextWave = this.gameConfig.scriptedWaves[this.nextScriptedWaveIndex];
       if (nextWave && this.grids.length === 0 && this.scriptedClock >= nextWave.minStartFrame) {
@@ -905,8 +1003,8 @@ export class LocalGameEngine {
           this.asteroids.push(
             new Asteroid(this.ctx, this.canvas, {
               target: {
-                x: this.player.position.x + this.player.width / 2,
-                y: this.player.position.y + this.player.height / 2,
+                x: this.localPlayer.position.x + this.localPlayer.width / 2,
+                y: this.localPlayer.position.y + this.localPlayer.height / 2,
               },
             }),
           );
@@ -922,17 +1020,15 @@ export class LocalGameEngine {
       this.frames = 0;
     }
 
-    // TESTBED: asteroidi scriptati, indipendenti dall'eventuale spawner casuale sopra (vedi
-    // gameConfig.scriptedAsteroids in types.ts) - stessa logica di spawn/target dell'asteroide
-    // casuale, ma all'istante esatto invece che a intervallo casuale. Nessun impatto se assente.
+    // TESTBED: asteroidi scriptati, indipendenti dall'eventuale spawner casuale sopra.
     if (this.gameConfig.scriptedAsteroids) {
       const nextAsteroidEvent = this.gameConfig.scriptedAsteroids[this.nextScriptedAsteroidIndex];
       if (nextAsteroidEvent && this.scriptedClock >= nextAsteroidEvent.minStartFrame) {
         this.asteroids.push(
           new Asteroid(this.ctx, this.canvas, {
             target: {
-              x: this.player.position.x + this.player.width / 2,
-              y: this.player.position.y + this.player.height / 2,
+              x: this.localPlayer.position.x + this.localPlayer.width / 2,
+              y: this.localPlayer.position.y + this.localPlayer.height / 2,
             },
           }),
         );
@@ -941,22 +1037,19 @@ export class LocalGameEngine {
     }
     this.scriptedClock += 1;
 
-    //ogni tot frame, in modo casuale, creo un nuovo asteroide che si muove verso il giocatore
-    // TESTBED: gli asteroidi possono essere disattivati del tutto per uno scenario (vedi
-    // gameConfig.asteroidsEnabled, usato ad es. dallo scenario "stress" per ridurre una fonte di
-    // variabilita' e concentrare il carico su nemici/movimento/spari - vedi TESTBED.md).
+    //ogni tot frame, in modo casuale, creo un nuovo asteroide che si muove verso la propria navicella
     if (
       this.gameConfig.asteroidsEnabled &&
       this.frames > 0 &&
-      this.scriptedClock % this.asteroidSpawnInterval === 0 &&
+      this.frames % this.asteroidSpawnInterval === 0 &&
       (this.gameConfig.asteroidMaxCount === undefined ||
         this.asteroidsSpawned < this.gameConfig.asteroidMaxCount)
     ) {
       this.asteroids.push(
         new Asteroid(this.ctx, this.canvas, {
           target: {
-            x: this.player.position.x + this.player.width / 2,
-            y: this.player.position.y + this.player.height / 2,
+            x: this.localPlayer.position.x + this.localPlayer.width / 2,
+            y: this.localPlayer.position.y + this.localPlayer.height / 2,
           },
         }),
       );

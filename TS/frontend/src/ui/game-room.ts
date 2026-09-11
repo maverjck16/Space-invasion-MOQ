@@ -1,46 +1,32 @@
 import type { GameSnapshot } from "../moq/publisher";
-import { createLocalGame } from "../game/localGame";
+import { createLocalGame, type LocalGameHandle } from "../game/localGame";
 import type { GameDifficultyConfig } from "../game/localGame/types";
-import spaceshipImgSrc from "../image/spaceship.png";
-import invaderImgSrc from "../image/invader.png";
 import { exportJSON, exportCSV } from "../metrics/metrics";
 
-const remotePlayerImage = new Image();
-remotePlayerImage.src = spaceshipImgSrc;
-
-const remoteInvaderImage = new Image();
-remoteInvaderImage.src = invaderImgSrc;
-
+// 1v1: un'unica arena condivisa (un solo canvas) al posto dei due pannelli "IL TUO GIOCO" /
+// "GIOCO AVVERSARIO" della versione a specchio: la navicella locale (rossa) e quella
+// dell'avversario (blu) vengono ora disegnate insieme dallo stesso LocalGameEngine - vedi
+// game/localGame/LocalGameEngine.ts. Questo file resta responsabile solo di: costruire il DOM
+// attorno al canvas, il badge/HUD (punteggio, vite, timer) e inoltrare gli aggiornamenti di rete
+// dell'avversario al motore.
 type GameRoomHandlers = {
-  onSnapshot: (snapshot: GameSnapshot) => void;
   onLeave: () => void;
-  //  TESTBED: configurazione di difficolta'/carico opzionale per lo scenario in corso (vedi
-  // src/testbed/scenario.types.ts). Se assente, il gioco locale usa gli stessi valori di sempre.
-  gameConfig?: GameDifficultyConfig;
-};
-
-type RemoteGameState = {
-  username: string;
-  snapshot: GameSnapshot | null;
 };
 
 let rootEl: HTMLDivElement | null = null;
-let localCanvas: HTMLCanvasElement | null = null;
-let remoteCanvas: HTMLCanvasElement | null = null;
-let remoteCtx: CanvasRenderingContext2D | null = null;
+let arenaCanvas: HTMLCanvasElement | null = null;
+let arenaCtx: CanvasRenderingContext2D | null = null;
 
 let statusEl: HTMLDivElement | null = null;
 let remoteNameEl: HTMLSpanElement | null = null;
 let roomEl: HTMLSpanElement | null = null;
 let localNameEl: HTMLSpanElement | null = null;
-
-let currentRemote: RemoteGameState = {
-  username: "",
-  snapshot: null,
-};
+let remoteScoreEl: HTMLElement | null = null;
+let remoteLivesEl: HTMLElement | null = null;
+let timerEl: HTMLElement | null = null;
 
 let currentUsers: string[] = [];
-let destroyLocalGame: (() => void) | null = null;
+let localGame: LocalGameHandle | null = null;
 
 export function renderGameRoom(
   username: string,
@@ -60,7 +46,7 @@ export function renderGameRoom(
       <div class="topbar__left">
         <div class="badge">ROOM: <span id="roomLabel"></span></div>
         <div class="badge">TU: <span id="localPlayerLabel"></span></div>
-        <div class="badge">ALTRO PLAYER: <span id="remotePlayerLabel">---</span></div>
+        <div class="badge">AVVERSARIO: <span id="remotePlayerLabel">---</span></div>
       </div>
 
       <button id="metricsBtn" class="leave-btn">ESPORTA METRICHE</button>
@@ -71,24 +57,19 @@ export function renderGameRoom(
       In attesa di un altro player...
     </div>
 
-    <div class="split-layout">
-      <section class="screen-panel">
-        <div class="screen-title">IL TUO GIOCO</div>
-        <div class="canvas-shell">
-          <div class="score-chip">Score: <span id="localScoreEl">0</span></div>
-          <canvas id="localCanvas" width="1024" height="576"></canvas>
+    <div class="arena-layout">
+      <div class="canvas-shell">
+        <div class="score-chip score-chip--local">
+          <span class="chip-label">TU</span>
+          Score: <span id="localScoreEl">0</span> &middot; Vite: <span id="localLivesEl">3</span>
         </div>
-      </section>
-
-      <div class="divider"></div>
-
-      <section class="screen-panel">
-        <div class="screen-title">GIOCO AVVERSARIO</div>
-        <div class="canvas-shell">
-          <div class="score-chip score-chip--remote">Score: <span id="remoteScoreEl">0</span></div>
-          <canvas id="remoteCanvas" width="1024" height="576"></canvas>
+        <div class="score-chip score-chip--remote">
+          <span class="chip-label">AVVERSARIO</span>
+          Score: <span id="remoteScoreEl">0</span> &middot; Vite: <span id="remoteLivesEl">3</span>
         </div>
-      </section>
+        <div class="timer-chip" id="matchTimerEl">--:--</div>
+        <canvas id="arenaCanvas" width="1024" height="576"></canvas>
+      </div>
     </div>
   `;
 
@@ -98,10 +79,12 @@ export function renderGameRoom(
   localNameEl = document.querySelector("#localPlayerLabel");
   remoteNameEl = document.querySelector("#remotePlayerLabel");
   statusEl = document.querySelector("#statusBanner");
+  remoteScoreEl = document.querySelector("#remoteScoreEl");
+  remoteLivesEl = document.querySelector("#remoteLivesEl");
+  timerEl = document.querySelector("#matchTimerEl");
 
-  localCanvas = document.querySelector("#localCanvas");
-  remoteCanvas = document.querySelector("#remoteCanvas");
-  remoteCtx = remoteCanvas?.getContext("2d") ?? null;
+  arenaCanvas = document.querySelector("#arenaCanvas");
+  arenaCtx = arenaCanvas?.getContext("2d") ?? null;
 
   if (roomEl) roomEl.textContent = room;
   if (localNameEl) localNameEl.textContent = username;
@@ -118,15 +101,13 @@ export function renderGameRoom(
     exportCSV();
   });
 
-  drawRemoteWaitingScreen();
-  destroyLocalGame = mountLocalGame(localCanvas, handlers.onSnapshot, handlers.gameConfig);
+  drawWaitingScreen();
 }
 
 export function updatePresence(users: string[]): void {
   currentUsers = users;
 
   const remoteUsername = users[0] ?? "";
-  currentRemote.username = remoteUsername;
 
   if (remoteNameEl) {
     remoteNameEl.textContent = remoteUsername || "---";
@@ -137,296 +118,103 @@ export function updatePresence(users: string[]): void {
   if (users.length === 0) {
     statusEl.textContent = "In attesa di un altro player...";
     statusEl.style.display = "flex";
-    drawRemoteWaitingScreen();
     return;
   }
 
-  statusEl.textContent = `Connesso con ${remoteUsername}. Partita attiva.`;
+  // 1v1: la partita vera e propria parte solo dopo l'handshake seed/istante condiviso (vedi
+  // main.ts) - questo banner segnala solo la presenza dell'avversario nella room, non l'inizio
+  // effettivo del motore (che avviene poco dopo, tramite startLocalMatch()).
+  statusEl.textContent = `Connesso con ${remoteUsername}. Avvio partita...`;
   statusEl.style.display = "flex";
 
   window.setTimeout(() => {
     if (statusEl && currentUsers.length > 0) {
       statusEl.style.display = "none";
     }
-  }, 1800);
+  }, 2200);
+}
+
+// 1v1: monta il motore di gioco locale sul canvas condiviso - va chiamato SOLO dopo l'handshake
+// di inizio partita (seed deterministico installato, istante di partenza raggiunto), vedi
+// main.ts. Prima di questo momento l'arena mostra solo lo schermo di attesa.
+export function startLocalMatch(
+  onSnapshot: (snapshot: GameSnapshot) => void,
+  gameConfig?: GameDifficultyConfig,
+): void {
+  if (!arenaCanvas) return;
+
+  localGame?.destroy();
+  localGame = createLocalGame(arenaCanvas, onSnapshot, undefined, gameConfig, {
+    onLivesChange: (lives) => {
+      const el = document.querySelector("#localLivesEl");
+      if (el) el.textContent = String(Math.max(0, lives));
+    },
+    onTimeRemaining: (msRemaining) => {
+      if (timerEl) timerEl.textContent = formatTime(msRemaining);
+    },
+    onMatchEnd: () => {
+      if (statusEl) {
+        statusEl.textContent = "Partita terminata.";
+        statusEl.style.display = "flex";
+      }
+    },
+  });
+  // onScoreChange e' gestito internamente dal motore su #localScoreEl (vedi
+  // LocalGameEngine.updateScoreUI) - qui non serve passarlo di nuovo.
 }
 
 export function updateRemoteGame(
   remoteUsername: string,
   snapshot: GameSnapshot,
 ): void {
-  currentRemote = {
-    username: remoteUsername,
-    snapshot,
-  };
-
   if (remoteNameEl) {
     remoteNameEl.textContent = remoteUsername;
   }
 
-  const remoteScoreEl = document.querySelector("#remoteScoreEl");
   if (remoteScoreEl) {
     remoteScoreEl.textContent = String(snapshot.score ?? 0);
   }
+  if (remoteLivesEl) {
+    remoteLivesEl.textContent = String(Math.max(0, snapshot.lives ?? 0));
+  }
 
-  drawRemoteSnapshot(snapshot);
+  // Il motore gestisce il rendering della navicella/proiettili dell'avversario e la
+  // riconciliazione delle eliminazioni condivise (killedIds) - vedi applyRemoteSnapshot() in
+  // LocalGameEngine.ts.
+  localGame?.applyRemoteSnapshot(snapshot);
 }
 
-function drawRemoteWaitingScreen(): void {
-  if (!remoteCtx || !remoteCanvas) return;
+function formatTime(msRemaining: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(msRemaining / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
 
-  remoteCtx.fillStyle = "black";
-  remoteCtx.fillRect(0, 0, remoteCanvas.width, remoteCanvas.height);
+function drawWaitingScreen(): void {
+  if (!arenaCtx || !arenaCanvas) return;
 
-  drawStars(remoteCtx, remoteCanvas.width, remoteCanvas.height, 80);
+  arenaCtx.fillStyle = "black";
+  arenaCtx.fillRect(0, 0, arenaCanvas.width, arenaCanvas.height);
 
-  remoteCtx.fillStyle = "#00ffff";
-  remoteCtx.font = '20px "Press Start 2P", monospace';
-  remoteCtx.textAlign = "center";
-  remoteCtx.fillText(
-    "WAITING FOR PLAYER 2",
-    remoteCanvas.width / 2,
-    remoteCanvas.height / 2 - 10,
+  drawStars(arenaCtx, arenaCanvas.width, arenaCanvas.height, 120);
+
+  arenaCtx.fillStyle = "#00ffff";
+  arenaCtx.font = '20px "Press Start 2P", monospace';
+  arenaCtx.textAlign = "center";
+  arenaCtx.fillText(
+    "IN ATTESA DI UN AVVERSARIO",
+    arenaCanvas.width / 2,
+    arenaCanvas.height / 2 - 10,
   );
 
-  remoteCtx.fillStyle = "#ffffff";
-  remoteCtx.font = '12px "Press Start 2P", monospace';
-  remoteCtx.fillText(
-    "la schermata remota apparira qui",
-    remoteCanvas.width / 2,
-    remoteCanvas.height / 2 + 30,
+  arenaCtx.fillStyle = "#ffffff";
+  arenaCtx.font = '12px "Press Start 2P", monospace';
+  arenaCtx.fillText(
+    "la partita 1v1 iniziera' appena si connette",
+    arenaCanvas.width / 2,
+    arenaCanvas.height / 2 + 30,
   );
-}
-
-function drawRemoteSnapshot(snapshot: GameSnapshot): void {
-  if (!remoteCtx || !remoteCanvas) return;
-
-  remoteCtx.fillStyle = "black";
-  remoteCtx.fillRect(0, 0, remoteCanvas.width, remoteCanvas.height);
-
-  drawRemoteParticles(snapshot.particles);
-  drawRemotePlayer(snapshot.player);
-  drawRemoteProjectiles(snapshot.projectiles);
-  drawRemoteInvaderProjectiles(snapshot.invaderProjectiles);
-  drawRemoteGrids(snapshot.grids);
-  drawRemoteAsteroids(snapshot.asteroids);
-
-  if (snapshot.gameOver || !snapshot.gameActive) {
-    drawRemoteGameOver(snapshot.score);
-  }
-}
-
-function drawRemotePlayer(player: GameSnapshot["player"]): void {
-  if (!remoteCtx) return;
-
-  const width = player?.width ?? 60;
-  const height = player?.height ?? 60;
-  const x = player?.x ?? 0;
-  const y = player?.y ?? 0;
-  const rotation = player?.rotation ?? 0;
-  const opacity = player?.opacity ?? 1;
-
-  if (!remotePlayerImage.complete) return;
-
-  remoteCtx.save();
-  remoteCtx.globalAlpha = opacity;
-  remoteCtx.translate(x + width / 2, y + height / 2);
-  remoteCtx.rotate(rotation);
-  remoteCtx.translate(-(x + width / 2), -(y + height / 2));
-
-  remoteCtx.drawImage(remotePlayerImage, x, y, width, height);
-  remoteCtx.restore();
-}
-
-function drawRemoteProjectiles(projectiles: GameSnapshot["projectiles"]): void {
-  if (!remoteCtx || !Array.isArray(projectiles)) return;
-
-  for (const projectile of projectiles) {
-    remoteCtx.beginPath();
-    remoteCtx.arc(
-      projectile?.x ?? 0,
-      projectile?.y ?? 0,
-      projectile?.radius ?? 4,
-      0,
-      Math.PI * 2,
-    );
-    remoteCtx.fillStyle = "#ff4d4d";
-    remoteCtx.fill();
-    remoteCtx.closePath();
-  }
-}
-
-function drawRemoteInvaderProjectiles(
-  projectiles: GameSnapshot["invaderProjectiles"],
-): void {
-  if (!remoteCtx || !Array.isArray(projectiles)) return;
-
-  for (const projectile of projectiles) {
-    const x = projectile?.x ?? 0;
-    const y = projectile?.y ?? 0;
-    const width = projectile?.width ?? 4;
-    const height = projectile?.height ?? 10;
-
-    remoteCtx.fillStyle = "#ffffff";
-    remoteCtx.fillRect(x, y, width, height);
-  }
-}
-
-function drawRemoteGrids(grids: GameSnapshot["grids"]): void {
-  if (!remoteCtx || !Array.isArray(grids)) return;
-
-  for (const grid of grids) {
-    if (!Array.isArray(grid.invaders)) continue;
-
-    for (const invader of grid.invaders) {
-      drawRemoteInvader(invader);
-    }
-  }
-}
-
-function drawRemoteInvader(invader: {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-}): void {
-  if (!remoteCtx) return;
-
-  const x = invader?.x ?? 0;
-  const y = invader?.y ?? 0;
-  const width = invader?.width ?? 30;
-  const height = invader?.height ?? 30;
-
-  if (!remoteInvaderImage.complete) return;
-
-  remoteCtx.drawImage(remoteInvaderImage, x, y, width, height);
-}
-
-function drawRemoteParticles(particles: GameSnapshot["particles"]): void {
-  if (!remoteCtx || !Array.isArray(particles)) return;
-
-  for (const particle of particles) {
-    const opacity = particle?.opacity ?? 1;
-    if (opacity <= 0) continue;
-
-    remoteCtx.save();
-    remoteCtx.globalAlpha = opacity;
-    remoteCtx.beginPath();
-    remoteCtx.arc(
-      particle?.x ?? 0,
-      particle?.y ?? 0,
-      particle?.radius ?? 2,
-      0,
-      Math.PI * 2,
-    );
-    remoteCtx.fillStyle = particle?.color ?? "#ffffff";
-    remoteCtx.fill();
-    remoteCtx.closePath();
-    remoteCtx.restore();
-  }
-}
-
-function drawRemoteAsteroids(asteroids: GameSnapshot["asteroids"]): void {
-  if (!remoteCtx || !Array.isArray(asteroids)) return;
-
-  for (const asteroid of asteroids) {
-    const x = asteroid?.x ?? 0;
-    const y = asteroid?.y ?? 0;
-    const radius = asteroid?.radius ?? 20;
-    const rotation = asteroid?.rotation ?? 0;
-    const points = Array.isArray(asteroid?.points) ? asteroid.points : [];
-
-    remoteCtx.save();
-    remoteCtx.translate(x, y);
-    remoteCtx.rotate(rotation);
-
-  if (points.length >= 3) {
-  remoteCtx.beginPath();
-
-  const firstX = points[0];
-  const firstY = points[1];
-  const firstR = points[2];
-  remoteCtx.moveTo(firstX * firstR, firstY * firstR);
-
-  for (let i = 3; i < points.length; i += 3) {
-    const px = points[i];
-    const py = points[i + 1];
-    const pr = points[i + 2];
-    remoteCtx.lineTo(px * pr, py * pr);
-  }
-
-  remoteCtx.closePath();
-} else {
-  remoteCtx.beginPath();
-  remoteCtx.arc(0, 0, radius, 0, Math.PI * 2);
-}
-
-    remoteCtx.fillStyle = "#9f9f9f";
-    remoteCtx.strokeStyle = "#d0d0d0";
-    remoteCtx.lineWidth = 2;
-    remoteCtx.fill();
-    remoteCtx.stroke();
-
-    remoteCtx.restore();
-
-    drawAsteroidHealthBar(asteroid);
-  }
-}
-
-function drawAsteroidHealthBar(
-  asteroid: GameSnapshot["asteroids"][number],
-): void {
-  if (!remoteCtx) return;
-
-  const x = asteroid?.x ?? 0;
-  const y = asteroid?.y ?? 0;
-  const radius = asteroid?.radius ?? 20;
-  const health = Math.max(0, asteroid?.health ?? 0);
-  const maxHealth = Math.max(1, asteroid?.maxHealth ?? 1);
-
-  const width = radius * 1.8;
-  const height = 5;
-  const left = x - width / 2;
-  const top = y - radius - 14;
-
-  remoteCtx.fillStyle = "rgba(255,255,255,0.18)";
-  remoteCtx.fillRect(left, top, width, height);
-
-  remoteCtx.fillStyle = "#00ffff";
-  remoteCtx.fillRect(left, top, width * (health / maxHealth), height);
-}
-
-function drawRemoteGameOver(score: number): void {
-  if (!remoteCtx || !remoteCanvas) return;
-
-  remoteCtx.save();
-  remoteCtx.fillStyle = "rgba(0, 0, 0, 0.75)";
-  remoteCtx.fillRect(0, 0, remoteCanvas.width, remoteCanvas.height);
-
-  remoteCtx.textAlign = "center";
-  remoteCtx.textBaseline = "middle";
-
-  remoteCtx.shadowColor = "#ff00ff";
-  remoteCtx.shadowBlur = 24;
-  remoteCtx.fillStyle = "#ffffff";
-  remoteCtx.font = 'bold 72px Impact, sans-serif';
-  remoteCtx.fillText(
-    "GAME OVER",
-    remoteCanvas.width / 2,
-    remoteCanvas.height / 2 - 40,
-  );
-
-  remoteCtx.shadowColor = "#00ffff";
-  remoteCtx.shadowBlur = 14;
-  remoteCtx.fillStyle = "#00ffff";
-  remoteCtx.font = '18px "Press Start 2P", monospace';
-  remoteCtx.fillText(
-    `SCORE: ${score}`,
-    remoteCanvas.width / 2,
-    remoteCanvas.height / 2 + 30,
-  );
-
-  remoteCtx.restore();
 }
 
 function drawStars(
@@ -448,40 +236,22 @@ function drawStars(
   }
 }
 
-function mountLocalGame(
-  canvas: HTMLCanvasElement | null,
-  onSnapshot: (snapshot: GameSnapshot) => void,
-  gameConfig?: GameDifficultyConfig,
-): (() => void) | null {
-  if (!canvas) return null;
-
-  const scoreEl = document.querySelector("#localScoreEl") as HTMLElement | null;
-
-  return createLocalGame(
-    canvas,
-    onSnapshot,
-    (score) => {
-      if (scoreEl) scoreEl.textContent = String(score);
-    },
-    gameConfig,
-  );
-}
-
 function cleanup(): void {
-  destroyLocalGame?.();
-  destroyLocalGame = null;
-const style = document.querySelector("#game-room-styles");
-  style?.remove(); // 🔥 QUESTO RISOLVE
- currentRemote = { username: "", snapshot: null };
+  localGame?.destroy();
+  localGame = null;
+  const style = document.querySelector("#game-room-styles");
+  style?.remove();
   currentUsers = [];
   rootEl = null;
-  localCanvas = null;
-  remoteCanvas = null;
-  remoteCtx = null;
+  arenaCanvas = null;
+  arenaCtx = null;
   statusEl = null;
   remoteNameEl = null;
   roomEl = null;
   localNameEl = null;
+  remoteScoreEl = null;
+  remoteLivesEl = null;
+  timerEl = null;
 }
 
 function injectStyles(): void {
@@ -560,83 +330,85 @@ function injectStyles(): void {
       padding: 0 12px;
     }
 
-    .split-layout {
+    .arena-layout {
       flex: 1;
       min-height: 0;
-      display: grid;
-      grid-template-columns: 1fr 8px 1fr;
-      gap: 12px;
+      display: flex;
       align-items: center;
+      justify-content: center;
     }
 
-    .divider {
-      background: linear-gradient(
-        to bottom,
-        transparent,
-        rgba(255,255,255,0.65),
-        transparent
-      );
-      opacity: 0.45;
-      border-radius: 999px;
+    .canvas-shell {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+
+      aspect-ratio: 1024 / 576;
+
+      border: 1px solid rgba(255,255,255,0.15);
+      background: #000;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-
-    .screen-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-  min-height: 0;
-  align-items: center;
-  height: 100%;
-}
-
-    .screen-title {
-      text-align: center;
-      font-size: 12px;
-      color: #ffffff;
-      letter-spacing: 1px;
-    }
-
-  .canvas-shell {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  max-width: 100%;
-  max-height: 100%;
-  
-  aspect-ratio: 1024 / 576;
-
-  border: 1px solid rgba(255,255,255,0.15);
-  background: #000;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
     .score-chip {
       position: absolute;
       top: 10px;
       left: 10px;
       z-index: 2;
-      font-size: 12px;
-      color: white;
-      background: rgba(0,0,0,0.45);
-      border: 1px solid rgba(255,255,255,0.18);
+      font-size: 11px;
+      line-height: 1.8;
+      color: #ffb3b3;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,120,120,0.4);
       padding: 8px 10px;
+    }
+
+    .score-chip--local .chip-label {
+      color: #ff8080;
     }
 
     .score-chip--remote {
       left: auto;
       right: 10px;
+      color: #b3d9ff;
+      border-color: rgba(120,170,255,0.4);
+    }
+
+    .score-chip--remote .chip-label {
+      color: #80c2ff;
+    }
+
+    .chip-label {
+      display: block;
+      font-size: 10px;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .timer-chip {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
+      font-size: 14px;
+      color: #ffffff;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.25);
+      padding: 8px 14px;
     }
 
     canvas {
-  width: 100%;
-  height: 100%;
-  display: block;
-  background: #000;
-}
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: #000;
+    }
   `;
   document.head.appendChild(style);
 }

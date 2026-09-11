@@ -7,7 +7,7 @@
 import * as Moq from "@moq/lite";
 import { APP_PREFIX, TRACK_GAME, TRACK_PRIORITY } from "../config";
 import { connectToRelay, type MoqConnection } from "./connection";
-import type { GameSnapshot } from "./publisher";
+import { claimMatchInitiator, type GameSnapshot } from "./publisher";
 import { recordReceived, type NetEnvelope } from "../metrics/metrics";
 
 const textDecoder = new TextDecoder();
@@ -89,7 +89,25 @@ async function watchAnnouncements(
       const ctrl = new AbortController();
       userControllers.set(remoteUsername, ctrl);
 
-      //  Notifico la presenza del nuovo utente così da poter aggiornare la lista dei giocatori connessi. 
+      //  1v1: regola di determinismo per decidere chi genera seed/istante di partenza condivisi
+      // (vedi publisher.ts, claimMatchInitiator()/MatchInit). A differenza della versione WebRTC,
+      // dove il server di signaling fornisce un elenco esplicito di "chi era gia' in room quando mi
+      // sono unito" (joinRoom) e quindi un ordine di arrivo su cui basare la regola anti-glare, qui
+      // la stream announced() NON distingue un peer gia' presente al momento della sottoscrizione da
+      // uno arrivato dopo: un confronto basato sull'ordine di scoperta sarebbe soggetto a race
+      // condition (a seconda dell'ordine di consegna degli annunci da parte del relay, entrambi i
+      // lati potrebbero scoprirsi "iniziatori" contemporaneamente, generando due seed diversi). Il
+      // confronto lessicografico tra i due username e' invece una funzione pura di un'informazione
+      // che ENTRAMBI i lati conoscono in modo identico non appena si scoprono a vicenda: decide in
+      // modo deterministico e senza correre alcuna race quale dei due (quello con username
+      // "maggiore") chiama claimMatchInitiator() - l'altro lato, facendo lo stesso confronto al
+      // contrario, non lo chiama mai. Nessun nuovo messaggio di rete: e' una decisione puramente
+      // locale, presa identicamente su entrambi i client.
+      if (localUsername > remoteUsername) {
+        claimMatchInitiator();
+      }
+
+      //  Notifico la presenza del nuovo utente così da poter aggiornare la lista dei giocatori connessi.
       //  La funzione ensureRemoteUser aggiunge l'utente alla lista se non è già presente, e restituisce il nome utente.
       ensureRemoteUser(remoteUsername);
       onPresenceUpdate?.([...remoteUsers]);

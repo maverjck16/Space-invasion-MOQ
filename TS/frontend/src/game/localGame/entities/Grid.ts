@@ -1,4 +1,4 @@
-import { nextId } from "../id";
+import { nextArenaId } from "../id";
 import type { Vec2 } from "../types";
 import type { GameDifficultyConfig } from "../types";
 import { Invader } from "./Invader";
@@ -32,7 +32,7 @@ export class Grid {
     private canvas: HTMLCanvasElement,
     config?: Pick<GameDifficultyConfig, "gridColumnsMin" | "gridColumnsMax" | "gridRowsMin" | "gridRowsMax">,
   ) {
-    this.id = nextId("grid");
+    this.id = nextArenaId("grid");
     this.position = { x: 0, y: 0 };
     this.velocity = { x: 3, y: 0 };
     this.invaders = [];
