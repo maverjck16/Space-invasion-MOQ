@@ -1,12 +1,15 @@
 import type { GameSnapshot } from "../../webrtc/snapshot";
 import { LocalGameEngine } from "./LocalGameEngine";
-import type { GameDifficultyConfig } from "./types";
+import type { GameDifficultyConfig, MatchMode, MatchResult } from "./types";
 
-// 1v1: opzioni aggiuntive dell'HUD/fine partita.
+// 1v1: opzioni aggiuntive dell'HUD/fine partita. "matchMode" sceglie le regole di partita (vedi
+// MatchMode in types.ts): assente = partita manuale di sempre, "testbed" = partita automatica.
 export type CreateLocalGameExtras = {
   onLivesChange?: (lives: number) => void;
-  onMatchEnd?: () => void;
+  onMatchEnd?: (result: MatchResult) => void;
   onTimeRemaining?: (msRemaining: number) => void;
+  matchMode?: MatchMode;
+  onBeforeFrame?: (frame: number) => void;
 };
 
 // 1v1: handle restituito da createLocalGame - oltre a poter distruggere il gioco, espone
@@ -36,6 +39,8 @@ export function createLocalGame(
     onMatchEnd: extras?.onMatchEnd,
     onTimeRemaining: extras?.onTimeRemaining,
     gameConfig,
+    matchMode: extras?.matchMode,
+    onBeforeFrame: extras?.onBeforeFrame,
   });
 
   game.start();

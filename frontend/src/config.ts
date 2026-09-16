@@ -111,3 +111,28 @@ export const MATCH_INIT_LEAD_MS = 1200;
 // partenza teorico. Dopo la finestra il traffico torna simmetrico tra i due lati per il resto della
 // partita (nessun campo extra sugli snapshot), preservando il confronto di banda a regime.
 export const MATCH_INIT_RESEND_WINDOW_MS = 2000;
+
+// ---------------------------------------------------------------------------------------------
+// TESTBED 1v1: regole della partita automatica (solo con "?auto=1", vedi main.ts). La partita
+// manuale continua a usare le costanti qui sopra (timer, vite multiple, respawn) senza differenze.
+// Identiche nella versione MoQ.
+// ---------------------------------------------------------------------------------------------
+
+// Vite di ciascuna navicella nel testbed: una sola, quindi nessun respawn. Chi viene colpito resta
+// fuori gioco e l'avversario continua a giocare (vedi LocalGameEngine.updateTestbedMatchState).
+export const TESTBED_LIVES_PER_PLAYER = 1;
+
+// Nel testbed non c'e' un timer di partita: la partita termina quando entrambe le navicelle sono
+// state eliminate oppure questo intervallo dopo l'eliminazione dell'ultima ondata scriptata.
+export const TESTBED_END_DELAY_AFTER_LAST_WAVE_MS = 3000;
+
+// Tempo massimo di attesa dello stato finale dell'avversario dopo che questo client ha chiuso la
+// propria partita. Di norma arriva con lo snapshot successivo (qualche decina di ms): il limite
+// serve solo a non restare bloccati se l'avversario si disconnette proprio in quel momento.
+export const TESTBED_FINAL_STATE_TIMEOUT_MS = 5000;
+
+// Pausa tra l'eliminazione di un'ondata scriptata e la comparsa della successiva. Oltre a separare
+// le fasi, assorbe la latenza di rete: l'ondata successiva compare nello stesso frame di gioco su
+// entrambi i client (vedi LocalGameEngine.updateTestbedWaves()), purche' l'informazione
+// "ondata eliminata" arrivi all'altro client entro questo intervallo.
+export const TESTBED_WAVE_SPAWN_DELAY_MS = 1000;

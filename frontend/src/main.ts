@@ -19,7 +19,7 @@ import { startSubscriber, stopSubscriber } from "./webrtc/subscriber";
 import { startSession, endSession } from "./metrics/metrics";
 import { installDeterministicRandom } from "./testbed/rng";
 import { resetIdCounters } from "./game/localGame/id";
-import type { GameDifficultyConfig } from "./game/localGame/types";
+import type { GameDifficultyConfig, MatchResult } from "./game/localGame/types";
 import { ScenarioPlayer } from "./testbed/scenarioPlayer";
 import { startRun, finishRun, recordSnapshotForHash } from "./testbed/runLogger";
 import { toPlayerRun, type PlayerId, type Scenario } from "./testbed/scenario.types";
@@ -103,10 +103,10 @@ function waitForPeerReady(
 }
 
 //  Esegue il join a una room (manuale o automatico) e avvia publisher/subscriber. In modalita'
-// automatica, prima di fare qualunque altra cosa: scarica lo scenario condiviso e installa il
-// generatore di numeri casuali seedato (deve succedere PRIMA che venga montato il
-// LocalGameEngine, perche' Math.random() viene gia' chiamato negli inizializzatori dei suoi
-// campi). In modalita' manuale (1v1 reale), il seed condiviso non e' noto in anticipo: arriva
+// automatica, prima di fare qualunque altra cosa: scarica lo scenario condiviso e registra i
+// metadati del run. Il motore del testbed viene montato piu' avanti, insieme a ScenarioPlayer,
+// quando anche l'avversario e' presente: il generatore seedato viene installato in quel momento
+// (vedi sotto). In modalita' manuale (1v1 reale), il seed condiviso non e' noto in anticipo: arriva
 // tramite l'handshake matchInit scambiato sul canale "game" gia' esistente (vedi
 // webrtc/peerManager.ts) - il motore locale viene montato solo dopo che l'handshake e' completo,
 // vedi applyMatchInit() sotto.
@@ -123,7 +123,6 @@ async function join(
       console.error(`[Testbed] impossibile scaricare scenario "${auto.scenarioId}" (HTTP ${res.status}).`);
     } else {
       scenario = (await res.json()) as Scenario;
-      installDeterministicRandom(scenario.seed);
       startRun({
         runId: auto.runId,
         protocol: "webrtc",
@@ -137,7 +136,6 @@ async function join(
     }
   }
 
-  let lastLocalSnapshot: GameSnapshot | null = null;
   let presenceListener: ((users: string[]) => void) | null = null;
 
   //  1v1: true non appena il motore locale e' stato montato (via scenario automatico o via
@@ -146,7 +144,6 @@ async function join(
   let matchStarted = false;
 
   const onSnapshot = (snapshot: GameSnapshot) => {
-    lastLocalSnapshot = snapshot;
     recordSnapshotForHash(snapshot);
     publishSnapshot(snapshot);
   };
@@ -197,12 +194,6 @@ async function join(
       },
     });
 
-    if (auto && scenario) {
-      //  Modalita' automatica: seed gia' installato sopra, nessun handshake da attendere - il
-      // motore locale viene montato subito con la configurazione di difficolta' dello scenario.
-      startLocalMatch(onSnapshot, scenario.gameConfig);
-    }
-
     await startSubscriber(
       room,
       username,
@@ -224,26 +215,77 @@ async function join(
       });
       presenceListener = null;
 
+      //  TESTBED 1v1: motore di gioco e timeline di input partono insieme, nel momento in cui
+      // ciascun client vede l'avversario nella room. Cosi' i due client entrano nell'arena
+      // condivisa praticamente nello stesso istante (a meno della latenza con cui ognuno rileva
+      // l'altro) e i frame di gioco dei due lati restano confrontabili: le regole di fine partita
+      // del testbed li usano (vedi LocalGameEngine.updateTestbedMatchState()).
+      //  Il run non finisce piu' allo scadere di scenario.durationMs ma quando la partita ha un
+      // esito (una sola vita, nessun timer): la timeline di input e' solo la sequenza massima di
+      // comandi disponibili per il giocatore automatico.
       const scenarioStartedAt = performance.now();
-      scenarioPlayer = new ScenarioPlayer(toPlayerRun(scenario, auto.player));
-      scenarioPlayer.start(() => {
+      const activeScenario = scenario;
+      const player = new ScenarioPlayer(toPlayerRun(activeScenario, auto.player));
+      scenarioPlayer = player;
+      let runFinished = false;
+
+      const onTestbedMatchEnd = (result: MatchResult) => {
+        if (runFinished) return;
+        runFinished = true;
+        player.stop();
+
         const actualDurationMs = performance.now() - scenarioStartedAt;
-        console.info(`[Testbed] scenario completato (run "${auto.runId}").`);
+        console.info(
+          `[Testbed] partita conclusa (run "${auto.runId}"): ${result.outcome} (${result.decidedBy}), ` +
+            `punteggio ${result.localScore} - ${result.remoteScore}.`,
+        );
 
         const actual: ActualPlayerResult = {
-          finalScore: lastLocalSnapshot?.score ?? 0,
-          survived: !(lastLocalSnapshot?.gameOver ?? false),
-          finalPositionX: lastLocalSnapshot?.player.x ?? 0,
-          finalPositionY: lastLocalSnapshot?.player.y ?? 0,
+          finalScore: result.localScore,
+          survived: !result.localEliminated,
+          finalPositionX: result.finalPositionX,
+          finalPositionY: result.finalPositionY,
           actualDurationMs,
+          outcome: result.outcome,
+          endReason: result.endReason,
+          decidedBy: result.decidedBy,
+          opponentScore: result.remoteScore,
+          opponentSurvived: !result.remoteEliminated,
+          eliminatedAtFrame: result.localEliminatedAtFrame,
+          opponentEliminatedAtFrame: result.remoteEliminatedAtFrame,
+          lastWaveClearedAtFrame: result.lastWaveClearedAtFrame,
+          endFrame: result.endFrame,
+          opponentFinalStateReceived: result.remoteFinalStateReceived,
         };
-        const determinismCheck = checkDeterminism(scenario, auto.player, actual);
+        const determinismCheck = checkDeterminism(activeScenario, auto.player, actual);
         console.info(
           `[Testbed] determinismCheck: ${determinismCheck.status}`,
           determinismCheck,
         );
 
-        void finishRun(scenarioPlayer?.getLog() ?? [], [], actual, determinismCheck);
+        void finishRun(player.getLog(), [], actual, determinismCheck);
+      };
+
+      //  Seed dello scenario installato qui, subito prima di costruire il motore (Math.random()
+      // viene gia' chiamato nel suo costruttore), e contatori di id azzerati come nella partita
+      // manuale. Farlo adesso e non subito dopo il download dello scenario conta: nel frattempo il
+      // client che risulta iniziatore dell'handshake 1v1 ha gia' estratto un numero casuale per il
+      // proprio matchInit (vedi webrtc/peerManager.ts, ignorato in modalita' automatica), e i due
+      // client partirebbero da punti diversi della sequenza.
+      installDeterministicRandom(activeScenario.seed);
+      resetIdCounters();
+      startLocalMatch(onSnapshot, activeScenario.gameConfig, {
+        mode: "testbed",
+        onMatchEnd: onTestbedMatchEnd,
+        // Timeline registrata a frame (vedi testbed/scenarioPlayer.ts): gli input partono
+        // all'inizio del frame previsto invece che con i timer del browser.
+        onBeforeFrame: (frame) => player.onFrame(frame),
+      });
+      player.start(() => {
+        if (runFinished) return;
+        console.info(
+          `[Testbed] timeline di input terminata (run "${auto.runId}"): la partita prosegue fino all'esito.`,
+        );
       });
     }
   } catch (err) {

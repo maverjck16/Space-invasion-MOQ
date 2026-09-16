@@ -1,4 +1,4 @@
-import { nextArenaId } from "../id";
+import { nextId } from "../id";
 import type { Vec2 } from "../types";
 
 //Classe InvaderProjectile rappresenta i proiettili sparati dagli invasori, gestisce la loro posizione, velocità, disegno e
@@ -14,9 +14,12 @@ export class InvaderProjectile {
     private ctx: CanvasRenderingContext2D,
     args: { position: Vec2; velocity: Vec2 },
   ) {
-    // 1v1: id dal contatore dedicato all'arena condivisa (vedi id.ts) - i proiettili nemici fanno
-    // parte della simulazione deterministica condivisa (vedi LocalGameEngine.ts).
-    this.id = nextArenaId("invproj");
+    // Id dal contatore locale (vedi id.ts): i proiettili nemici fanno parte dell'arena simulata su
+    // entrambi i client, ma non vengono mai eliminati da un colpo ne' citati in
+    // GameSnapshot.killedIds, quindi il loro id non deve coincidere tra i due lati. Tenerli fuori
+    // dal contatore dell'arena evita che uno sparo in piu' su un solo client (ondata eliminata con
+    // qualche frame di ritardo) sposti gli id di tutte le griglie/invasori/asteroidi successivi.
+    this.id = nextId("invproj");
     this.position = { ...args.position };
     this.velocity = { ...args.velocity };
     this.width = 3;

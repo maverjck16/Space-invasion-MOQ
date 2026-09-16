@@ -4,6 +4,31 @@ Questo progetto e' una copia di [`Space-invasion-WebRTC-provaF`](../Space-invasi
 
 > Aggiornamento rispetto alla versione precedente di questo documento: il sistema e' passato da UNO scenario condiviso (stessa timeline per entrambi i client) a **3 scenari**, ciascuno con **due timeline di input distinte** (Player A / Player B, comportamenti diversi), un **controllo automatico di determinismo PASS/FAIL** a fine partita, e un **simulatore headless** (`scripts/headless-sim.mjs`) che calcola i risultati attesi eseguendo il vero motore di gioco fuori dal browser. Vedi la cronologia del cambiamento in fondo.
 
+## Regole della partita automatica 1v1 (aggiornamento)
+
+Con `?auto=1` la partita segue regole diverse da quella manuale, che resta invariata (timer di 3 minuti, 3 vite con respawn):
+
+- **una sola vita** per giocatore, nessun respawn e **nessun timer**: il run finisce quando la partita ha un esito, non dopo `durationMs` (che ora indica solo la lunghezza massima della timeline di input);
+- chi viene eliminato resta fuori gioco (sul suo schermo compare "SEI STATO ELIMINATO") e l'avversario **continua a giocare**;
+- se vengono eliminati **entrambi** la partita finisce subito: **GAME OVER** a chi e' stato eliminato per primo (anche se ha piu' punti), **YOU WIN** all'altro;
+- **3 s dopo l'eliminazione dell'ultima ondata** la partita finisce: se e' sopravvissuto uno solo vince lui, se sono sopravvissuti entrambi vince chi ha piu' punti;
+- a parita' compare **DRAW** in argento.
+
+Le ondate scriptate sono ora tre: la 4x7 che non spara, poi una riga di 10 alieni che spara e, dopo la sua eliminazione completa, una seconda riga uguale (in entrambi gli scenari; in `scenario-2` ogni ondata porta anche il suo asteroide).
+
+Come resta coerente l'esito tra i due client (vedi `LocalGameEngine.updateTestbedMatchState()` e `updateTestbedWaves()`):
+
+- i due motori partono insieme quando i client si vedono nella room, e i tempi di gioco si misurano in frame;
+- il frame di eliminazione del giocatore e quello di eliminazione di ogni ondata viaggiano negli snapshot (`eliminatedAtFrame`, `wavesClearedAtFrame`) e vengono ripetuti finche' la partita non finisce; a fine partita ogni client invia `gameActive: false` come stato definitivo;
+- ogni ondata compare nello stesso frame su entrambi i client (pausa di 1 s dopo l'eliminazione della precedente e `minStartFrame` calcolato dal generatore);
+- nel testbed gli effetti grafici e la scelta dell'invasore che spara usano generatori casuali separati, e le eliminazioni vengono ripetute per qualche snapshot.
+
+Le timeline di `scenario-1`/`scenario-2` sono registrate da `scripts/generate-scenario.mjs` facendo giocare due bot (mirano, schivano, sparano) sul motore reale, e `ScenarioPlayer` le esegue **a frame** (campo `frame` di ogni azione) invece che con i timer del browser. Esiti attuali: in `scenario-1` sopravvivono entrambi e A vince a punti; in `scenario-2` B non schiva l'asteroide della prima riga che spara, viene eliminato e A vince da unico sopravvissuto, pur avendo meno punti.
+
+`scripts/headless-sim.mjs` simula ora i due client insieme (opzione `--latency-ms`) e `scripts/verify-determinism.mjs` controlla riproducibilita', coerenza tra A e B e stabilita' dell'esito con diverse latenze (`--latencies`). Il punteggio ha una tolleranza (`scoreTolerance`), perche' un invasore colpito da entrambi mentre l'eliminazione e' ancora in viaggio vale punti a tutti e due. `scripts/run-batch.ps1` non aspetta piu' un tempo fisso: chiude ogni run quando compaiono i due file di risultato (attesa massima `-MaxWaitMs`).
+
+Le sezioni seguenti descrivono la versione precedente del testbed e restano valide per architettura, determinismo e metriche; tabelle degli scenari e risultati attesi aggiornati sono nei file `scenario-N.json`.
+
 ## Architettura
 
 ```

@@ -1,12 +1,26 @@
 <#
 .SYNOPSIS
   Esegue N ripetizioni di uno scenario deterministico del testbed (Player A + Player B, stessa
-  room), aprendo due finestre Chrome indipendenti per ciascun run ed aspettando che lo scenario
+  room), aprendo due finestre Chrome indipendenti per ciascun run ed aspettando che la partita
   finisca prima di passare al run successivo. Ogni run produce un file in results/ (vedi
-  vite.config.ts, endpoint /api/report) grazie a src/testbed/runLogger.ts. Dopo l'attesa, lo script
-  controlla che i 2 file di risultato attesi (uno per player) siano effettivamente comparsi in
-  results/ prima di considerare il run riuscito - non si limita piu' ad aprire/chiudere le finestre
-  "alla cieca".
+  vite.config.ts, endpoint /api/report) grazie a src/testbed/runLogger.ts.
+
+  TESTBED 1v1: la partita automatica non ha una durata fissa (una sola vita per giocatore, nessun
+  timer: finisce quando entrambi sono eliminati o poco dopo l'ultima ondata). Per questo lo script
+  non aspetta un tempo prefissato ma controlla ogni secondo la cartella results/: il run e' concluso
+  appena compaiono i 2 file di risultato attesi (uno per player), che i client salvano quando la
+  partita ha un esito. Se non compaiono entro -MaxWaitMs il run viene segnalato come incompleto.
+
+.PARAMETER ScenarioDurationMs
+  Lunghezza della timeline di input dello scenario (campo "durationMs", letto dal file scenario se
+  non indicato). Serve solo a calcolare l'attesa massima di default.
+
+.PARAMETER MaxWaitMs
+  Attesa massima per ogni run, in ms. Default: ScenarioDurationMs + 60000.
+
+.PARAMETER BufferMs
+  Attesa usata solo se la cartella results/ non e' disponibile per il controllo (in quel caso lo
+  script aspetta ScenarioDurationMs + BufferMs, come nelle versioni precedenti).
 
 .PARAMETER ResultsDir
   Cartella results/ del progetto (contiene i JSON prodotti da /api/report), usata SOLO per la
@@ -28,6 +42,7 @@ param(
   [int]$Runs = 1,
   [string]$Room = "",
   [int]$ScenarioDurationMs = 0,
+  [int]$MaxWaitMs = 0,
   [int]$BufferMs = 8000,
   [string]$ChromePath = "${env:ProgramFiles}\Google\Chrome\Application\chrome.exe",
   [string]$ResultsDir = ""
@@ -73,9 +88,14 @@ if (-not $ResultsDir) {
   $ResultsDir = $candidateResultsDirs | Where-Object { Test-Path (Split-Path -Parent $_) } | Select-Object -First 1
 }
 
-$waitMs = $ScenarioDurationMs + $BufferMs
+if ($MaxWaitMs -le 0) { $MaxWaitMs = $ScenarioDurationMs + 60000 }
+$canValidateResults = [bool]($ResultsDir -and (Test-Path (Split-Path -Parent $ResultsDir)))
 
-Write-Host "Eseguo $Runs run di '$ScenarioId' ($Protocol) contro $BaseUrl, room base '$Room' (attesa per run: $($waitMs)ms)`n"
+if ($canValidateResults) {
+  Write-Host "Eseguo $Runs run di '$ScenarioId' ($Protocol) contro $BaseUrl, room base '$Room' (ogni run termina con i 2 file di risultato, attesa massima $($MaxWaitMs)ms)`n"
+} else {
+  Write-Host "Eseguo $Runs run di '$ScenarioId' ($Protocol) contro $BaseUrl, room base '$Room' (cartella results/ non disponibile: attesa fissa di $($ScenarioDurationMs + $BufferMs)ms per run)`n"
+}
 
 $failedRuns = @()
 
@@ -105,7 +125,23 @@ for ($i = 1; $i -le $Runs; $i++) {
   Start-Sleep -Milliseconds 500
   $procB = Start-Process -FilePath $ChromePath -ArgumentList "--user-data-dir=`"$profileB`"", "--no-first-run", "--no-default-browser-check", "$urlB" -PassThru
 
-  Start-Sleep -Milliseconds $waitMs
+  $newFiles = 0
+  if ($canValidateResults) {
+    # Attende i 2 file di risultato del run (A e B), controllando una volta al secondo.
+    $deadline = (Get-Date).AddMilliseconds($MaxWaitMs)
+    while ((Get-Date) -lt $deadline) {
+      Start-Sleep -Milliseconds 1000
+      if (Test-Path $ResultsDir) {
+        $resultsCountNow = (Get-ChildItem $ResultsDir -Filter "$runId-*.json" -ErrorAction SilentlyContinue | Measure-Object).Count
+        $newFiles = $resultsCountNow - $resultsCountBefore
+        if ($newFiles -ge 2) { break }
+      }
+    }
+    # Lascia visibile per un momento la schermata finale prima di chiudere le finestre.
+    Start-Sleep -Milliseconds 1500
+  } else {
+    Start-Sleep -Milliseconds ($ScenarioDurationMs + $BufferMs)
+  }
 
   foreach ($proc in @($procA, $procB)) {
     try { Stop-Process -Id $proc.Id -Force -ErrorAction Stop } catch { }
@@ -117,11 +153,11 @@ for ($i = 1; $i -le $Runs; $i++) {
 
   Remove-Item -Recurse -Force $profileA, $profileB -ErrorAction SilentlyContinue
 
-  if ($ResultsDir -and (Test-Path $ResultsDir)) {
+  if ($canValidateResults -and (Test-Path $ResultsDir)) {
     $resultsCountAfter = (Get-ChildItem $ResultsDir -Filter "$runId-*.json" -ErrorAction SilentlyContinue | Measure-Object).Count
     $newFiles = $resultsCountAfter - $resultsCountBefore
     if ($newFiles -lt 2) {
-      Write-Warning "Run ${i}: attesi 2 file di risultato (A+B) con prefisso '$runId-', trovati $newFiles. Controllare manualmente (connessione fallita? scenario non completato in tempo?)."
+      Write-Warning "Run ${i}: attesi 2 file di risultato (A+B) con prefisso '$runId-', trovati $newFiles entro $($MaxWaitMs)ms. Controllare manualmente (connessione fallita? partita non conclusa?)."
       $failedRuns += $i
     } else {
       Write-Host "Run $i completato: $newFiles file di risultato trovati in results/.`n"

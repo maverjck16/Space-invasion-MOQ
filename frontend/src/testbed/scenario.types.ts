@@ -1,9 +1,14 @@
 //  Schema condiviso (identico byte-per-byte tra il testbed MoQ e quello WebRTC, vedi TESTBED.md)
 // del file di scenario deterministico. Un file scenario-N.json descrive UN esperimento completo:
-// seed RNG, durata, room suggerita, configurazione di difficolta' del motore di gioco, le timeline
-// di input di ENTRAMBI i giocatori automatici (A e B, con comportamenti volutamente diversi) e i
-// risultati attesi di ciascuno (usati a fine partita per il controllo automatico di determinismo,
-// vedi determinism.ts).
+// seed RNG, lunghezza della timeline di input, room suggerita, configurazione di difficolta' del
+// motore di gioco, le timeline di input di ENTRAMBI i giocatori automatici (A e B, con
+// comportamenti volutamente diversi) e i risultati attesi di ciascuno (usati a fine partita per il
+// controllo automatico di determinismo, vedi determinism.ts).
+//
+//  TESTBED 1v1: la partita automatica non ha un timer. I due giocatori condividono la stessa arena
+// con una sola vita ciascuno e la partita finisce quando entrambi sono stati eliminati oppure poco
+// dopo l'eliminazione dell'ultima ondata (vedi LocalGameEngine.updateTestbedMatchState()). La
+// durata di un run dipende quindi da come va la partita, non da "durationMs".
 //
 //  IMPORTANTE: A e B condividono lo stesso seed (quindi lo stesso "mondo": stessi spawn di griglie
 // e asteroidi, stesso timing, stessa struttura) perche' ciascun client simula il gioco IN LOCALE
@@ -15,16 +20,23 @@
 
 export type PlayerId = "A" | "B";
 
+//  "timeMs" e' l'istante dell'azione dall'avvio della partita. "frame" (TESTBED 1v1, opzionale) e'
+// il frame di gioco all'inizio del quale l'azione va inviata: se tutte le azioni lo hanno,
+// ScenarioPlayer le esegue sincronizzate con i frame del motore invece che con i timer del browser
+// (vedi scenarioPlayer.ts).
+type ScenarioActionTiming = { id: string; timeMs: number; frame?: number };
+
 export type ScenarioAction =
-  | { id: string; timeMs: number; type: "moveX"; dir: "left" | "right" | "none" }
-  | { id: string; timeMs: number; type: "moveY"; dir: "up" | "down" | "none" }
-  | { id: string; timeMs: number; type: "shoot" };
+  | (ScenarioActionTiming & { type: "moveX"; dir: "left" | "right" | "none" })
+  | (ScenarioActionTiming & { type: "moveY"; dir: "up" | "down" | "none" })
+  | (ScenarioActionTiming & { type: "shoot" });
 
 //  Timeline di input per UN giocatore: sottoinsieme del file scenario completo, ed e' esattamente
 // cio' che consuma ScenarioPlayer (che quindi non ha bisogno di sapere nulla di "A"/"B"/multi-player,
 // riducendo al minimo le modifiche a un modulo gia' esistente e verificato).
 export type PlayerRun = {
   seed: number;
+  // Lunghezza della timeline: allo scadere ScenarioPlayer rilascia i tasti ancora premuti.
   durationMs: number;
   actions: ScenarioAction[];
 };
@@ -82,24 +94,39 @@ export type ScenarioScriptedAsteroidEvent = {
 // fine partita reale (browser) per il confronto PASS/FAIL, vedi determinism.ts.
 export type ScenarioExpectedResult = {
   finalScore: number;
-  survived: boolean; // true se il giocatore NON e' morto (game.over === false) alla fine dello scenario
+  survived: boolean; // true se il giocatore NON e' stato eliminato a fine partita
   finalPositionX: number;
   finalPositionY: number;
-  actualDurationMs: number; // durata osservata dal simulatore di riferimento (per il confronto di FASE 7)
+  actualDurationMs: number; // durata della partita osservata dal simulatore di riferimento (per il confronto di FASE 7)
+  // TESTBED 1v1: esito della partita per questo giocatore e criterio con cui e' stato deciso (vedi
+  // MatchOutcome/MatchDecidedBy in game/localGame/types.ts, qui duplicati come stringhe per lo
+  // stesso motivo di ScenarioScriptedWave), piu' alcuni dati di contesto calcolati dal simulatore.
+  outcome?: "win" | "lose" | "draw";
+  decidedBy?: "eliminationOrder" | "survival" | "score";
+  opponentScore?: number;
+  eliminatedAtFrame?: number | null;
+  lastWaveClearedAtFrame?: number | null;
+  endFrame?: number;
 };
 
 export type Scenario = {
   scenarioId: string;
   description: string;
   seed: number;
+  // Lunghezza massima della timeline di input dei giocatori automatici (non e' la durata della
+  // partita: vedi il commento in cima al file).
   durationMs: number;
   room: string;
   // Tolleranze usate dal controllo di determinismo (vedi determinism.ts): quanto puo' scostarsi un
-  // valore osservato dal valore atteso prima di essere considerato un FAIL. Lo score/la posizione
-  // devono restare ESATTI (tolleranza 0) perche' dipendono solo dal seed+azioni, mai dal trasporto
-  // di rete; la durata ha una piccola tolleranza per il jitter di setTimeout/rAF nel browser reale
-  // (vedi il limite onesto documentato in scenarioPlayer.ts).
+  // valore osservato dal valore atteso prima di essere considerato un FAIL. Posizione, sopravvivenza
+  // ed esito sono confrontati esattamente; la durata della partita ha una piccola tolleranza per il
+  // jitter di setTimeout nel browser reale e per la latenza con cui arrivano le informazioni
+  // dell'avversario (vedi il limite onesto documentato in scenarioPlayer.ts e TESTBED.md).
   durationToleranceMs: number;
+  // TESTBED 1v1: tolleranza sul punteggio finale, in punti. Un invasore colpito da entrambi i
+  // giocatori prima che l'eliminazione arrivi all'altro client vale 100 punti a tutti e due, e
+  // quante volte succede dipende dalla latenza reale. Se assente, il punteggio deve coincidere.
+  scoreTolerance?: number;
   gameConfig: ScenarioGameConfig;
   players: Record<PlayerId, { actions: ScenarioAction[] }>;
   expected: Record<PlayerId, ScenarioExpectedResult>;
