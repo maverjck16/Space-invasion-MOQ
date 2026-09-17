@@ -39,16 +39,20 @@ import {
 // src/testbed/scenario.types.ts) puo' sovrascrivere questi valori per variare il carico applicativo
 // dell'esperimento (FASE 4 della tesi) senza toccare nessun altro percorso di codice.
 const DEFAULT_GAME_CONFIG: GameDifficultyConfig = {
-  gridSpawnIntervalFramesMin: 900,
-  gridSpawnIntervalFramesMax: 1599,
-  gridColumnsMin: 2,
-  gridColumnsMax: 4,
-  gridRowsMin: 1,
-  gridRowsMax: 2,
+  // SCREENSHOT/DEMO: intervalli e dimensione ondate aumentati di parecchio rispetto ai valori
+  // storici (900-1599 / 1400-1999, gridColumns 2-4, gridRows 1-2) per riempire la schermata di
+  // alieni e asteroidi durante una sessione di gioco normale (non-Testbed) da mostrare in uno
+  // screenshot. Ripristinare i valori originali per tornare al bilanciamento standard.
+  gridSpawnIntervalFramesMin: 180,
+  gridSpawnIntervalFramesMax: 300,
+  gridColumnsMin: 4,
+  gridColumnsMax: 7,
+  gridRowsMin: 2,
+  gridRowsMax: 4,
   // Nota: la primissima istanza (nel costruttore, quando "gameConfig" non e' fornito) usa invece
   // la base storica 1200-1799, diversa da questa - vedi il costruttore per il perche'.
-  asteroidSpawnIntervalFramesMin: 1400,
-  asteroidSpawnIntervalFramesMax: 1999,
+  asteroidSpawnIntervalFramesMin: 90,
+  asteroidSpawnIntervalFramesMax: 180,
   asteroidsEnabled: true,
 };
 
@@ -317,7 +321,7 @@ export class LocalGameEngine {
           this.gameConfig.asteroidSpawnIntervalFramesMin,
           this.gameConfig.asteroidSpawnIntervalFramesMax,
         )
-      : randomIntervalIn(1200, 1799);
+      : randomIntervalIn(90, 180); // SCREENSHOT/DEMO: era 1200-1799, allineato al nuovo DEFAULT_GAME_CONFIG
 
     // 1v1: due navicelle nello stesso canvas, separate orizzontalmente cosi' non nascono
     // sovrapposte (vedi LOCAL_SPAWN_X_FRACTION/REMOTE_SPAWN_X_FRACTION sopra).
