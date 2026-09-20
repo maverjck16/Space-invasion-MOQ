@@ -26,14 +26,13 @@ export const CHANNEL_GAME = "game";
 // punto di vista della rete effettivamente attraversata.
 //
 // Lasciare TURN_URL vuoto per tornare al comportamento originale (solo STUN pubblico, nessun TURN).
-// TURN disattivato per ora: il security group OpenStack apre solo 80/443/4443 (nessun range UDP
-// dedicato), e un server TURN ha bisogno di una porta UDP libera per ogni sessione relayata
-// contemporanea - con 2 giocatori servono almeno 2 porte, non una sola condivisa con MoQ sulla
-// 4443. Finche' non si ottiene dal tutor un piccolo range UDP aggiuntivo, si torna al
-// comportamento originale (solo STUN pubblico, connessione diretta peer-to-peer).
-const TURN_URL = ""; // es. "turn:IP_O_DOMINIO_DEL_TUO_SERVER:3478" oppure "turns:dominio:5349" (TLS)
-const TURN_USERNAME = ""; // deve combaciare con "user=" in turn/turnserver.conf
-const TURN_CREDENTIAL = ""; // deve combaciare con la password dopo i due punti in "user=...:PASSWORD"
+// TURN attivo: coturn (vedi turn/turnserver.conf) gira sulla stessa VM del signaling e ascolta in
+// UDP sulla porta 443 (listening-port=443 + no-tcp: la TCP 443 resta libera per il signaling
+// WebSocket). Per questo l'URL usa la porta 443 con transport=udp e non la 3478 di default.
+// Serve che la UDP 443 della VM sia raggiungibile dai client (security group OpenStack).
+const TURN_URL = "turn:130.136.223.208:443?transport=udp"; // es. "turns:dominio:5349" per TLS
+const TURN_USERNAME = "spaceinvasion"; // deve combaciare con "user=" in turn/turnserver.conf
+const TURN_CREDENTIAL = "SaraFranci1816"; // deve combaciare con la password dopo i due punti in "user=...:PASSWORD"
 
 export const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun.l.google.com:19302" },
