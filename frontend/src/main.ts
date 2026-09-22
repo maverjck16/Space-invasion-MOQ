@@ -292,6 +292,14 @@ async function join(
     console.error("ERRORE DURANTE LA CONNESSIONE:", err);
 
     if (auto) {
+      // A differenza della modalita' manuale (che torna alla lobby con un alert, vedi sotto),
+      // qui nessuna schermata viene mai montata prima di questo punto: senza un feedback visibile
+      // un errore di connessione (es. SIGNALING_URL non raggiungibile) e' indistinguibile da una
+      // pagina che sta ancora caricando, restando bianca a tempo indefinito.
+      const appEl = document.getElementById("app");
+      if (appEl) {
+        appEl.innerHTML = `<pre style="color:#f55;background:#111;padding:1rem;font-family:monospace;white-space:pre-wrap;">[Testbed] Errore di connessione:\n${String(err)}</pre>`;
+      }
       void finishRun([], [String(err)]);
     } else {
       alert("Errore di connessione: " + err);
