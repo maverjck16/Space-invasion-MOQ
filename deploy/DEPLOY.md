@@ -22,8 +22,18 @@ quanto già presente nel progetto:
   certificati Let's Encrypt già presenti in `/etc/letsencrypt`, vedi
   `moq-keycast-ts/compose.yml` nel branch/progetto MoQ). Vantaggio: un solo host per
   entrambi i Testbed, niente nuovi certificati da gestire (qui non servono comunque, vedi
-  punto 1). Le porte usate da questo stack (8080, 8081, 3478, 5349, 49152–49452) sono
-  diverse da quelle del relay MoQ (443, 4443), quindi possono coesistere sulla stessa VM.
+  punto 1).
+
+  **Nota sulle porte (aggiornata 22/09/2026)**: questo stack riusa deliberatamente lo
+  stesso schema a singola porta già verificato funzionante sulla VM Politecnico/OpenStack
+  (80 frontend, 443 signaling+TURN, vedi `deploy/.env.example`), che coincide con le porte
+  usate dal relay MoQ su questa VM (443, 4443). Funziona perché **MoQ e WebRTC vengono
+  avviati/fermati uno alla volta, mai in contemporanea** (scelta dell'utente, che gestisce
+  direttamente il firewall/VPC di questa VM): prima di un `docker compose up` qui, verifica
+  che lo stack MoQ sia fermo (porta 443/4443 libera), e viceversa. Se in futuro servisse
+  farli girare insieme, va ripristinato lo schema a porte dedicate (8080 signaling, 8081
+  frontend, 3478 TURN - vedi la cronologia di questo file/di `deploy/.env.example` per i
+  valori esatti) per evitare che i due `docker compose up` collidano sulla stessa porta.
 - **La VM del Politecnico**, se invece è quella il target: verifica con il tutor quali
   porte sono davvero aperte in ingresso (vedi punto 3, "Se è aperta solo la 443").
 
@@ -59,30 +69,26 @@ ti serviranno al punto 5 per `frontend/src/config.ts`.
 
 ## 3. Apri le porte sul firewall della VM
 
+Schema attuale (22/09/2026), uguale a quello già usato sulla VM Politecnico/OpenStack:
+
 | Porta | Protocollo | Servizio | Note |
 |---|---|---|---|
-| 8081 | TCP | frontend (webapp) | modificabile in `deploy/.env` |
-| 8080 | TCP | signaling (WebSocket) | modificabile in `deploy/.env` |
-| 3478 | UDP+TCP | coturn (controllo TURN) | vedi sotto se solo 443 è aperta |
-| 5349 | UDP+TCP | coturn (TURN su TLS, opzionale) | richiede certificato, vedi `turn/turnserver.conf` |
+| 80 | TCP | frontend (webapp) | modificabile in `deploy/.env` |
+| 443 | TCP | signaling (WebSocket) | modificabile in `deploy/.env`; su questa VM coincide con la porta del frontend HTTPS di MoQ - va bene solo se i due stack non girano mai insieme, vedi punto 0 |
+| 443 | **UDP** | coturn (controllo TURN) | `listening-port=443` + `no-tcp` in `turn/turnserver.conf`, cosi' da non confliggere con la TCP/443 del signaling sopra |
 | 49152–49452 | **UDP** | coturn (dati relayati) | **indispensabile**, vedi nota sotto |
 
 **Nota sul range 49152–49452**: è la parte che conta davvero. La porta di
-"controllo" (3478 o 443) serve solo per la richiesta iniziale di allocazione TURN; i
+"controllo" (443 qui) serve solo per la richiesta iniziale di allocazione TURN; i
 pacchetti di gioco veri e propri, una volta allocato il relay, passano sulle porte di
 questo range (una porta dinamica per sessione). Se il firewall blocca tutto questo range,
-TURN non funziona anche se 3478/443 sono raggiungibili — non è un dettaglio rimandabile,
-va verificato con chi amministra la VM.
+TURN non funziona anche se la porta di controllo è raggiungibile — non è un dettaglio
+rimandabile, va verificato esplicitamente.
 
-**Se sulla VM è aperta solo la porta 443** (es. VM del Politecnico): in
-`turn/turnserver.conf` imposta `listening-port=443` al posto di `3478` (già commentato
-nel file). UDP/443 di coturn e TCP/443 di un eventuale altro servizio HTTPS sullo stesso
-host non confliggono (protocolli diversi sulla stessa porta): coesistono senza problemi.
-Il range 49152–49452 in UDP resta comunque necessario e **va aperto separatamente**: non
-c'è modo di far passare anche i dati relayati dentro la sola 443 con una configurazione
-standard di coturn. Se sulla rete del Politecnico non è possibile aprire quel range,
-l'unica alternativa realistica è restringerlo (`min-port`/`max-port` in
-`turnserver.conf`) a poche porte concordate con l'amministratore di rete, non eliminarlo.
+Se in futuro serve una porta dedicata invece di riusare la 443 (es. per far girare MoQ e
+WebRTC in contemporanea), vedi `turn/turnserver.conf` per tornare al default coturn 3478
+(commentando `no-tcp` e cambiando `listening-port`) e la cronologia di `deploy/.env.example`
+per i valori 8080/8081 usati in quello schema.
 
 ## 4. Build e avvio
 
@@ -100,9 +106,9 @@ docker compose logs -f coturn   # controlla che coturn sia partito senza errori
 Sul tuo PC di sviluppo (non sulla VM), in `frontend/src/config.ts`:
 
 ```ts
-export const SIGNALING_URL = "ws://<IP-o-dominio-della-VM>:8080";
+export const SIGNALING_URL = "ws://<IP-o-dominio-della-VM>:443";
 ...
-const TURN_URL = "turn:<IP-o-dominio-della-VM>:3478"; // o :443 se hai usato il fallback
+const TURN_URL = "turn:<IP-o-dominio-della-VM>:443?transport=udp";
 const TURN_USERNAME = "spaceinvasion";
 const TURN_CREDENTIAL = "<la password messa al punto 2>";
 ```

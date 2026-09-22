@@ -29,9 +29,9 @@ services:
     container_name: space-invasion-signaling
     restart: unless-stopped
     environment:
-      SIGNALING_PORT: ${SIGNALING_PORT:-8080}
+      SIGNALING_PORT: ${SIGNALING_PORT:-443}
     ports:
-      - "${SIGNALING_PORT:-8080}:${SIGNALING_PORT:-8080}"
+      - "${SIGNALING_PORT:-443}:${SIGNALING_PORT:-443}"
 
   frontend:
     build: ../frontend
@@ -40,4 +40,4 @@ services:
     depends_on:
       - signaling
     ports:
-      - "${FRONTEND_PORT:-8081}:80"
+      - "${FRONTEND_PORT:-80}:80"

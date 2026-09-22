@@ -101,6 +101,11 @@ Identico al testbed MoQ: dopo la connessione, ciascun client attende (tramite le
 Procedura completa in `deploy/DEPLOY.md`. In sintesi, sulla VM (host attuale: vedi
 `SIGNALING_URL`/`TURN_URL` in `frontend/src/config.ts`):
 
+> **Importante**: questa VM condivide le porte 443/4443 col relay MoQ. Lo stack WebRTC riusa
+> deliberatamente lo stesso schema a singola porta (443) gia' verificato funzionante sulla VM
+> Politecnico/OpenStack, cosa possibile solo perche' **MoQ e WebRTC vengono avviati/fermati uno
+> alla volta, mai in contemporanea**. Prima del comando sotto, verifica che lo stack MoQ sia fermo.
+
 ```bash
 cd Tesi-WebRTC/deploy
 docker compose up -d --build
@@ -108,14 +113,14 @@ docker compose ps              # verifica che frontend, signaling, coturn siano 
 docker compose logs -f coturn  # verifica che coturn sia partito senza errori
 ```
 
-Tre container: `signaling` (WebSocket, porta `SIGNALING_PORT`/8080 di default), `coturn`
-(`network_mode: host`, porte da `turn/turnserver.conf`: 3478 di controllo + 49152-49452 UDP per il
-traffico relayato) e `frontend` (webapp gia' buildata, servita da nginx sulla porta
-`FRONTEND_PORT`/8081 di default). `SIGNALING_URL`/`TURN_URL` sono compilati **dentro il bundle
-statico** al momento della build (`vite build` nel Dockerfile di `frontend/`): dopo aver
-modificato `frontend/src/config.ts` o `turn/turnserver.conf` serve sempre `docker compose up -d
---build` (o almeno `--build frontend`) sulla VM perche' il cambiamento abbia effetto - riavviare
-il container senza rebuild non basta.
+Tre container: `signaling` (WebSocket, porta `SIGNALING_PORT`/443 di default), `coturn`
+(`network_mode: host`, porte da `turn/turnserver.conf`: 443 UDP di controllo (`no-tcp`, per non
+confliggere con la TCP/443 del signaling) + 49152-49452 UDP per il traffico relayato) e `frontend`
+(webapp gia' buildata, servita da nginx sulla porta `FRONTEND_PORT`/80 di default). `SIGNALING_URL`/
+`TURN_URL` sono compilati **dentro il bundle statico** al momento della build (`vite build` nel
+Dockerfile di `frontend/`): dopo aver modificato `frontend/src/config.ts` o `turn/turnserver.conf`
+serve sempre `docker compose up -d --build` (o almeno `--build frontend`) sulla VM perche' il
+cambiamento abbia effetto - riavviare il container senza rebuild non basta.
 
 ### 2. Apri i due client
 
