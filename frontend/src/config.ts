@@ -3,7 +3,7 @@
 
 // URL del server di signaling WebSocket (equivalente, per la sola fase di rendez-vous, del
 // RELAY_URL della versione MoQ). Il traffico di gioco NON passa da qui: vedi src/webrtc/peerManager.ts.
-export const SIGNALING_URL = "ws://130.136.223.208:443"; // 443 e' l'unica porta TCP libera (oltre alla 80, usata dal frontend) tra quelle aperte dal tutor sul security group OpenStack: 80, 443, 4443
+export const SIGNALING_URL = "ws://34.154.34.239:443"; // 443 e' l'unica porta TCP libera (oltre alla 80, usata dal frontend) tra quelle aperte dal tutor sul security group OpenStack: 80, 443, 4443
 // export const SIGNALING_URL = "ws://localhost:8080"; // sviluppo locale
 // export const SIGNALING_URL = "wss://space-invasion-signaling-fb.loca.lt"; // tunnel pubblico (loca.lt, instabile) per accesso esterno
 // export const SIGNALING_URL = "wss://spaceinvasion.ddns.net:8080"; // esempio per deployment remoto
@@ -30,7 +30,7 @@ export const CHANNEL_GAME = "game";
 // UDP sulla porta 443 (listening-port=443 + no-tcp: la TCP 443 resta libera per il signaling
 // WebSocket). Per questo l'URL usa la porta 443 con transport=udp e non la 3478 di default.
 // Serve che la UDP 443 della VM sia raggiungibile dai client (security group OpenStack).
-const TURN_URL = "turn:130.136.223.208:443?transport=udp"; // es. "turns:dominio:5349" per TLS
+const TURN_URL = "turn:34.154.34.239:443?transport=udp"; // es. "turns:dominio:5349" per TLS
 const TURN_USERNAME = "spaceinvasion"; // deve combaciare con "user=" in turn/turnserver.conf
 const TURN_CREDENTIAL = "SaraFranci1816"; // deve combaciare con la password dopo i due punti in "user=...:PASSWORD"
 
