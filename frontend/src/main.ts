@@ -117,25 +117,6 @@ async function join(
 ): Promise<void> {
   let scenario: Scenario | null = null;
 
-  if (auto) {
-    const res = await fetch(`/scenarios/${auto.scenarioId}.json`);
-    if (!res.ok) {
-      console.error(`[Testbed] impossibile scaricare scenario "${auto.scenarioId}" (HTTP ${res.status}).`);
-    } else {
-      scenario = (await res.json()) as Scenario;
-      startRun({
-        runId: auto.runId,
-        protocol: "webrtc",
-        scenarioId: scenario.scenarioId,
-        scenarioSeed: scenario.seed,
-        scenarioDurationMs: scenario.durationMs,
-        player: auto.player,
-        username,
-        room,
-      });
-    }
-  }
-
   let presenceListener: ((users: string[]) => void) | null = null;
 
   //  1v1: true non appena il motore locale e' stato montato (via scenario automatico o via
@@ -167,6 +148,34 @@ async function join(
   };
 
   try {
+    //  TESTBED: il download dello scenario va dentro il try/catch che segue - prima stava fuori
+    // e un fallimento (es. HTTP 403/404, file non presente/non servito dal deployment) veniva solo
+    // loggato in console senza interrompere nulla: "scenario" restava null e tutto il blocco
+    // "if (scenario && auto)" piu' sotto veniva silenziosamente saltato, senza mai avviare la
+    // partita ne' mostrare un errore - indistinguibile da un problema di connessione WebRTC, ma
+    // causato da qualcosa di completamente diverso (il file scenario). Ora un fallimento qui
+    // produce lo stesso errore visibile a schermo del blocco catch sotto.
+    if (auto) {
+      const res = await fetch(`/scenarios/${auto.scenarioId}.json`);
+      if (!res.ok) {
+        throw new Error(
+          `Impossibile scaricare lo scenario "${auto.scenarioId}" (HTTP ${res.status}) da /scenarios/${auto.scenarioId}.json. ` +
+            `Verifica che il file sia presente ed effettivamente servito dal deployment del frontend.`,
+        );
+      }
+      scenario = (await res.json()) as Scenario;
+      startRun({
+        runId: auto.runId,
+        protocol: "webrtc",
+        scenarioId: scenario.scenarioId,
+        scenarioSeed: scenario.seed,
+        scenarioDurationMs: scenario.durationMs,
+        player: auto.player,
+        username,
+        room,
+      });
+    }
+
     await connectSignaling();
 
     if (!auto) {

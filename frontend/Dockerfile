@@ -14,4 +14,9 @@ RUN npm run build
 
 FROM nginx:alpine
 COPY --from=builder /app/dist /usr/share/nginx/html
+# COPY preserva i permessi dei file sorgente: se in frontend/public/ (es. public/scenarios/*.json)
+# alcuni file hanno permessi restrittivi (es. 600, come visto il 22/09/2026 - illeggibili per
+# l'utente non privilegiato con cui gira il worker nginx, causa 403 su /scenarios/*.json), vanno
+# resi leggibili esplicitamente qui, a prescindere da come sono messi sul filesystem sorgente.
+RUN chmod -R a+rX /usr/share/nginx/html
 EXPOSE 80
