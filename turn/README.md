@@ -37,3 +37,12 @@ Finché non compili `TURN_URL`, il comportamento è identico a prima (solo STUN 
 ## Cosa NON ho toccato
 
 Non ho deciso su quale macchina far girare coturn né toccato il deployment (l'hai detto tu: quello lo segui tu). Questo README presume che tu scelga dove e come farlo girare; il codice è già pronto ad usarlo appena gli dai un URL.
+
+## Aggiornamento: deployment effettivo (vedi `deploy/DEPLOY.md`)
+
+Il deployment è stato poi definito: `deploy/compose.yml` avvia insieme, sulla stessa VM, i tre
+servizi `frontend` + `signaling` + `coturn` (quest'ultimo con `network_mode: host`, porte da
+`turn/turnserver.conf`). `frontend/src/config.ts` punta attualmente a quella VM
+(`SIGNALING_URL`/`TURN_URL`). Procedura completa, tabella porte e checklist firewall in
+`deploy/DEPLOY.md`; istruzioni per lanciare gli scenari del testbed contro questo deployment in
+`TESTBED.md` (sezione "Come avviare un test").

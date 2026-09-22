@@ -32,7 +32,11 @@
   .\scripts\run-batch.ps1 -BaseUrl "https://spaceinvasion.ddns.net" -ScenarioId scenario-1 -Protocol moq -Runs 20
 
 .EXAMPLE
-  # Testbed WebRTC (locale, npm run dev sulla porta 5173):
+  # Testbed WebRTC: signaling+TURN deployati sulla VM (docker compose, vedi deploy/DEPLOY.md),
+  # ma frontend in locale via "npm run dev:frontend" (porta 5173) - richiesto perche' solo il dev
+  # server Vite espone l'endpoint /api/report che questo script usa per rilevare la fine di ogni
+  # run (vedi TESTBED.md, sezione "Come avviare un test"); il traffico di rete misurato resta
+  # comunque quello verso signaling/TURN remoti, indicati in frontend/src/config.ts.
   .\scripts\run-batch.ps1 -BaseUrl "http://localhost:5173" -ScenarioId scenario-1 -Protocol webrtc -Runs 20
 #>
 param(

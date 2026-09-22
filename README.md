@@ -36,6 +36,12 @@ Non servono certificati TLS né configurazioni particolari per l'uso locale (ved
 
 ## 3. Avvio di tutti i componenti
 
+> Le istruzioni di questa sezione (3-5) valgono per il gioco manuale in puro locale, senza TURN
+> forzato: utile per sviluppo rapido, ma **non** e' piu' la modalita' usata per gli esperimenti del
+> testbed (`?auto=1&...`), che richiede un server TURN forzato per un confronto equo con MoQ (vedi
+> `turn/README.md`) e quindi un deployment di signaling+TURN su una macchina remota raggiungibile da
+> entrambi i client (vedi `deploy/DEPLOY.md` e `TESTBED.md`, sezione "Come avviare un test").
+
 Avvio combinato (consigliato):
 
 ```bash
@@ -199,6 +205,17 @@ Space-invasion-WebRTC-provaF/
 
 ## Limiti noti
 
-- Nessun server TURN configurato: dietro NAT particolarmente restrittivi (NAT simmetrico su entrambi i lati) la connessione P2P potrebbe non stabilirsi. Non necessario per il confronto in rete locale/domestica; se serve, aggiungere un `{urls: "turn:...", username, credential}` a `ICE_SERVERS` in `config.ts`.
+- ~~Nessun server TURN configurato~~ (non piu' vero, vedi `turn/README.md` e `deploy/DEPLOY.md`): un
+  server TURN (coturn) e' ora configurato e, di default, forzato (`FORCE_TURN_RELAY = true` in
+  `config.ts`) per replicare la topologia a due hop del relay MoQ ed evitare un confronto sbilanciato
+  "locale vs remoto". Richiede pero' che signaling + TURN girino su una macchina remota raggiungibile
+  da entrambi i client (vedi `deploy/DEPLOY.md`): se quella macchina non e' raggiungibile o le porte
+  in `frontend/src/config.ts` non combaciano con quelle esposte dal deployment, la connessione non si
+  stabilisce affatto (vedi `TESTBED.md`, sezione "Se il test resta bloccato in caricamento").
+- La negoziazione WebRTC (apertura di `RTCPeerConnection`/`RTCDataChannel`) non ha un timeout
+  applicativo: se l'ICE non completa mai (es. TURN forzato ma non raggiungibile), il canale
+  semplicemente non si apre e non compare alcun errore a schermo - solo la connessione al server di
+  signaling ha un timeout esplicito con messaggio visibile (`CONNECT_TIMEOUT_MS`, `config.ts`).
+  `PEER_CONNECT_TIMEOUT_MS` e' definito in `config.ts` ma non e' ancora usato da nessuna parte.
 - La mesh P2P non scala oltre pochi giocatori per room (banda in upload lineare in N); per questo gioco (1v1) non è un problema, ma va tenuto presente se in futuro si aumentasse il numero di giocatori per room.
 - Il server di signaling non ha persistenza né autenticazione: coerente con l'obiettivo (esperimento locale/didattico), da rafforzare se mai esposto pubblicamente.

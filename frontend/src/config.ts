@@ -3,7 +3,7 @@
 
 // URL del server di signaling WebSocket (equivalente, per la sola fase di rendez-vous, del
 // RELAY_URL della versione MoQ). Il traffico di gioco NON passa da qui: vedi src/webrtc/peerManager.ts.
-export const SIGNALING_URL = "ws://34.154.34.239:443"; // 443 e' l'unica porta TCP libera (oltre alla 80, usata dal frontend) tra quelle aperte dal tutor sul security group OpenStack: 80, 443, 4443
+export const SIGNALING_URL = "ws://34.154.34.239:8080"; // schema di porte della VM GCP attuale (vedi deploy/DEPLOY.md): 8080 signaling, 8081 frontend, 3478 TURN, cosi' da non confliggere con le porte 443/4443 gia' usate dal relay MoQ sulla stessa macchina
 // export const SIGNALING_URL = "ws://localhost:8080"; // sviluppo locale
 // export const SIGNALING_URL = "wss://space-invasion-signaling-fb.loca.lt"; // tunnel pubblico (loca.lt, instabile) per accesso esterno
 // export const SIGNALING_URL = "wss://spaceinvasion.ddns.net:8080"; // esempio per deployment remoto
@@ -26,11 +26,12 @@ export const CHANNEL_GAME = "game";
 // punto di vista della rete effettivamente attraversata.
 //
 // Lasciare TURN_URL vuoto per tornare al comportamento originale (solo STUN pubblico, nessun TURN).
-// TURN attivo: coturn (vedi turn/turnserver.conf) gira sulla stessa VM del signaling e ascolta in
-// UDP sulla porta 443 (listening-port=443 + no-tcp: la TCP 443 resta libera per il signaling
-// WebSocket). Per questo l'URL usa la porta 443 con transport=udp e non la 3478 di default.
-// Serve che la UDP 443 della VM sia raggiungibile dai client (security group OpenStack).
-const TURN_URL = "turn:34.154.34.239:443?transport=udp"; // es. "turns:dominio:5349" per TLS
+// TURN attivo: coturn (vedi turn/turnserver.conf, listening-port=3478) gira sulla stessa VM del
+// signaling/frontend, secondo lo schema di porte di deploy/DEPLOY.md (8080 signaling, 8081
+// frontend, 3478 TURN, 49152-49452 UDP per il traffico relayato), scelto apposta per non
+// confliggere con le porte 443/4443 gia' usate dal relay MoQ sulla stessa macchina. Serve che
+// queste porte siano aperte in ingresso sul firewall/VPC della VM (vedi deploy/DEPLOY.md punto 3).
+const TURN_URL = "turn:34.154.34.239:3478"; // es. "turns:dominio:5349" per TLS
 const TURN_USERNAME = "spaceinvasion"; // deve combaciare con "user=" in turn/turnserver.conf
 const TURN_CREDENTIAL = "SaraFranci1816"; // deve combaciare con la password dopo i due punti in "user=...:PASSWORD"
 

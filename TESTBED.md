@@ -89,38 +89,98 @@ Identico al testbed MoQ: dopo la connessione, ciascun client attende (tramite le
 
 ## Come avviare un test
 
-A differenza della versione MoQ, questo testbed **gira interamente in locale**, senza certificati/dominio:
+> Aggiornamento 22/09/2026: questo testbed NON gira piu' interamente in locale (a differenza di
+> quanto diceva questa sezione in precedenza). Da quando e' stato aggiunto un server TURN forzato
+> (`FORCE_TURN_RELAY = true` in `frontend/src/config.ts`, vedi `turn/README.md`) per replicare la
+> topologia a due hop del relay MoQ, signaling e TURN devono girare su una macchina remota
+> raggiungibile da entrambi i client. Resta vero che non servono certificati/dominio (vedi
+> `deploy/DEPLOY.md` punto 1: RTCPeerConnection/RTCDataChannel funzionano anche su HTTP semplice).
+
+### 1. Deploy di signaling + TURN (+ frontend) sulla VM
+
+Procedura completa in `deploy/DEPLOY.md`. In sintesi, sulla VM (host attuale: vedi
+`SIGNALING_URL`/`TURN_URL` in `frontend/src/config.ts`):
 
 ```bash
-cd Space-invasion-WebRTC-Testbed
-npm run install:all   # solo la prima volta (installa anche in signaling/ e frontend/)
+cd Tesi-WebRTC/deploy
+docker compose up -d --build
+docker compose ps              # verifica che frontend, signaling, coturn siano "Up"
+docker compose logs -f coturn  # verifica che coturn sia partito senza errori
 ```
 
-I due processi (signaling WebSocket sulla porta 8080, Vite sulla porta 5173) vanno avviati separatamente (lo script `npm run dev` alla radice richiede il pacchetto `concurrently`, non installato nella root - se manca: `npm install --prefix . concurrently`, oppure piu' semplicemente due terminali):
-```bash
-npm run dev:signaling   # terminale 1
-npm run dev:frontend    # terminale 2
-```
+Tre container: `signaling` (WebSocket, porta `SIGNALING_PORT`/8080 di default), `coturn`
+(`network_mode: host`, porte da `turn/turnserver.conf`: 3478 di controllo + 49152-49452 UDP per il
+traffico relayato) e `frontend` (webapp gia' buildata, servita da nginx sulla porta
+`FRONTEND_PORT`/8081 di default). `SIGNALING_URL`/`TURN_URL` sono compilati **dentro il bundle
+statico** al momento della build (`vite build` nel Dockerfile di `frontend/`): dopo aver
+modificato `frontend/src/config.ts` o `turn/turnserver.conf` serve sempre `docker compose up -d
+--build` (o almeno `--build frontend`) sulla VM perche' il cambiamento abbia effetto - riavviare
+il container senza rebuild non basta.
+
+### 2. Apri i due client
+
+Due modi equivalenti per il traffico di gioco (entrambi passano dal signaling/TURN remoti appena
+avviati), diversi solo per dove viene servita la pagina e per come vengono salvati i risultati:
+
+- **Frontend servito dalla VM** (il container `frontend` sopra): apri direttamente
+  `http://<host-VM>:<FRONTEND_PORT>/?auto=1&...` nei due client. Piu' semplice, ma l'endpoint
+  locale `POST /api/report` usato per salvare automaticamente i risultati in `results/` esiste solo
+  nel dev server Vite (vedi `vite.config.ts`) e NON nella build statica servita da nginx: a fine run
+  `runLogger.ts` lo rileva (errore HTTP) e scarica comunque un JSON via browser come fallback (vedi
+  il commento in cima a `frontend/src/testbed/runLogger.ts`), da salvare/spostare a mano in
+  `frontend/results/`; in questa modalita' `scripts/run-batch.ps1` (che si basa sui file in
+  `results/` per capire quando un run e' finito) non funziona.
+- **Frontend in locale, signaling/TURN remoti** (consigliato per sviluppo/run ripetuti, incluso
+  `run-batch.ps1`): `npm run install:all` la prima volta, poi `npm run dev:frontend` sul proprio PC
+  (Vite sulla porta 5173, con `/api/report` disponibile e risultati salvati automaticamente in
+  `frontend/results/`); `SIGNALING_URL`/`TURN_URL` in `config.ts` puntano comunque alla VM remota,
+  quindi il traffico di rete misurato e' lo stesso della modalita' precedente - cambia solo da dove
+  viene scaricato il codice della pagina, non il transport. In questo caso NON va usato `npm run
+  dev:signaling` in locale: il signaling e' quello remoto avviato al passo 1.
 
 ### Scenario 1 (baseline)
 ```
-Client A: http://localhost:5173/?auto=1&scenario=scenario-1&player=A&room=room-test-1
-Client B: http://localhost:5173/?auto=1&scenario=scenario-1&player=B&room=room-test-1
+Client A: http://<host-VM>:<FRONTEND_PORT>/?auto=1&scenario=scenario-1&player=A&room=room-test-1
+Client B: http://<host-VM>:<FRONTEND_PORT>/?auto=1&scenario=scenario-1&player=B&room=room-test-1
 ```
 
 ### Scenario 2 (medium load)
 ```
-Client A: http://localhost:5173/?auto=1&scenario=scenario-2&player=A&room=room-test-2
-Client B: http://localhost:5173/?auto=1&scenario=scenario-2&player=B&room=room-test-2
+Client A: http://<host-VM>:<FRONTEND_PORT>/?auto=1&scenario=scenario-2&player=A&room=room-test-2
+Client B: http://<host-VM>:<FRONTEND_PORT>/?auto=1&scenario=scenario-2&player=B&room=room-test-2
 ```
 
 ### Scenario 3 (stress/long)
 ```
-Client A: http://localhost:5173/?auto=1&scenario=scenario-3&player=A&room=room-test-3
-Client B: http://localhost:5173/?auto=1&scenario=scenario-3&player=B&room=room-test-3
+Client A: http://<host-VM>:<FRONTEND_PORT>/?auto=1&scenario=scenario-3&player=A&room=room-test-3
+Client B: http://<host-VM>:<FRONTEND_PORT>/?auto=1&scenario=scenario-3&player=B&room=room-test-3
 ```
 
+(Se il frontend gira in locale come nella seconda modalita' sopra, sostituisci
+`http://<host-VM>:<FRONTEND_PORT>` con `http://localhost:5173`: cambia solo da dove viene servita
+la pagina, gli altri parametri restano identici.)
+
 `username` e' opzionale (default "Fra" per A, "Luca" per B); `runId` e' opzionale (default `<scenario>-<player>-<timestamp>`).
+
+### Se il test resta bloccato in caricamento senza mai partire
+
+Cause verificate leggendo il codice attuale, in ordine di probabilita':
+
+1. **La VM non e' raggiungibile dall'esterno su nessuna porta**: il client non riesce nemmeno ad
+   aprire la WebSocket di signaling. Il timeout applicativo su questo passo (`CONNECT_TIMEOUT_MS`,
+   8s, vedi `config.ts`) in modalita' testbed produce pero' un errore visibile a schermo (blocco
+   `catch` in `main.ts`) - se non compare nulla dopo pochi secondi, il problema e' probabilmente
+   altrove (punti 2-3), ma vale comunque la pena verificare la raggiungibilita' di rete della VM.
+2. **`SIGNALING_URL`/`TURN_URL` in `config.ts` non corrispondono alle porte realmente esposte** dal
+   deployment (`deploy/compose.yml`/`.env` per signaling/frontend, `turn/turnserver.conf` per TURN):
+   un disallineamento qui fa fallire la connessione anche a VM perfettamente raggiungibile.
+3. **Negoziazione ICE mai completata** (es. `FORCE_TURN_RELAY = true` con un TURN non raggiungibile
+   su quella porta/protocollo): a differenza del punto 1, qui NON esiste al momento nessun timeout
+   applicativo (`PEER_CONNECT_TIMEOUT_MS` in `config.ts` e' definito ma non e' referenziato da
+   nessuna parte in `webrtc/peerManager.ts`/`webrtc/connection.ts`) ne' un messaggio d'errore
+   visibile: il `RTCDataChannel` semplicemente non si apre mai e la partita non parte, senza alcun
+   segnale a schermo - il caso che produce un blocco indistinguibile da "sta ancora caricando" a
+   tempo indefinito. Verificabile da `chrome://webrtc-internals` (candidate-pair mai "succeeded").
 
 ## Piu' run in sequenza (batch)
 
@@ -128,7 +188,14 @@ Client B: http://localhost:5173/?auto=1&scenario=scenario-3&player=B&room=room-t
 .\scripts\run-batch.ps1 -BaseUrl "http://localhost:5173" -ScenarioId scenario-1 -Protocol webrtc -Runs 20
 ```
 
-Richiede Chrome installato e `npm run dev:signaling` + `npm run dev:frontend` gia' avviati in altri terminali. Lo script legge in locale `scenario-1.json` per ricavare room/durata di default, apre N coppie di finestre Chrome (Player A + Player B, profili isolati), attende la durata dello scenario + un margine, e **verifica che siano comparsi 2 nuovi file di risultato** in `results/` per ogni run.
+Richiede: il deploy di signaling+TURN sulla VM gia' avviato (punto 1 sopra), Chrome installato, e
+`npm run dev:frontend` in locale (**non** `npm run dev:signaling`: il signaling e' quello remoto).
+Lo script legge in locale `scenario-1.json` per ricavare room/durata di default, apre N coppie di
+finestre Chrome (Player A + Player B, profili isolati), attende la durata dello scenario + un
+margine, e **verifica che siano comparsi 2 nuovi file di risultato** in `results/` per ogni run -
+per questo `-BaseUrl` deve puntare al frontend servito in locale (`http://localhost:5173`, dove
+`/api/report` e' disponibile) e non a quello servito dalla VM (vedi nota sull'endpoint
+`/api/report` nella sezione precedente).
 
 ## Dove sono i risultati e come leggerli
 
