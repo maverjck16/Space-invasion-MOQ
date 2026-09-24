@@ -1,3 +1,30 @@
+// STATO (1v1 - server autoritativo): questo generatore e' storico/congelato, non eseguibile cosi'
+// com'e' con l'attuale scripts/headless-sim.mjs. Il bot AI che autora le timeline sotto legge lo
+// stato di simulazione INTERNO del vecchio LocalGameEngine lato client (griglie/asteroidi/
+// proiettili come riferimenti a oggetti JS del motore, tramite createSimClient/
+// buildSimulationBundles) per decidere dove muoversi/schivare/sparare: quel motore-client non
+// simula piu' nulla (l'arena condivisa vive ora solo in arena-server/simulation.js, vedi il
+// commento in cima a simulation.js), quindi quegli export non esistono piu' in headless-sim.mjs e
+// questo file non puo' piu' importarli.
+//
+// I DUE FILE GIA' GENERATI (frontend/public/scenarios/scenario-1.json e scenario-2.json) restano
+// pero' pienamente validi: la timeline di azioni registrata al loro interno (players.A/B.actions)
+// e' un semplice elenco fisso di input con relativo frame di invio, riproducibile da
+// ScenarioPlayer indipendentemente da come e' stata generata - e la riproducibilita' bit-per-bit
+// di entrambi contro il nuovo arena-server/simulation.js e' stata riverificata con
+// "node scripts/verify-determinism.mjs" dopo la conversione. Non serve quindi rigenerarli per
+// continuare a usare il testbed con l'architettura attuale.
+//
+// Se in futuro servissero NUOVI scenari, questo file andrebbe riscritto per far decidere al bot le
+// proprie mosse leggendo un ArenaSnapshot (invasori/asteroidi/proiettili/vite cosi' come li vede
+// un client reale, vedi arena/arenaClient.ts) invece dello stato interno del motore - un lavoro
+// separato dalla conversione dell'architettura, non necessario per il funzionamento del testbed con
+// i due scenari esistenti. Il resto di questo file (euristica del bot, struttura delle ondate) resta
+// comunque valido come descrizione di COME i due scenari attuali sono stati originariamente
+// prodotti, utile ai fini della tesi anche se non piu' eseguibile.
+//
+// ---------------------------------------------------------------------------------------------
+//
 // Genera i 2 file di scenario deterministico (scenario-1.json, scenario-2.json) usati dal
 // testbed al posto del controllo manuale da tastiera (vedi frontend/src/testbed/scenarioPlayer.ts
 // e frontend/src/testbed/scenario.types.ts per lo schema).

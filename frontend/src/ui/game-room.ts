@@ -1,11 +1,7 @@
 import type { GameSnapshot } from "../webrtc/publisher";
 import { createLocalGame, type LocalGameHandle } from "../game/localGame";
-import {
-  MATCH_OUTCOME_LABEL,
-  type GameDifficultyConfig,
-  type MatchMode,
-  type MatchResult,
-} from "../game/localGame/types";
+import { MATCH_OUTCOME_LABEL, type MatchMode, type MatchResult } from "../game/localGame/types";
+import type { ArenaMatchResult, ArenaSnapshot } from "../arena/arenaClient";
 import { exportJSON, exportCSV } from "../metrics/metrics";
 import { TESTBED_LIVES_PER_PLAYER } from "../config";
 
@@ -143,26 +139,32 @@ export function updatePresence(users: string[]): void {
 // Opzioni di startLocalMatch: "mode" sceglie le regole di partita (assente = partita manuale,
 // "testbed" = partita automatica, vedi MatchMode), "onMatchEnd" riceve l'esito a fine partita,
 // "onBeforeFrame" viene chiamata all'inizio di ogni frame simulato (input scriptati del testbed).
+// "sendArenaState"/"sendArenaFire" inoltrano al server dell'arena lo stato della propria navicella
+// e i propri colpi (vedi arena/arenaClient.ts) - e' l'unico canale che decide punteggio/collisioni.
 export type StartLocalMatchOptions = {
   mode?: MatchMode;
   onMatchEnd?: (result: MatchResult) => void;
   onBeforeFrame?: (frame: number) => void;
 };
 
-// 1v1: monta il motore di gioco locale sul canvas condiviso - va chiamato SOLO dopo l'handshake
-// di inizio partita (seed deterministico installato, istante di partenza raggiunto), vedi
-// main.ts. Prima di questo momento l'arena mostra solo lo schermo di attesa.
+// 1v1: monta il motore di gioco locale sul canvas condiviso - va chiamato SOLO dopo che il server
+// dell'arena ha comunicato matchStart (vedi main.ts). Prima di questo momento l'arena mostra solo
+// lo schermo di attesa.
 export function startLocalMatch(
+  username: string,
   onSnapshot: (snapshot: GameSnapshot) => void,
-  gameConfig?: GameDifficultyConfig,
+  sendArenaState: (state: { x: number; y: number; width: number; height: number }) => void,
+  sendArenaFire: (shot: { id: string; x: number; y: number; vx: number; vy: number; radius: number }) => void,
   options: StartLocalMatchOptions = {},
 ): void {
   if (!arenaCanvas) return;
 
   const mode = options.mode ?? "timed";
 
-  // TESTBED 1v1: niente timer di partita e una sola vita per navicella (vedi LocalGameEngine),
-  // quindi il countdown non si mostra e i contatori delle vite partono da 1.
+  // TESTBED 1v1: niente timer di partita e una sola vita per navicella (vedi
+  // arena-server/simulation.js), quindi il countdown non si mostra e i contatori delle vite
+  // partono da 1 - valori di visualizzazione iniziale, il primo ArenaSnapshot li sovrascrive gia'
+  // con quelli reali.
   if (mode === "testbed") {
     if (timerEl) timerEl.style.display = "none";
     const localLivesEl = document.querySelector("#localLivesEl");
@@ -171,7 +173,7 @@ export function startLocalMatch(
   }
 
   localGame?.destroy();
-  localGame = createLocalGame(arenaCanvas, onSnapshot, undefined, gameConfig, {
+  localGame = createLocalGame(arenaCanvas, username, onSnapshot, sendArenaState, sendArenaFire, undefined, {
     matchMode: mode,
     onBeforeFrame: options.onBeforeFrame,
     onLivesChange: (lives) => {
@@ -196,6 +198,10 @@ export function startLocalMatch(
   // LocalGameEngine.updateScoreUI) - qui non serve passarlo di nuovo.
 }
 
+// 1v1: rendering P2P COSMETICO dell'avversario (posizione/rotazione/proiettili in volo) - vedi
+// applyRemoteSnapshot() in LocalGameEngine.ts. Punteggio/vite dell'avversario NON viaggiano piu'
+// qui: arrivano dall'ArenaSnapshot del server (vedi updateArenaState() sotto), che il motore usa
+// gia' per aggiornare da solo #remoteScoreEl/#remoteLivesEl.
 export function updateRemoteGame(
   remoteUsername: string,
   snapshot: GameSnapshot,
@@ -204,17 +210,19 @@ export function updateRemoteGame(
     remoteNameEl.textContent = remoteUsername;
   }
 
-  if (remoteScoreEl) {
-    remoteScoreEl.textContent = String(snapshot.score ?? 0);
-  }
-  if (remoteLivesEl) {
-    remoteLivesEl.textContent = String(Math.max(0, snapshot.lives ?? 0));
-  }
-
-  // Il motore gestisce il rendering della navicella/proiettili dell'avversario e la
-  // riconciliazione delle eliminazioni condivise (killedIds) - vedi applyRemoteSnapshot() in
-  // LocalGameEngine.ts.
   localGame?.applyRemoteSnapshot(snapshot);
+}
+
+// 1v1: inoltra al motore l'ultimo stato autoritativo dell'arena (vedi arena/arenaClient.ts) - da
+// chiamare ad ogni messaggio "arena" ricevuto dal server, vedi main.ts.
+export function updateArenaState(snapshot: ArenaSnapshot): void {
+  localGame?.applyArenaSnapshot(snapshot);
+}
+
+// 1v1: inoltra al motore l'esito autoritativo di fine partita (vedi arena/arenaClient.ts) - da
+// chiamare al messaggio "matchEnd" del server, vedi main.ts.
+export function applyArenaMatchEnd(result: ArenaMatchResult): void {
+  localGame?.applyArenaMatchEnd(result);
 }
 
 function formatTime(msRemaining: number): string {

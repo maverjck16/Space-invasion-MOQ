@@ -186,6 +186,16 @@ Cause verificate leggendo il codice attuale, in ordine di probabilita':
    visibile: il `RTCDataChannel` semplicemente non si apre mai e la partita non parte, senza alcun
    segnale a schermo - il caso che produce un blocco indistinguibile da "sta ancora caricando" a
    tempo indefinito. Verificabile da `chrome://webrtc-internals` (candidate-pair mai "succeeded").
+4. **`/scenarios/<scenarioId>.json` non scaricabile** (visto dal vivo il 22/09/2026, HTTP 403 dal
+   frontend servito dalla VM): entrambi i client restano su "IN ATTESA DI UN AVVERSARIO" a tempo
+   indefinito, ma la causa non e' WebRTC - e' che il download dello scenario fallisce, quindi tutta
+   la logica che avvia la partita (`if (scenario && auto)` in `main.ts`) viene saltata. Da `main.ts`
+   attuale, un fallimento qui produce ora un errore visibile a schermo (prima veniva solo loggato in
+   console e ignorato silenziosamente - vedi commento nel codice). Se compare questo errore,
+   il problema e' nel deployment del frontend (il file `frontend/public/scenarios/<scenarioId>.json`
+   non e' presente/leggibile nell'immagine servita da nginx), non nel signaling/TURN: controllare
+   `docker compose logs frontend` sulla VM e verificare con `docker compose exec frontend ls -la
+   /usr/share/nginx/html/scenarios/` che i file ci siano con permessi leggibili.
 
 ## Piu' run in sequenza (batch)
 

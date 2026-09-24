@@ -1,6 +1,7 @@
 # Deployment completo del Testbed WebRTC di Space Invasion: webapp (frontend + signaling)
-# + server TURN (coturn), pensati per girare sulla STESSA VM raggiungibile da entrambi i
-# client di test (vedi DEPLOY.md in questa cartella per la procedura passo-passo).
+# + server autoritativo dell'arena (arena-server) + server TURN (coturn), pensati per girare
+# sulla STESSA VM raggiungibile da entrambi i client di test (vedi DEPLOY.md in questa cartella
+# per la procedura passo-passo).
 #
 # Uso:
 #   cd deploy/
@@ -33,11 +34,26 @@ services:
     ports:
       - "${SIGNALING_PORT:-443}:${SIGNALING_PORT:-443}"
 
+  # Server autoritativo dell'arena condivisa (invasori/asteroidi/proiettili nemici, punteggio,
+  # vite): sostituisce la simulazione locale identica sui due client. Vedi
+  # ../arena-server/server.js per il protocollo e ../arena-server/simulation.js per la logica.
+  # Connessione separata da quella di signaling: il signaling resta responsabile solo del
+  # rendez-vous SDP/ICE fra i due client, invariato in questa modifica.
+  arena-server:
+    build: ../arena-server
+    container_name: space-invasion-arena-server
+    restart: unless-stopped
+    environment:
+      ARENA_PORT: ${ARENA_PORT:-8081}
+    ports:
+      - "${ARENA_PORT:-8081}:${ARENA_PORT:-8081}"
+
   frontend:
     build: ../frontend
     container_name: space-invasion-webrtc-frontend
     restart: unless-stopped
     depends_on:
       - signaling
+      - arena-server
     ports:
       - "${FRONTEND_PORT:-80}:80"

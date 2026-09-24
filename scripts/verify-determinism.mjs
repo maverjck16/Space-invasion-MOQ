@@ -1,15 +1,19 @@
 // Calcola (e opzionalmente scrive) i risultati ATTESI di ciascuno scenario/player usando il
-// simulatore headless reale (scripts/headless-sim.mjs, che esegue il VERO codice del motore di
-// gioco - non una riscrittura), e verifica che siano riproducibili bit-per-bit su piu' ripetizioni
-// indipendenti (FASE 7 della tesi: distinguere "il trasporto ha avuto prestazioni diverse" da "i
-// due esperimenti hanno eseguito partite diverse" richiede prima di tutto sapere che, a parita' di
-// scenario, il gameplay e' sempre identico).
+// simulatore headless (scripts/headless-sim.mjs), che fa girare direttamente
+// arena-server/simulation.js - lo stesso modulo eseguito dal vero processo server in produzione -
+// e verifica che siano riproducibili bit-per-bit su piu' ripetizioni indipendenti (FASE 7 della
+// tesi: distinguere "il trasporto ha avuto prestazioni diverse" da "i due esperimenti hanno
+// eseguito partite diverse" richiede prima di tutto sapere che, a parita' di scenario, l'arena
+// condivisa si evolve sempre allo stesso modo).
 //
-//  TESTBED 1v1: la partita automatica si gioca in due nella stessa arena, quindi ogni simulazione
-// gioca A e B insieme e i risultati attesi dei due giocatori vengono dalla stessa partita (rete
-// ideale, latenza 0). Lo script controlla anche che i due esiti siano complementari e ripete la
-// partita con alcune latenze di rete simulate: esito e sopravvivenza devono restare gli stessi,
-// punteggio e durata entro le tolleranze dello scenario (scoreTolerance, durationToleranceMs).
+//  TESTBED 1v1 - server autoritativo: la partita automatica si gioca in due nella stessa arena,
+// quindi ogni simulazione gioca A e B insieme nella STESSA stanza e i risultati attesi dei due
+// giocatori vengono dalla stessa partita (rete ideale, latenza 0 verso il server dell'arena). Lo
+// script controlla anche che i due esiti siano complementari e ripete la partita con alcune
+// latenze di rete simulate (il ritardo con cui la posizione/i colpi di un giocatore raggiungono il
+// server, non piu' il ritardo tra le due copie client di un tempo): esito e sopravvivenza devono
+// restare gli stessi, punteggio e durata entro le tolleranze dello scenario (scoreTolerance,
+// durationToleranceMs).
 //
 //  Uso:
 //    node scripts/verify-determinism.mjs                 # calcola e stampa PASS/FAIL, non scrive nulla
@@ -23,7 +27,7 @@
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
-import { buildSimulationBundles, runOneMatch } from "./headless-sim.mjs";
+import { runOneMatch } from "./headless-sim.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.dirname(__dirname);
@@ -96,7 +100,6 @@ async function main() {
     throw new Error(`Nessuno scenario-N.json trovato in ${scenariosDir}. Esegui prima generate-scenario.mjs.`);
   }
 
-  const bundles = await buildSimulationBundles();
   let anyFail = false;
   let anyWarning = false;
 
@@ -110,7 +113,7 @@ async function main() {
     // 1) Riproducibilita': N partite indipendenti con rete ideale devono essere identiche.
     const matches = [];
     for (let i = 0; i < args.repeat; i++) {
-      matches.push(runOneMatch({ ...bundles, scenario, latencyMs: 0 }));
+      matches.push(runOneMatch({ scenario, latencyMs: 0 }));
     }
     const reference = matches[0];
     const reproducible = matches.every((match) => JSON.stringify(match) === JSON.stringify(reference));
@@ -132,7 +135,7 @@ async function main() {
 
     // 3) Robustezza rispetto alla latenza di rete.
     for (const latencyMs of args.latencies) {
-      const match = runOneMatch({ ...bundles, scenario, latencyMs });
+      const match = runOneMatch({ scenario, latencyMs });
       const problems = [];
       for (const player of ["A", "B"]) {
         const expected = reference[player];

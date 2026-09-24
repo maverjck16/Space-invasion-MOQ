@@ -8,6 +8,16 @@ export const SIGNALING_URL = "ws://34.154.34.239:443"; // stesso schema a singol
 // export const SIGNALING_URL = "wss://space-invasion-signaling-fb.loca.lt"; // tunnel pubblico (loca.lt, instabile) per accesso esterno
 // export const SIGNALING_URL = "wss://spaceinvasion.ddns.net:8080"; // esempio per deployment remoto
 
+// 1v1: URL del server autoritativo dell'arena condivisa (vedi arena-server/server.js). Sostituisce
+// la simulazione locale identica sui due client (stesso seed pseudo-casuale installato su
+// entrambi, vedi la versione precedente di questo file): invasori/asteroidi/proiettili nemici,
+// punteggio, vite e la fine partita sono decisi UNA SOLA VOLTA li', su questa connessione
+// WebSocket separata dal signaling - i due client si limitano a mandare la posizione della propria
+// navicella/i propri colpi e a renderizzare cio' che arriva da qui. Stesso host del signaling,
+// porta dedicata (vedi deploy/.env.example, ARENA_PORT).
+export const ARENA_URL = "ws://34.154.34.239:8081";
+// export const ARENA_URL = "ws://localhost:8081"; // sviluppo locale
+
 // Nome del DataChannel usato per lo stato di gioco, equivalente della TRACK_GAME MoQ.
 export const CHANNEL_GAME = "game";
 
@@ -78,68 +88,45 @@ export const NETWORK_TICK_HZ = 25;
 export const METRICS_LOG_INTERVAL_MS = 5000;
 
 // ---------------------------------------------------------------------------------------------
-// 1v1: costanti della partita competitiva a punteggio (arena condivisa, vedi LocalGameEngine.ts).
-// Identiche nella versione MoQ (stessa struttura di file), cosi' il confronto resta a parita' di
-// regole di gioco, non solo di trasporto.
+// 1v1: costanti della partita competitiva a punteggio (arena condivisa). L'AUTORITA' su queste
+// regole (quando finisce la partita, quante vite, i tempi di respawn) e' passata interamente al
+// server dell'arena (vedi arena-server/simulation.js, che ha la sua copia di questi stessi
+// valori): il client non decide piu' nulla di tutto questo, si limita a mostrare quello che il
+// server comunica in ogni ArenaSnapshot/ArenaMatchResult (vedi arena/arenaClient.ts).
+//
+// Le costanti che restano qui sono quindi solo:
+// (a) valori di visualizzazione INIZIALE per l'HUD, prima che arrivi il primo ArenaSnapshot (che
+//     porta gia' vite/punteggio reali) - puramente cosmetici, mai usati per decidere alcunche';
+// (b) i tempi dell'animazione di "morte"/respawn della PROPRIA navicella (nascondersi, particelle,
+//     breve invulnerabilita' visiva), disegnata dal client quando nota che le proprie vite sono
+//     scese in un nuovo ArenaSnapshot - anche questa e' pura cosmesi: la vulnerabilita' reale ai
+//     fini delle collisioni resta decisa dal server, che ha il proprio timer identico e
+//     indipendente. Se il client sbagliasse questi tempi l'unico effetto sarebbe un'animazione
+//     leggermente sfasata, mai un risultato di gioco diverso.
 // ---------------------------------------------------------------------------------------------
 
-// Durata di una partita: allo scadere, il motore si ferma e vince chi ha piu' punti (a parita',
-// pareggio). 3 minuti di default - facilmente regolabile per gli esperimenti.
-export const MATCH_DURATION_MS = 3 * 60 * 1000;
-
-// Vite di ciascuna navicella: colpita da invasore/asteroide/proiettile nemico, respawna invece di
-// terminare subito la partita; esaurite le vite la navicella resta fuori gioco (non piu' pilotabile
-// ne' collidibile) ma l'arena condivisa continua a girare per l'altro giocatore fino al timer.
+// Vite di ciascuna navicella nella partita manuale - valore mostrato nell'HUD prima del primo
+// ArenaSnapshot (vedi sopra). Deve restare uguale a LIVES_PER_PLAYER in arena-server/simulation.js.
 export const LIVES_PER_PLAYER = 3;
 
-// Tempo tra la "morte" (perdita di una vita) e il respawn della navicella, in ms - riuso dello
-// stesso ritardo gia' presente nella versione originale (playerDeath, LocalGameEngine.ts) prima di
-// mostrare la schermata di game over.
+// Tempo tra la "morte" (perdita di una vita) e il respawn della navicella, in ms - solo per
+// l'animazione locale (vedi sopra); deve restare uguale a RESPAWN_DELAY_MS lato server perche' la
+// navicella non riappaia visivamente prima o dopo il momento in cui il server la considera di
+// nuovo vulnerabile.
 export const RESPAWN_DELAY_MS = 2000;
 
-// Durata dell'invulnerabilita' subito dopo il respawn, in ms - evita di rimorire istantaneamente
-// se si respawna in mezzo a una minaccia gia' presente sullo schermo.
+// Durata dell'invulnerabilita' subito dopo il respawn, in ms - idem, solo cosmetico lato client
+// (deve restare uguale a RESPAWN_INVULNERABILITY_MS lato server).
 export const RESPAWN_INVULNERABILITY_MS = 2000;
 
-// Handshake di inizio partita (vedi webrtc/peerManager.ts e main.ts): chi si accorge per ultimo
-// della presenza dell'altro genera un seed condiviso e un istante di partenza comune
-// (Date.now() + questo margine), cosi' entrambi i client hanno il tempo di ricevere/applicare il
-// seed e programmare l'avvio del proprio motore locale allo stesso istante, prima che scada.
-export const MATCH_INIT_LEAD_MS = 1200;
-
-// Il messaggio che porta il matchInit viaggia sullo stesso canale/track "game" gia' esistente, che
-// e' inaffidabile per design (WebRTC: DataChannel "unordered, maxRetransmits:0" - vedi
-// peerManager.ts; MoQ: i gruppi vecchi vengono scartati a favore dei piu' recenti - vedi
-// subscriber.ts): un singolo invio del seed potrebbe quindi perdersi. Per non rischiare che
-// l'intera partita non parta mai per un pacchetto perso, il lato che genera il matchInit continua
-// a riallegarlo (idempotente per chi riceve) a ogni snapshot in uscita per questa finestra di
-// tempo dopo averlo generato, invece che una volta sola - vedi peerManager.ts/moq/publisher.ts.
-// Va oltre MATCH_INIT_LEAD_MS per lasciare qualche tentativo di margine anche dopo l'istante di
-// partenza teorico. Dopo la finestra il traffico torna simmetrico tra i due lati per il resto della
-// partita (nessun campo extra sugli snapshot), preservando il confronto di banda a regime.
-export const MATCH_INIT_RESEND_WINDOW_MS = 2000;
-
 // ---------------------------------------------------------------------------------------------
-// TESTBED 1v1: regole della partita automatica (solo con "?auto=1", vedi main.ts). La partita
-// manuale continua a usare le costanti qui sopra (timer, vite multiple, respawn) senza differenze.
-// Identiche nella versione MoQ.
+// TESTBED 1v1: regole della partita automatica (solo con "?auto=1", vedi main.ts). Anche qui tutto
+// cio' che riguarda QUANDO la partita finisce (eliminazioni, ondate, ritardo finale) e' deciso dal
+// server - vedi arena-server/simulation.js. Il client non tiene piu' un proprio stato di
+// avanzamento delle ondate: disegna semplicemente gli invasori/asteroidi che l'ultimo
+// ArenaSnapshot contiene, qualunque sia l'ondata a cui appartengono.
 // ---------------------------------------------------------------------------------------------
 
-// Vite di ciascuna navicella nel testbed: una sola, quindi nessun respawn. Chi viene colpito resta
-// fuori gioco e l'avversario continua a giocare (vedi LocalGameEngine.updateTestbedMatchState).
+// Vite di ciascuna navicella nel testbed (una sola, nessun respawn) - valore mostrato nell'HUD
+// prima del primo ArenaSnapshot. Deve restare uguale a TESTBED_LIVES_PER_PLAYER lato server.
 export const TESTBED_LIVES_PER_PLAYER = 1;
-
-// Nel testbed non c'e' un timer di partita: la partita termina quando entrambe le navicelle sono
-// state eliminate oppure questo intervallo dopo l'eliminazione dell'ultima ondata scriptata.
-export const TESTBED_END_DELAY_AFTER_LAST_WAVE_MS = 3000;
-
-// Tempo massimo di attesa dello stato finale dell'avversario dopo che questo client ha chiuso la
-// propria partita. Di norma arriva con lo snapshot successivo (qualche decina di ms): il limite
-// serve solo a non restare bloccati se l'avversario si disconnette proprio in quel momento.
-export const TESTBED_FINAL_STATE_TIMEOUT_MS = 5000;
-
-// Pausa tra l'eliminazione di un'ondata scriptata e la comparsa della successiva. Oltre a separare
-// le fasi, assorbe la latenza di rete: l'ondata successiva compare nello stesso frame di gioco su
-// entrambi i client (vedi LocalGameEngine.updateTestbedWaves()), purche' l'informazione
-// "ondata eliminata" arrivi all'altro client entro questo intervallo.
-export const TESTBED_WAVE_SPAWN_DELAY_MS = 1000;
