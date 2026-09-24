@@ -3,11 +3,7 @@
 
 // URL del server di signaling WebSocket (equivalente, per la sola fase di rendez-vous, del
 // RELAY_URL della versione MoQ). Il traffico di gioco NON passa da qui: vedi src/webrtc/peerManager.ts.
-<<<<<<< HEAD
-export const SIGNALING_URL = "ws://20.19.48.192/ws";
-=======
 export const SIGNALING_URL = "ws://34.154.34.239:8080";
->>>>>>> 41ebc3a (forzo turn)
 // export const SIGNALING_URL = "wss://space-invasion-signaling-fb.loca.lt"; // tunnel pubblico (loca.lt, instabile) per accesso esterno
 // export const SIGNALING_URL = "wss://spaceinvasion.ddns.net:8080"; // esempio per deployment remoto
 
@@ -29,15 +25,9 @@ export const CHANNEL_GAME = "game";
 // punto di vista della rete effettivamente attraversata.
 //
 // Lasciare TURN_URL vuoto per tornare al comportamento originale (solo STUN pubblico, nessun TURN).
-<<<<<<< HEAD
-const TURN_URL = "turn:20.19.48.192:443";
-const TURN_USERNAME = "spaceinvasion";
-const TURN_CREDENTIAL = "SaraeFranci1816";
-=======
 const TURN_URL = "turn:34.154.34.239:3478?transport=udp"; // es. "turn:IP_O_DOMINIO_DEL_TUO_SERVER:3478" oppure "turns:dominio:5349" (TLS)
 const TURN_USERNAME = "spaceinvasion"; // deve combaciare con "user=" in turn/turnserver.conf
 const TURN_CREDENTIAL = "SaraFranci1816"; // deve combaciare con la password dopo i due punti in "user=...:PASSWORD"
->>>>>>> 41ebc3a (forzo turn)
 
 export const ICE_SERVERS: RTCIceServer[] = [
   { urls: "stun:stun.l.google.com:19302" },
