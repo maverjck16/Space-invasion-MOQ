@@ -7605,30 +7605,30 @@
   },
   "expected": {
     "A": {
-      "finalScore": 2490,
-      "survived": false,
+      "finalScore": 2500,
+      "survived": true,
       "finalPositionX": 852,
       "finalPositionY": 514.5,
-      "actualDurationMs": 37083.333,
+      "actualDurationMs": 34766.66666666733,
       "outcome": "win",
-      "decidedBy": "eliminationOrder",
-      "opponentScore": 1200,
-      "eliminatedAtFrame": 2223,
-      "lastWaveClearedAtFrame": null,
-      "endFrame": 2224
+      "decidedBy": "survival",
+      "opponentScore": 2510,
+      "eliminatedAtFrame": null,
+      "lastWaveClearedAtFrame": 1905,
+      "endFrame": 2085
     },
     "B": {
-      "finalScore": 1200,
+      "finalScore": 2510,
       "survived": false,
-      "finalPositionX": 0,
+      "finalPositionX": 677,
       "finalPositionY": 535.5,
-      "actualDurationMs": 37083.333,
+      "actualDurationMs": 34816.666666667326,
       "outcome": "lose",
-      "decidedBy": "eliminationOrder",
-      "opponentScore": 2490,
-      "eliminatedAtFrame": 550,
-      "lastWaveClearedAtFrame": null,
-      "endFrame": 2224
+      "decidedBy": "survival",
+      "opponentScore": 2500,
+      "eliminatedAtFrame": 1568,
+      "lastWaveClearedAtFrame": 1905,
+      "endFrame": 2085
     }
   }
 }

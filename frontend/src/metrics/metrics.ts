@@ -39,9 +39,7 @@ export type NetEnvelope = {
 
 type PerMessageRecord = {
   tRecorded: number; // performance.now() locale al momento della registrazione
-  // "send"/"recv": canale P2P tra i due client. "arena_send"/"arena_recv": WebSocket verso il
-  // server dell'arena (solo byte, nessun RTT/jitter: vedi recordArenaSent/recordArenaReceived).
-  type: "send" | "recv" | "arena_send" | "arena_recv";
+  type: "send" | "recv";
   peer: string;
   seq: number;
   bytes: number;
@@ -72,12 +70,6 @@ let sentCount = 0;
 let bytesSent = 0;
 let recvCount = 0;
 let bytesReceived = 0;
-let arenaSentCount = 0;
-let arenaBytesSent = 0;
-let arenaRecvCount = 0;
-let arenaBytesReceived = 0;
-let serverStatsWindows: unknown[] = [];
-let serverStatsSummary: unknown = null;
 let gapTotal = 0;
 let duplicateOrOutOfOrderTotal = 0;
 
@@ -117,12 +109,6 @@ export function startSession(username: string, room: string): void {
   bytesSent = 0;
   recvCount = 0;
   bytesReceived = 0;
-  arenaSentCount = 0;
-  arenaBytesSent = 0;
-  arenaRecvCount = 0;
-  arenaBytesReceived = 0;
-  serverStatsWindows = [];
-  serverStatsSummary = null;
   gapTotal = 0;
   duplicateOrOutOfOrderTotal = 0;
 
@@ -269,34 +255,6 @@ export function recordPeerConnected(peer: string, elapsedMs: number): void {
   console.info(`[Metrics] canale dati con ${peer} aperto in ${elapsedMs.toFixed(1)}ms`);
 }
 
-const ARENA_PEER_KEY = "__arena__";
-
-//  Traffico verso il server dell'arena (WebSocket, vedi arena/arenaClient.ts). Tenuto separato dai
-// contatori del canale P2P (recordSent/recordReceived) cosi' banda, RTT e jitter gia' raccolti
-// restano confrontabili con le campagne precedenti: nel CSV/JSON queste righe hanno type
-// "arena_send"/"arena_recv" e non compaiono quando si filtra per "send"/"recv".
-export function recordArenaSent(bytes: number): void {
-  arenaSentCount++;
-  arenaBytesSent += bytes;
-  if (!sessionActive) return;
-  pushRecord({ tRecorded: performance.now(), type: "arena_send", peer: ARENA_PEER_KEY, seq: arenaSentCount, bytes });
-}
-
-export function recordArenaReceived(bytes: number): void {
-  arenaRecvCount++;
-  arenaBytesReceived += bytes;
-  if (!sessionActive) return;
-  pushRecord({ tRecorded: performance.now(), type: "arena_recv", peer: ARENA_PEER_KEY, seq: arenaRecvCount, bytes });
-}
-
-//  Statistiche di carico del server dell'arena (tempo di tick, CPU, entita', byte), inoltrate dal
-// server stesso a ogni finestra da 1 s e a fine partita (vedi arena-server/stats.js). Vengono solo
-// conservate e scritte nel JSON esportato: non entrano nei contatori di banda.
-export function recordServerStats(payload: { kind: string; window?: unknown; summary?: unknown }): void {
-  if (payload.kind === "window" && payload.window) serverStatsWindows.push(payload.window);
-  if (payload.kind === "summary") serverStatsSummary = payload.summary ?? null;
-}
-
 function percentile(sorted: number[], p: number): number {
   if (sorted.length === 0) return NaN;
   const idx = Math.min(sorted.length - 1, Math.max(0, Math.ceil((p / 100) * sorted.length) - 1));
@@ -338,12 +296,6 @@ export type MetricsSummary = {
   bytesReceived: number;
   bandwidthUpBytesPerSec: number;
   bandwidthDownBytesPerSec: number;
-  arenaMessagesSent: number;
-  arenaMessagesReceived: number;
-  arenaBytesSent: number;
-  arenaBytesReceived: number;
-  arenaBandwidthUpBytesPerSec: number;
-  arenaBandwidthDownBytesPerSec: number;
   updateFrequencyHz: number; // frequenza media di aggiornamenti ricevuti dal peer
   gapTotal: number; // messaggi presunti persi/superati (vedi nota limite)
   duplicateOrOutOfOrderTotal: number;
@@ -369,12 +321,6 @@ export function getSummary(): MetricsSummary {
     bytesReceived,
     bandwidthUpBytesPerSec: bytesSent / durationSec,
     bandwidthDownBytesPerSec: bytesReceived / durationSec,
-    arenaMessagesSent: arenaSentCount,
-    arenaMessagesReceived: arenaRecvCount,
-    arenaBytesSent,
-    arenaBytesReceived,
-    arenaBandwidthUpBytesPerSec: arenaBytesSent / durationSec,
-    arenaBandwidthDownBytesPerSec: arenaBytesReceived / durationSec,
     updateFrequencyHz: recvCount / durationSec,
     gapTotal,
     duplicateOrOutOfOrderTotal,
@@ -406,7 +352,6 @@ export function logSummary(): void {
       `Messages sent / received: ${s.messagesSent} / ${s.messagesReceived}`,
       `Bytes sent / received: ${s.bytesSent} / ${s.bytesReceived}`,
       `Estimated bandwidth up/down: ${fmt(s.bandwidthUpBytesPerSec / 1024, 2)} KB/s / ${fmt(s.bandwidthDownBytesPerSec / 1024, 2)} KB/s`,
-      `Arena (WebSocket) bytes sent / received: ${s.arenaBytesSent} / ${s.arenaBytesReceived} (${fmt(s.arenaBandwidthUpBytesPerSec / 1024, 2)} / ${fmt(s.arenaBandwidthDownBytesPerSec / 1024, 2)} KB/s)`,
       `Update frequency (recv): ${fmt(s.updateFrequencyHz, 1)} Hz`,
       `Gap totale (presunti persi/superati, vedi nota): ${s.gapTotal}`,
       `Duplicati/fuori ordine rilevati: ${s.duplicateOrOutOfOrderTotal}`,
@@ -455,7 +400,6 @@ function timestampForFilename(): string {
 export function exportJSON(): void {
   const data = {
     summary: getSummary(),
-    serverStats: { summary: serverStatsSummary, windows: serverStatsWindows },
     records: records.map((r) => ({
       tRecordedMs: r.tRecorded,
       type: r.type,
