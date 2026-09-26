@@ -79,6 +79,15 @@ export type GameSnapshot = {
   // 1v1: id delle entita' del campo condiviso (invasori/asteroidi) eliminate da un proprio colpo
   // dall'ultimo snapshot inviato. Vuoto/assente quando non c'e' nulla da riconciliare.
   killedIds?: string[];
+  // TESTBED 1v1 (solo partita automatica, assenti nella partita manuale): frame del proprio motore
+  // in cui la propria navicella e' stata eliminata, e frame in cui risulta eliminata ciascuna ondata
+  // scriptata gia' conclusa (indice = numero dell'ondata). Una volta presenti vengono ripetuti in
+  // tutti gli snapshot successivi, cosi' la perdita di un singolo messaggio non li cancella. In
+  // questa modalita' "gameActive: false" significa che la partita di chi invia e' conclusa e il suo
+  // stato (punteggio, eliminazione) e' definitivo - vedi LocalGameEngine.updateTestbedMatchState()
+  // e LocalGameEngine.updateTestbedWaves().
+  eliminatedAtFrame?: number;
+  wavesClearedAtFrame?: number[];
   // 1v1: presente solo durante la finestra di handshake iniziale, vedi MatchInit sopra.
   matchInit?: MatchInit;
 };

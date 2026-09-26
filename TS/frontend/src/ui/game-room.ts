@@ -1,7 +1,13 @@
 import type { GameSnapshot } from "../moq/publisher";
 import { createLocalGame, type LocalGameHandle } from "../game/localGame";
-import type { GameDifficultyConfig } from "../game/localGame/types";
+import {
+  MATCH_OUTCOME_LABEL,
+  type GameDifficultyConfig,
+  type MatchMode,
+  type MatchResult,
+} from "../game/localGame/types";
 import { exportJSON, exportCSV } from "../metrics/metrics";
+import { TESTBED_LIVES_PER_PLAYER } from "../config";
 
 // 1v1: un'unica arena condivisa (un solo canvas) al posto dei due pannelli "IL TUO GIOCO" /
 // "GIOCO AVVERSARIO" della versione a specchio: la navicella locale (rossa) e quella
@@ -134,17 +140,40 @@ export function updatePresence(users: string[]): void {
   }, 2200);
 }
 
+// Opzioni di startLocalMatch: "mode" sceglie le regole di partita (assente = partita manuale,
+// "testbed" = partita automatica, vedi MatchMode), "onMatchEnd" riceve l'esito a fine partita,
+// "onBeforeFrame" viene chiamata all'inizio di ogni frame simulato (input scriptati del testbed).
+export type StartLocalMatchOptions = {
+  mode?: MatchMode;
+  onMatchEnd?: (result: MatchResult) => void;
+  onBeforeFrame?: (frame: number) => void;
+};
+
 // 1v1: monta il motore di gioco locale sul canvas condiviso - va chiamato SOLO dopo l'handshake
 // di inizio partita (seed deterministico installato, istante di partenza raggiunto), vedi
 // main.ts. Prima di questo momento l'arena mostra solo lo schermo di attesa.
 export function startLocalMatch(
   onSnapshot: (snapshot: GameSnapshot) => void,
   gameConfig?: GameDifficultyConfig,
+  options: StartLocalMatchOptions = {},
 ): void {
   if (!arenaCanvas) return;
 
+  const mode = options.mode ?? "timed";
+
+  // TESTBED 1v1: niente timer di partita e una sola vita per navicella (vedi LocalGameEngine),
+  // quindi il countdown non si mostra e i contatori delle vite partono da 1.
+  if (mode === "testbed") {
+    if (timerEl) timerEl.style.display = "none";
+    const localLivesEl = document.querySelector("#localLivesEl");
+    if (localLivesEl) localLivesEl.textContent = String(TESTBED_LIVES_PER_PLAYER);
+    if (remoteLivesEl) remoteLivesEl.textContent = String(TESTBED_LIVES_PER_PLAYER);
+  }
+
   localGame?.destroy();
   localGame = createLocalGame(arenaCanvas, onSnapshot, undefined, gameConfig, {
+    matchMode: mode,
+    onBeforeFrame: options.onBeforeFrame,
     onLivesChange: (lives) => {
       const el = document.querySelector("#localLivesEl");
       if (el) el.textContent = String(Math.max(0, lives));
@@ -152,11 +181,15 @@ export function startLocalMatch(
     onTimeRemaining: (msRemaining) => {
       if (timerEl) timerEl.textContent = formatTime(msRemaining);
     },
-    onMatchEnd: () => {
+    onMatchEnd: (result) => {
       if (statusEl) {
-        statusEl.textContent = "Partita terminata.";
+        statusEl.textContent =
+          mode === "testbed"
+            ? `Partita terminata: ${MATCH_OUTCOME_LABEL[result.outcome]}`
+            : "Partita terminata.";
         statusEl.style.display = "flex";
       }
+      options.onMatchEnd?.(result);
     },
   });
   // onScoreChange e' gestito internamente dal motore su #localScoreEl (vedi
