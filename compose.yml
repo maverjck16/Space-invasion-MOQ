@@ -21,7 +21,7 @@ services:
     - --web-https-key
     - /etc/letsencrypt/live/spaceinvasion.ddns.net/privkey.pem
     - --auth-public
-    - "moq-keycast"
+    - "space-invasion"
     - --server-quic-qlog
     - /qlogs
     ports:
